@@ -1,27 +1,46 @@
 package Lim.boardApp.Controller;
 
+import Lim.boardApp.PageConst;
 import Lim.boardApp.domain.Text;
+import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.repository.TextRepository;
+import Lim.boardApp.service.PagingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @Controller
 @Slf4j
 @RequestMapping("/board")
 public class textController {
 
-    @Autowired
-    TextRepository textRepository;
+    //TODO : 페이징 작업 -> prev, next에서 오류가 발생함.
+    private final TextRepository textRepository;
+    private final PagingService pagingService;
+    public textController(TextRepository textRepository, PagingService pagingService){
+        this.textRepository = textRepository;
+        this.pagingService = pagingService;
+    }
 
     //글 리스트 전체를 보여주는 페이지
     @GetMapping
-    public String showTextList(Model model){
-        List<Text> textList = textRepository.findAll();
+    public String showTextList(Model model, @RequestParam(value = "page", defaultValue = "1") int page){
+
+        page -= 1;
+        PageRequest pageRequest = PageRequest.of(page, PageConst.PAGE_BLOCK_LENGTH);
+        Page<Text> textList = textRepository.findAll(pageRequest);
+        int totalPages = textList.getTotalPages();
+        PageBlockForm block = pagingService.findBlock(page, totalPages);
+
+        model.addAttribute("block", block);
         model.addAttribute("textList", textList);
+        model.addAttribute("curPage", page);
+
         return "board/textlist";
     }
 

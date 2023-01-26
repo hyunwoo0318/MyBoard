@@ -4,22 +4,47 @@
     <meta charset="UTF-8">
     <link th:href="@{/css/bootstrap.min.css}"
           href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        table{
+            margin:auto;
+        }
+        ul{
+            display: inline-block;
+            margin-top:20px;
+        }
+        ul li{
+            list-style-type: none;
+            diplay: inline-block;
+            margin-right:10px;
+            float:left;
+        }
+    </style>
 </head>
 <body>
-<h2>게시판</h2>
+<h2 th:align="center">게시판</h2>
 <table>
     <form th:action th:object="${textList}" th:method="post">
         <tr>
-            <th>번호</th>
             <th>제목</th>
         </tr>
-        <tr th:each="text, textStat : ${textList}" class="form-check form-check-inline">
-            <td th:text="${textStat.index + 1}"></td>
+        <tr th:each="text: ${textList}" class="form-check form-check-inline">
             <td th:text="${text.title}" th:onclick="|location.href='@{/board/{tid}(tid=${text.tid})}'|"></td>
         </tr>
     </form>
 </table>
-<button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
-<button type="button" th:onclick="|location.href='@{logout}'|">로그아웃</button>
+<div th:align="center">
+    <ul>
+        <li><a th:href="@{/board/(page=(${curPage}-1))}" th:text="prev"></a></li>
+        <li th:each="page : ${#numbers.sequence(block.getStart(), block.getEnd())}">
+            <a th:href = "@{/board/(page=(${page}))}" th:text="(${page}) "></a>
+        </li>
+        <li><a th:href="@{/board/(page=(${curPage}+1))}" th:text="next"></a></li>
+    </ul>
+</div>
+<br>
+<div th:align="center">
+    <button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
+    <button type="button" th:onclick="|location.href='@{logout}'|">로그아웃</button>
+</div>
 </body>
 </html>
