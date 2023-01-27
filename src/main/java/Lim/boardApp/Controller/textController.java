@@ -6,13 +6,14 @@ import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.repository.TextRepository;
 import Lim.boardApp.service.PagingService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -31,11 +32,20 @@ public class textController {
     @GetMapping
     public String showTextList(Model model, @RequestParam(value = "page", defaultValue = "1") int page){
 
-        page -= 1;
-        PageRequest pageRequest = PageRequest.of(page, PageConst.PAGE_BLOCK_LENGTH);
+        PageRequest size = PageRequest.ofSize(PageConst.PAGE_BLOCK_SIZE);
+        Page<Text> tp = textRepository.findAll(size);
+        int totalPages = tp.getTotalPages();
+
+        if(page -1 >= totalPages) {
+            return "redirect:/board?page=" + Integer.toString(totalPages);
+        }
+        if(page < 1) {
+            return "redirect:/board/?page=1";
+        }
+
+        PageRequest pageRequest = PageRequest.of(page-1, PageConst.PAGE_BLOCK_SIZE);
         Page<Text> textList = textRepository.findAll(pageRequest);
-        int totalPages = textList.getTotalPages();
-        PageBlockForm block = pagingService.findBlock(page, totalPages);
+        PageBlockForm block = pagingService.findBlock(page-1, totalPages);
 
         model.addAttribute("block", block);
         model.addAttribute("textList", textList);
