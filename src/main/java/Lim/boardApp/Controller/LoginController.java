@@ -27,11 +27,8 @@ public class LoginController {
     //TODO : validation 구현
     //TODO : validation까지 완료한 이후에 jwt를 이용해서 회원가입 구현하기.
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private LoginService loginService;
+    private final CustomerRepository customerRepository;
+    private final LoginService loginService;
 
     //일반 홈 화면
     @GetMapping("/")
@@ -78,7 +75,7 @@ public class LoginController {
         }
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public String logout(HttpServletRequest request){
         loginService.logout(request);
         return "/home";

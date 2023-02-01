@@ -34,17 +34,19 @@
 </table>
 <div th:align="center">
     <ul>
-        <li><a th:href="@{/board/(page=(${curPage}-1))}" th:text="prev"></a></li>
-        <li th:each="page : ${#numbers.sequence(block.getStart(), block.getEnd())}">
-            <a th:href = "@{/board/(page=(${page}))}" th:text="(${page}) "></a>
+        <li><a th:href="@{/board/(page=(${page}-1))}" th:text="prev"></a></li>
+        <li th:each="pg : ${#numbers.sequence(block.getStart(), block.getEnd())}">
+            <a th:href = "@{/board/(page=(${pg}))}" th:text="(${pg}) "></a>
         </li>
-        <li><a th:href="@{/board/(page=(${curPage}+1))}" th:text="next"></a></li>
+        <li><a th:href="@{/board/(page=(${page}+1))}" th:text="next"></a></li>
     </ul>
 </div>
 <br>
 <div th:align="center">
     <button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
-    <button type="button" th:onclick="|location.href='@{logout}'|">로그아웃</button>
+    <form th:method="post">
+        <button type="button" th:onclick="|location.href='@{logout}'|">로그아웃</button>
+    </form>
 </div>
 </body>
 </html>

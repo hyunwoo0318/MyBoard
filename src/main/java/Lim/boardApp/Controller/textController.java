@@ -4,7 +4,8 @@ import Lim.boardApp.PageConst;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.repository.TextRepository;
-import Lim.boardApp.service.PagingService;
+import Lim.boardApp.service.TextService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Page;
@@ -14,42 +15,35 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
+@RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/board")
 public class textController {
 
-    //TODO : 페이징 작업 -> prev, next에서 오류가 발생함.
     private final TextRepository textRepository;
-    private final PagingService pagingService;
-    public textController(TextRepository textRepository, PagingService pagingService){
-        this.textRepository = textRepository;
-        this.pagingService = pagingService;
-    }
+    private final TextService textService;
 
     //글 리스트 전체를 보여주는 페이지
     @GetMapping
-    public String showTextList(Model model, @RequestParam(value = "page", defaultValue = "1") int page){
+    public String showTextList(Model model, @RequestParam(value = "page", defaultValue = "0") int page){
 
-        PageRequest size = PageRequest.ofSize(PageConst.PAGE_BLOCK_SIZE);
-        Page<Text> tp = textRepository.findAll(size);
-        int totalPages = tp.getTotalPages();
+        int lastPage = textService.getLastPage(PageConst.PAGE_SIZE);
 
-        if(page -1 >= totalPages) {
-            return "redirect:/board?page=" + Integer.toString(totalPages);
-        }
-        if(page < 1) {
-            return "redirect:/board/?page=1";
-        }
+        if(page < 0) page = 0;
+        if(lastPage < page) page = lastPage;
 
-        PageRequest pageRequest = PageRequest.of(page-1, PageConst.PAGE_BLOCK_SIZE);
-        Page<Text> textList = textRepository.findAll(pageRequest);
-        PageBlockForm block = pagingService.findBlock(page-1, totalPages);
+        PageRequest pageRequest = PageRequest.of(page, PageConst.PAGE_SIZE);
+        Page<Text> pages = textRepository.findAll(pageRequest);
+        List<Text> textList = pages.getContent();
 
-        model.addAttribute("block", block);
+        PageBlockForm block = textService.findBlock(page,lastPage, PageConst.PAGE_BLOCK_SIZE);
+
         model.addAttribute("textList", textList);
-        model.addAttribute("curPage", page);
+        model.addAttribute("page", page);
+        model.addAttribute("block", block);
 
         return "board/textlist";
     }
@@ -68,13 +62,13 @@ public class textController {
         return "redirect:/board";
     }
 
-
     //글을 추가 및 수정하는 메서드
-    //TODO: update전용 객체를 만들어서 받고 넘기기.(제목하고 내용만 바꾸면됨.)
     @GetMapping("/new")
-    public String goToMakeText(@RequestParam(value = "tid",required = false,defaultValue = "") Long tid ,Model model) {
-        Text text = new Text();
-        text.setTid(tid);
+    public String goToMakeText(@RequestParam(value = "id",required = false,defaultValue = "-1") Long id ,Model model) {
+
+        Optional<Text> findText = textRepository.findById(id);
+        Text text = findText.orElse(new Text());
+
         model.addAttribute("text", text);
         return "board/maketext";
     }

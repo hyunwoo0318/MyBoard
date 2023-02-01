@@ -4,9 +4,10 @@ package Lim.boardApp.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /* customer 테이블
     cid varchar pk,
@@ -18,10 +19,10 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-public class Customer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cid;
+public class Customer extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="customer_id")
+    private Long id;
 
     @Column(unique = true)
     private String loginId;
@@ -31,6 +32,9 @@ public class Customer {
     private String cname;
 
     private Integer age;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    List<Text> texts = new ArrayList<>();
 
     public Customer(){}
     @Builder
