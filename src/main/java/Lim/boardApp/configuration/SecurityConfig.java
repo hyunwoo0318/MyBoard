@@ -14,6 +14,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain tempConfig(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.httpBasic().disable();
+        httpSecurity.csrf().disable();
         return httpSecurity.build();
     }
 }

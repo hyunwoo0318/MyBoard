@@ -32,14 +32,10 @@ class TextServiceTest {
          * lastPage -> 2
          */
 
-        Customer customer = new Customer();
-        customerRepository.save(customer);
-        for(int i=0;i<6;i++){
-            Text text = new Text("content" + i, "title" + i, customer);
-            textRepository.save(text);
-        }
+        addText(6);
 
         int pageSize = 2;
+
 
         int lastPage = textService.getLastPage(pageSize);
 
@@ -55,12 +51,7 @@ class TextServiceTest {
          * pageSize = 2
          * lastPage -> 0
          */
-        Customer customer = new Customer();
-        customerRepository.save(customer);
-        for(int i=0;i<2;i++){
-            Text text = new Text("content" + i, "title" + i, customer);
-            textRepository.save(text);
-        }
+        addText(2);
 
         int pageSize = 2;
 
@@ -95,12 +86,7 @@ class TextServiceTest {
          * 7번 페이지의 페이지 블록 - (6 ~ 8)
          */
 
-        Customer customer = new Customer();
-        customerRepository.save(customer);
-        for(int i=0;i<10;i++){
-            Text text = new Text("content" + i, "title" + i, customer);
-            textRepository.save(text);
-        }
+        addText(10);
 
         int pageBlockSize = 3;
         int lastPage = 9;
@@ -111,7 +97,54 @@ class TextServiceTest {
         assertThat(blockPage5).isEqualTo(new PageBlockForm(3,5,3));
         assertThat(blockPage7).isEqualTo(new PageBlockForm(6,8,3));
     }
-    
-    //TODO : 마지막 페이지, 첫페이지 테스트 추가하기
+
+    @Test
+    @DisplayName("마지막 블록에 블록 사이즈보다 블록 개수가 적은경우")
+    public void calcLastBlockLessThanBlockSize(){
+        /**
+         * text개수 = 10개
+         * blockSize = 3
+         * lastPage = 9
+         * page 9 -> (9 ~ 9)
+         */
+
+        addText(10);
+
+        int pageBlockSize = 3;
+        int lastPage = 9;
+
+        PageBlockForm blockPage9 = textService.findBlock(9, lastPage,pageBlockSize);
+
+        assertThat(blockPage9).isEqualTo(new PageBlockForm(9,9,1));
+    }
+
+    @Test
+    @DisplayName("첫번째 블록에 블록 사이즈보다 블록 개수가 적은경우")
+    public void calcFirstBlockLessThanBlockSize(){
+        /**
+         * text개수 = 2개
+         * blockSize = 3
+         * lastPage = 1
+         * page 1 -> (0 ~ 1)
+         */
+
+       addText(2);
+
+        int pageBlockSize = 3;
+        int lastPage = 1;
+
+        PageBlockForm blockPage9 = textService.findBlock(1, lastPage,pageBlockSize);
+
+        assertThat(blockPage9).isEqualTo(new PageBlockForm(0,1,2));
+    }
+
+    private void addText(int num){
+        Customer customer = new Customer();
+        customerRepository.save(customer);
+        for(int i=0;i<num;i++){
+            Text text = new Text("content" + i, "title" + i, customer);
+            textRepository.save(text);
+        }
+    }
 
 }

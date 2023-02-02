@@ -32,7 +32,7 @@ public class TextService {
         int end;
         if(lastPages < start + blockSize-1) end = lastPages;
         else end = start + blockSize -1;
-        return new PageBlockForm(start, end, blockSize);
+        return new PageBlockForm(start, end, end - start + 1);
     }
 
 }

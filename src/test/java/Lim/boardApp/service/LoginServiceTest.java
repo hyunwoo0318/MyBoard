@@ -18,7 +18,7 @@ class LoginServiceTest {
 
     @Autowired LoginService loginService;
 
-    public void registerCustomer(){
+    private void registerCustomer(){
         Customer regCustomer = Customer.builder()
                 .loginId("id123123")
                 .cname("hyeonwoo")

@@ -36,7 +36,7 @@ public class LoginController {
         if (loginCustomer == null) {
             return "home";
         }else {
-            model.addAttribute("loginCustomer", loginCustomer);
+            model.addAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer);
             return "redirect:/board";
         }
     }
