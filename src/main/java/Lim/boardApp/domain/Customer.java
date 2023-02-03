@@ -29,7 +29,7 @@ public class Customer extends BaseEntity {
 
     private String password;
 
-    private String cname;
+    private String name;
 
     private Integer age;
 
@@ -38,10 +38,10 @@ public class Customer extends BaseEntity {
 
     public Customer(){}
     @Builder
-    public Customer(String loginId, String password, String cname, Integer age) {
+    public Customer(String loginId, String password, String name, Integer age) {
         this.loginId = loginId;
         this.password = password;
-        this.cname = cname;
+        this.name = name;
         this.age = age;
     }
 }

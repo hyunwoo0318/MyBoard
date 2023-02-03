@@ -7,7 +7,6 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Getter
-@Setter
 @Entity
 public class Text extends BaseEntity {
 
@@ -32,6 +31,11 @@ public class Text extends BaseEntity {
         this.content = content;
         this.title = title;
         this.customer = customer;
+    }
+
+    public void updateText(String content, String title){
+        this.content = content;
+        this.title = title;
     }
 
     public void setCustomer(Customer customer){

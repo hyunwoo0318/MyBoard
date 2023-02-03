@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link th:href="@{/css/bootstrap.min.css}"
+        href="css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    input{
+      width: 50%
+    }
+    textarea{
+      resize: none;
+      width: 50%;
+      height: 6.25em;
+    }
+  </style>
+</head>
+<body>
+<h2>글 수정</h2>
+<form th:action th:object="${text}" th:method="post">
+  <div>
+    <label for="title"></label>
+    <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:placeholder="${text.title}">
+  </div>
+  <div>
+    <label for="content"></label>
+    <textarea class="form-control" id="content" th:field="*{content}" th:class="form-control" th:text="${text.content}" rows="20"
+    ></textarea>
+  </div>
+  <button type="submit">수정</button>
+  <button type="button" th:onclick="|location.href='@{/board}'|">취소</button>
+</form>
+</body>
+</html>

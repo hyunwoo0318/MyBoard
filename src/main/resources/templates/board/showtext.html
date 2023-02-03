@@ -10,7 +10,7 @@
     table {
       font-family: arial, sans-serif;
       border-collapse: collapse;
-      width: 20%;
+      width: 50%;
     }
     td, th {
       border: 1px solid #dddddd;
@@ -19,6 +19,10 @@
     }
     tr:nth-child(even) {
       background-color: #dddddd;
+    }
+    textarea{
+      resize: none;
+      width:50%
     }
   </style>
 
@@ -31,13 +35,11 @@
   <th>날짜</th>
   <tr>
     <td th:text="${text.title}"></td>
-    <td th:text="${text.createdDate}"></td>
+    <td th:text="${text.createdTime}"></td>
   </tr>
-</table>
-<div th:text="${text.content}">
-내용
-</div>
-<button type="button" th:onclick="|location.href='@{/board/new(tid=${text.tid})}'|">글 수정</button>
+</table><br>
+<textarea th:text="${text.content}" readonly rows="20"></textarea><br>
+<button type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
 <form th:action th:object="${text}" th:method="post">
 <button type="submit">글 삭제</button>
 </form>

@@ -1,12 +1,18 @@
 package Lim.boardApp.form;
 
-
+import Lim.boardApp.domain.Text;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-//글 수정시 제목과 내용만 바뀔수 있게 함
+
 @Data
+@NoArgsConstructor
 public class TextUpdateForm {
-
     private String title;
     private String content;
+
+    public TextUpdateForm(Text text){
+        this.content = text.getContent();
+        this.title = text.getTitle();
+    }
 }

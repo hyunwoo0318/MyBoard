@@ -28,7 +28,7 @@
             <th>제목</th>
         </tr>
         <tr th:each="text: ${textList}" class="form-check form-check-inline">
-            <td th:text="${text.title}" th:onclick="|location.href='@{/board/{tid}(tid=${text.tid})}'|"></td>
+            <td th:text="${text.title}" th:onclick="|location.href='@{/board/{id}(id=${text.id})}'|"></td>
         </tr>
     </form>
 </table>
@@ -44,8 +44,8 @@
 <br>
 <div th:align="center">
     <button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
-    <form th:method="post">
-        <button type="button" th:onclick="|location.href='@{logout}'|">로그아웃</button>
+    <form th:action="@{/logoutss}" method="post">
+        <button type="submit">로그아웃</button>
     </form>
 </div>
 </body>

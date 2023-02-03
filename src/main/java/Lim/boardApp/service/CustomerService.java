@@ -1,15 +1,18 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.domain.Customer;
+import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class LoginService {
+public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
@@ -24,6 +27,12 @@ public class LoginService {
     //로그아웃
     public void logout(HttpServletRequest request) {
         request.getSession().invalidate();
+    }
+
+    public boolean dupLoginId(CustomerRegisterForm customerRegisterForm){
+        List<Customer> dupLoginId = customerRepository.findByLoginId(customerRegisterForm.getLoginId());
+        if(dupLoginId.isEmpty()) return false;
+        else return true;
     }
 
 }
