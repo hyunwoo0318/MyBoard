@@ -1,4 +1,4 @@
-package Lim.boardApp.Controller;
+package Lim.boardApp.controller;
 
 import Lim.boardApp.SessionConst;
 import Lim.boardApp.domain.Customer;
@@ -10,10 +10,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -46,6 +48,22 @@ class LoginControllerTest {
                         .sessionAttr(SessionConst.LOGIN_CUSTOMER, loginCustomer))
                         .andExpect(redirectedUrl("/board"))
                         .andDo(print());
+    }
+
+    @Test
+    @DisplayName("로그아웃 테스트 - /logout")
+    public void logoutTest() throws Exception{
+        Customer loginCustomer = new Customer();
+        customerRepository.save(loginCustomer);
+
+        MockHttpSession loginSession = new MockHttpSession();
+        loginSession.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
+
+        MvcResult mvcResult = mockMvc.perform(post("/logout").session(loginSession)).andReturn();
+        Object result = mvcResult.getRequest().getSession().getAttribute(SessionConst.LOGIN_CUSTOMER);
+
+        assertThat(result).isNull();
+
     }
 
 

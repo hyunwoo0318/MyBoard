@@ -24,8 +24,17 @@ public class LoginService {
     //서비스와 form의 독립성을 위해서 loginForm을 인자로 넘기지 않음
     //로그인 실패시 null을, 성공시 customer을 리턴함.
     public Customer login(String loginId, String password){
-        Optional<Customer> customer = customerRepository.findByLoginId(loginId);
-        return customer.orElse(null);
+        Optional<Customer> customerOptional = customerRepository.findByLoginId(loginId);
+        if(customerOptional.isEmpty()) {
+            return null;
+        }
+        Customer customer = customerOptional.get();
+        if(customer.getPassword() == password){
+            return customer;
+        }else{
+            return null;
+        }
+
     }
 
     //로그아웃

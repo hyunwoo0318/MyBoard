@@ -1,4 +1,4 @@
-package Lim.boardApp.Controller;
+package Lim.boardApp.controller;
 
 import Lim.boardApp.PageConst;
 import Lim.boardApp.SessionConst;

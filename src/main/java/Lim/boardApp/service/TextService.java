@@ -26,7 +26,7 @@ public class TextService {
         return lastPage;
     }
     public PageBlockForm findBlock(int page, int lastPages, int blockSize){
-        if(page < 0) page = 0;
+
         int blockNo = page / blockSize;
         int start = blockNo * blockSize;
         int end;

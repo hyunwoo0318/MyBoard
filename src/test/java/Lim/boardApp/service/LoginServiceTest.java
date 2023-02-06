@@ -73,6 +73,17 @@ class LoginServiceTest {
     }
 
     @Test
+    @DisplayName("정상적인 회원가입 시도")
+    public void regCustomer(){
+        registerNormalCustomer();
+        CustomerRegisterForm customer = new CustomerRegisterForm("id456456", "pw123123", "john", 12);
+
+        boolean result = loginService.dupLoginId(customer);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
     @DisplayName("이미 존재하는 아이디로 회원가입 시도")
     public void regCustomerExistLoginId(){
         registerNormalCustomer();
