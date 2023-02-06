@@ -4,22 +4,21 @@ package Lim.boardApp.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/* customer 테이블
-    cid varchar pk,
-    loginId varchar unique
-    password varchar,
-    cname varchar,
-    age int
-* */
+
 @Entity
 @Getter
 @Setter
-public class Customer extends BaseEntity {
+public class Customer  extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="customer_id")
     private Long id;
@@ -34,7 +33,8 @@ public class Customer extends BaseEntity {
     private Integer age;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    List<Text> texts = new ArrayList<>();
+    private List<Text> texts = new ArrayList<>();
+
 
     public Customer(){}
     @Builder
@@ -44,4 +44,6 @@ public class Customer extends BaseEntity {
         this.name = name;
         this.age = age;
     }
+
+
 }

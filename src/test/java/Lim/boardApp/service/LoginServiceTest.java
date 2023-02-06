@@ -1,24 +1,26 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.domain.Customer;
-import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import static org.assertj.core.api.Assertions.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import Lim.boardApp.form.CustomerRegisterForm;
 
 
 @SpringBootTest
 @Transactional
-class CustomerServiceTest {
+class LoginServiceTest {
 
     @Autowired CustomerRepository customerRepository;
 
     @Autowired
-    CustomerService customerService;
+    LoginService loginService;
 
     private void registerNormalCustomer(){
         Customer regCustomer = Customer.builder()
@@ -41,7 +43,7 @@ class CustomerServiceTest {
         String correctId = "id123123";
         String correctPassword = "pw123123";
 
-        Customer result = customerService.login(correctId, correctPassword);
+        Customer result = loginService.login(correctId, correctPassword);
 
         assertThat(result.getLoginId()).isEqualTo(correctId);
         assertThat(result.getPassword()).isEqualTo(correctPassword);
@@ -61,9 +63,9 @@ class CustomerServiceTest {
         String incorrectId = "id456456";
         String incorrectPassword = "pw456456";
 
-        Customer incorrectPasswordCustomer = customerService.login(correctId, incorrectPassword);
-        Customer incorrectIdCustomer = customerService.login(incorrectPassword, correctPassword);
-        Customer incorrectIdAndPasswordCustomer = customerService.login(incorrectId, incorrectPassword);
+        Customer incorrectPasswordCustomer = loginService.login(correctId, incorrectPassword);
+        Customer incorrectIdCustomer = loginService.login(incorrectPassword, correctPassword);
+        Customer incorrectIdAndPasswordCustomer = loginService.login(incorrectId, incorrectPassword);
 
         assertThat(incorrectPasswordCustomer).isNull();
         assertThat(incorrectIdCustomer).isNull();
@@ -76,9 +78,10 @@ class CustomerServiceTest {
         registerNormalCustomer();
         CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw2", "hy", 21);
 
-        boolean result = customerService.dupLoginId(dupCustomer);
+        boolean result = loginService.dupLoginId(dupCustomer);
 
         assertThat(result).isTrue();
     }
     //TODO : 로그아웃 테스트
 }
+

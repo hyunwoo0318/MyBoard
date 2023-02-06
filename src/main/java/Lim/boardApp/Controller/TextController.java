@@ -51,7 +51,7 @@ public class TextController {
         model.addAttribute("page", page);
         model.addAttribute("block", block);
 
-        return "board/textList";
+        return "ex";
     }
 
     //선택한 글의 정보를 보여줌

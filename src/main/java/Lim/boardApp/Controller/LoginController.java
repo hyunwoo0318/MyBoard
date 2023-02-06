@@ -6,18 +6,17 @@ import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.service.CustomerService;
+import Lim.boardApp.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -32,6 +31,9 @@ public class LoginController {
 
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
+    private final LoginService loginService;
+
+
 
     //일반 홈 화면
     @GetMapping("/")
@@ -39,7 +41,7 @@ public class LoginController {
         if (loginCustomer == null) {
             return "home";
         }else {
-            model.addAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer);
+            model.addAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
             return "redirect:/board";
         }
     }
@@ -56,7 +58,7 @@ public class LoginController {
     @PostMapping("/register")
     public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult) {
 
-       if(customerService.dupLoginId(customerRegisterForm))
+       if(loginService.dupLoginId(customerRegisterForm))
            bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
 
         if(bindingResult.hasErrors()){
@@ -80,20 +82,19 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginForm form, HttpServletRequest request) {
-        Customer loginCustomer = customerService.login(form.getLoginId(), form.getPassword());
-        if (loginCustomer == null) {
+    public String login(@ModelAttribute LoginForm form,HttpSession session) {
+        Customer loginCustomer = loginService.login(form.getLoginId(), form.getPassword());
+        if (loginCustomer == null) { //로그인 실패
             return "login";
         } else {
-            HttpSession session = request.getSession();
             session.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
             return "redirect:/board";
         }
     }
 
-    @PostMapping("/logoutss")
+    @PostMapping("/logout")
     public String logout(HttpServletRequest request){
-        customerService.logout(request);
+        loginService.logout(request);
         return "redirect:/";
     }
 }
