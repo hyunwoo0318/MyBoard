@@ -1,8 +1,14 @@
 package Lim.boardApp.form;
 
+import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
+import Lim.boardApp.repository.TextHashtagRepository;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 
 @Data
@@ -10,9 +16,10 @@ import lombok.NoArgsConstructor;
 public class TextUpdateForm {
     private String title;
     private String content;
+    private List<Hashtag> hashtags;
 
     public TextUpdateForm(Text text){
-        this.content = text.getContent();
         this.title = text.getTitle();
+        this.content = text.getContent();
     }
 }

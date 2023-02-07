@@ -19,7 +19,7 @@ public class Text extends BaseEntity {
 
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "CUSTOMER_ID")
     private Customer customer;
 
@@ -42,4 +42,5 @@ public class Text extends BaseEntity {
         this.customer = customer;
         customer.getTexts().add(this);
     }
+
 }

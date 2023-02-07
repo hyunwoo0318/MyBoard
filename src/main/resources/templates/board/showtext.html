@@ -1,48 +1,60 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <link th:href="@{/css/bootstrap.min.css}"
-        href="css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- 내부 css -->
-  <style>
-    table {
-      font-family: arial, sans-serif;
-      border-collapse: collapse;
-      width: 50%;
-    }
-    td, th {
-      border: 1px solid #dddddd;
-      text-align: left;
-      padding: 8px;
-    }
-    tr:nth-child(even) {
-      background-color: #dddddd;
-    }
-    textarea{
-      resize: none;
-      width:50%
-    }
-  </style>
-
+  <title>게시판</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<h2>글 내용</h2>
+<section class="ftco-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+        <h2 class="heading-section">게시글</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="table-wrap">
+          <table class="table">
+            <thead class="thead-primary">
+            <tr>
+              <th>제목</th>
+              <th>작성자</th>
+              <th>작성 일자</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td th:text="${text.title}">제목</td>
+              <td th:text="${text.content}">작성자</td>
+              <td th:text="${text.createdTime}">작성일자</td>
+            </tr>
+            </tbody>
+          </table>
+          <div th:align="center" th:width="80" th:height="20" th:text="${text.content}">글</div>
+          <p>
+            <span th:each = "hashtag : ${hashtagList}">
+              <span th:class="badge" th:text="${hashtag.name}"></span>
+            </span>
+          </p><br>
+          <button type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
+          <form th:action th:object="${text}" th:method="post">
+            <button type="submit">글 삭제</button>
+          </form>
+          <button type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<table th:class="table" th:border="1">
-  <th>제목</th>
-  <th>날짜</th>
-  <tr>
-    <td th:text="${text.title}"></td>
-    <td th:text="${text.createdTime}"></td>
-  </tr>
-</table><br>
-<textarea th:text="${text.content}" readonly rows="20"></textarea><br>
-<button type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
-<form th:action th:object="${text}" th:method="post">
-<button type="submit">글 삭제</button>
-</form>
-<button type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/popper.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
 </body>
 </html>

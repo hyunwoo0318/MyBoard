@@ -22,15 +22,10 @@ import javax.servlet.http.HttpSession;
 @RequiredArgsConstructor
 @Controller
 public class LoginController {
-    
-    //TODO : Filter & InterCeptor를 이용해서 whitelist 만들기.
-    //TODO : validation 구현
-    //TODO : validation까지 완료한 이후에 jwt를 이용해서 회원가입 구현하기.
 
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
     private final LoginService loginService;
-
 
 
     //일반 홈 화면

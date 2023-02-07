@@ -2,12 +2,14 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.PageConst;
 import Lim.boardApp.SessionConst;
-import Lim.boardApp.domain.Customer;
+import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.form.PageBlockForm;
+import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
 import Lim.boardApp.repository.CustomerRepository;
+import Lim.boardApp.repository.TextHashtagRepository;
 import Lim.boardApp.repository.TextRepository;
 import Lim.boardApp.service.TextService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,34 +34,41 @@ public class TextController {
     private final TextRepository textRepository;
     private final TextService textService;
     private final CustomerRepository customerRepository;
+    private final TextHashtagRepository textHashtagRepository;
 
     //글 리스트 전체를 보여주는 페이지
     @GetMapping
     public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
 
-        int lastPage = textService.getLastPage(PageConst.PAGE_SIZE);
+        String searchKey = new String();
 
-        if(page < 0) page = 0;
-        if(lastPage < page) page = lastPage;
+        PageForm pageForm = textService.pagingByAll(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE);
+        model.addAttribute("pageForm", pageForm);
+        model.addAttribute("searchKey", searchKey);
+        return "board/textList";
+    }
 
-        PageRequest pageRequest = PageRequest.of(page, PageConst.PAGE_SIZE);
-        Page<Text> pages = textRepository.findAll(pageRequest);
-        List<Text> textList = pages.getContent();
-
-        PageBlockForm block = textService.findBlock(page,lastPage, PageConst.PAGE_BLOCK_SIZE);
-
-        model.addAttribute("textList", textList);
-        model.addAttribute("page", page);
-        model.addAttribute("block", block);
-
-        return "ex";
+    @GetMapping("/search/show")
+    public String searchText( @RequestParam(value = "searchKey", defaultValue = "none", required = false) String searchKey,
+                              @RequestParam(value = "type", defaultValue = "all",required = false) String type,
+//                              @RequestParam(value = "page", defaultValue = "0",required = false) int page,
+                              Model model){
+        //TODO : input이 안받아지는 현상 -> post로 교체해서 해보기
+        int page  =0;
+        String newSearchKey = "";
+        PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, type);
+        model.addAttribute("pageForm", pageForm);
+        model.addAttribute("searchKey", newSearchKey);
+        return "board/textList";
     }
 
     //선택한 글의 정보를 보여줌
     @GetMapping("/{id}")
     public String showText(@PathVariable("id") Long id, Model model) {
         Text text = textRepository.getReferenceById(id);
+        List<Hashtag> hashtags = textHashtagRepository.findHashtagsByText(text);
         model.addAttribute(text);
+        model.addAttribute(hashtags);
         return "board/showtext";
     }
 
@@ -79,15 +89,10 @@ public class TextController {
     @PostMapping("/new")
     public String postNewText(@ModelAttribute("text") TextCreateForm textCreateForm,
                               @SessionAttribute(name= SessionConst.LOGIN_CUSTOMER) Long id) {
-        Optional<Customer> customerOptional = customerRepository.findById(id);
-        //TODO : 예외처리
-        Customer customer = customerOptional.get();
-        Text text = new Text().builder()
-                .title(textCreateForm.getTitle())
-                .content(textCreateForm.getContent())
-                .customer(customer)
-                .build();
-        textRepository.save(text);
+        if(textService.createText(id, textCreateForm) == null){
+            System.out.println("create 오류");
+            return "redirect:/board/new";
+        }
         return "redirect:/board";
     }
 
@@ -104,14 +109,9 @@ public class TextController {
 
     @PostMapping("/edit/{id}")
     public String postEditText(@ModelAttribute("text") TextUpdateForm textUpdateForm,@PathVariable Long id) {
-        Optional<Text> textOp = textRepository.findById(id);
-        if(textOp.isEmpty()) {
-            System.out.println("id = " + id);
-            return "redirect:/board";
+        if(textService.updateText(id, textUpdateForm) == null){
+            System.out.println("update 실패");
         }
-        Text text = textOp.get();
-        text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle());
-        textRepository.save(text);
         return "redirect:/board";
     }
 }

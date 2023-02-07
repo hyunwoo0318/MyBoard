@@ -1,52 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <link th:href="@{/css/bootstrap.min.css}"
-          href="css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        table{
-            margin:auto;
-        }
-        ul{
-            display: inline-block;
-            margin-top:20px;
-        }
-        ul li{
-            list-style-type: none;
-            diplay: inline-block;
-            margin-right:10px;
-            float:left;
-        }
-    </style>
+    <title>게시판</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
 </head>
 <body>
-<h2 th:align="center">게시판</h2>
-<table>
-    <form th:action th:object="${textList}" th:method="post">
-        <tr>
-            <th>제목</th>
-        </tr>
-        <tr th:each="text: ${textList}" class="form-check form-check-inline">
-            <td th:text="${text.title}" th:onclick="|location.href='@{/board/{id}(id=${text.id})}'|"></td>
-        </tr>
-    </form>
-</table>
-<div th:align="center">
-    <ul>
-        <li><a th:href="@{/board/(page=(${page}-1))}" th:text="prev"></a></li>
-        <li th:each="pg : ${#numbers.sequence(block.getStart(), block.getEnd())}">
-            <a th:href = "@{/board/(page=(${pg}))}" th:text="(${pg}) "></a>
-        </li>
-        <li><a th:href="@{/board/(page=(${page}+1))}" th:text="next"></a></li>
-    </ul>
-</div>
-<br>
-<div th:align="center">
-    <button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">로그아웃</button>
-    </form>
-</div>
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center mb-5">
+                <h2 class="heading-section">게시판</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead class="thead-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>제목</th>
+                            <th>작성자</th>
+                            <th>작성 일자</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="text, textStat: ${pageForm.textList}">
+                            <td th:text="${textStat.index} + 1">111</td>
+                            <td th:text="${text.title}" th:onclick="|location.href='@{/board/{id}(id=${text.id})}'|">222</td>
+                            <td th:text="${text.content}">333</td>
+                            <td>20230206</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+            <ul th:class = "pagination">
+                <li th:class="page-item"><a th:class="page-link" th:href="@{/board/(page=(${pageForm.page}-1))}" th:text="prev"></a></li>
+                <li th:class="page-item" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
+                    <a th:class="page-link" th:href = "@{/board/(page=(${pg}))}" th:text="(${pg} + 1) "></a>
+                </li>
+                <li th:class="page-item"><a th:class="page-link" th:href="@{/board/(page=(${pageForm.page}+1))}" th:text="next"></a></li>
+            </ul>
+        <form th:action="@{search/show/(searchKey = ${searchKey})}" th:object="${searchKey}" th:method="get">
+          <label class="form-check-label" for="searchKey">검색</label>
+          <input type="text" id="searchKey" th:field="${searchKey}" class="form-control"/>
+          <button type="submit">검색</button>
+        </form>
+        <div th:align="center">
+            <button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit">로그아웃</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/popper.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
 </body>
 </html>

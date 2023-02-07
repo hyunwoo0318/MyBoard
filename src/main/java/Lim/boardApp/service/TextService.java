@@ -1,8 +1,15 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.PageConst;
+import Lim.boardApp.domain.Customer;
+import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
+import Lim.boardApp.domain.TextHashtag;
 import Lim.boardApp.form.PageBlockForm;
+import Lim.boardApp.form.PageForm;
+import Lim.boardApp.form.TextCreateForm;
+import Lim.boardApp.form.TextUpdateForm;
+import Lim.boardApp.repository.CustomerRepository;
+import Lim.boardApp.repository.TextHashtagRepository;
 import Lim.boardApp.repository.TextRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,29 +17,91 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TextService {
 
     private final TextRepository textRepository;
-    public int getLastPage(int pageSize){
-        PageRequest pageRequest = PageRequest.ofSize(pageSize);
-        Page<Text> pages = textRepository.findAll(pageRequest);
-        int totalPages = pages.getTotalPages();
-        int lastPage;
-        if(totalPages == 0) lastPage = 0;
-        else lastPage = totalPages -1; // 0부터 시작
-        return lastPage;
+    private final TextHashtagRepository textHashtagRepository;
+    private final CustomerRepository customerRepository;
+
+    public PageForm pagingByAll(int page,int pageSize,int blockSize){
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
+        Page<Text> findPage = textRepository.findAll(pageRequest);
+
+        return makePageForm(findPage, page, blockSize);
     }
-    public PageBlockForm findBlock(int page, int lastPages, int blockSize){
+
+    public PageForm pagingBySearch(int page, int pageSize, int blockSize, String searchKey, String type){
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
+        type = "all";
+        if(type == "all"){
+            Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey, pageRequest);
+            return makePageForm(findPage, page, blockSize);
+        } else if(type == "content"){
+            Page<Text> findPage = textRepository.searchTextByContent(searchKey, pageRequest);
+            return makePageForm(findPage, page, blockSize);
+        } else if(type == "title"){
+            Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
+            return makePageForm(findPage, page, blockSize);
+        }else return null;
+    }
+
+    private PageForm makePageForm(Page<Text> findPage, int page, int blockSize){
+        int lastPage = findPage.getTotalPages()-1;
 
         int blockNo = page / blockSize;
         int start = blockNo * blockSize;
         int end;
-        if(lastPages < start + blockSize-1) end = lastPages;
+        if(lastPage < start + blockSize-1) end = lastPage;
         else end = start + blockSize -1;
-        return new PageBlockForm(start, end, end - start + 1);
+        PageBlockForm pageBlockForm = new PageBlockForm(start, end, end - start + 1);
+
+        PageForm pageForm = new PageForm(start,end, end-start + 1, page, lastPage, findPage.getContent(), findPage.isLast(), findPage.isFirst());
+        return pageForm;
     }
+
+    public Text createText(Long id, TextCreateForm textCreateForm) {
+        Optional<Customer> customerOptional = customerRepository.findById(id);
+        if(customerOptional.isEmpty()){
+            return null;
+        }
+        Customer customer = customerOptional.get();
+        Text text = new Text().builder()
+                .title(textCreateForm.getTitle())
+                .content(textCreateForm.getContent())
+                .customer(customer)
+                .build();
+        textRepository.save(text);
+
+        List<Hashtag> hashtags = textCreateForm.getHashtags();
+        for (Hashtag h : hashtags) {
+            textHashtagRepository.save(new TextHashtag(text, h));
+        }
+        return text;
+    }
+
+    public Text updateText(Long id,TextUpdateForm textUpdateForm){
+        //text 변경
+        Optional<Text> textOptional = textRepository.findById(id);
+        if(textOptional.isEmpty()){
+            return null;
+        }
+        Text text = textOptional.get();
+        text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle());
+        textRepository.save(text);
+
+        //hashTag 변경
+        textHashtagRepository.deleteAllByText(text);
+        for(Hashtag h : textUpdateForm.getHashtags()){
+            textHashtagRepository.save(new TextHashtag(text, h));
+        }
+        return text;
+    }
+
 
 }
