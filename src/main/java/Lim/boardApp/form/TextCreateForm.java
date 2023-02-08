@@ -12,7 +12,7 @@ import java.util.List;
 public class TextCreateForm {
     private String title;
     private String content;
-    private List<Hashtag> hashtags;
+    private String hashtags;
 
     public TextCreateForm(String title, String content) {
         this.title = title;

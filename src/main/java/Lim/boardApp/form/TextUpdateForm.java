@@ -16,7 +16,7 @@ import java.util.List;
 public class TextUpdateForm {
     private String title;
     private String content;
-    private List<Hashtag> hashtags;
+    private String hashtags;
 
     public TextUpdateForm(Text text){
         this.title = text.getTitle();

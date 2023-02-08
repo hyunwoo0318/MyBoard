@@ -1,11 +1,11 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.SessionConst;
+import Lim.boardApp.ObjectValue.RoleConst;
+import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
 import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.service.CustomerService;
 import Lim.boardApp.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,6 @@ import javax.servlet.http.HttpSession;
 public class LoginController {
 
     private final CustomerRepository customerRepository;
-    private final CustomerService customerService;
     private final LoginService loginService;
 
 
@@ -47,7 +46,7 @@ public class LoginController {
         return "addCustomer";
     }
 
-    //회원가입
+    //일반회원가입
     @PostMapping("/register")
     public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult) {
 
@@ -62,6 +61,7 @@ public class LoginController {
                         .age(customerRegisterForm.getAge())
                         .name(customerRegisterForm.getName())
                         .password(customerRegisterForm.getPassword())
+                        .role(RoleConst.USER)
                         .build();
         customerRepository.save(customer);
         return "home";
@@ -75,13 +75,14 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginForm form,HttpSession session) {
+    public String login(@RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,
+            @ModelAttribute LoginForm form,HttpSession session) {
         Customer loginCustomer = loginService.login(form.getLoginId(), form.getPassword());
         if (loginCustomer == null) { //로그인 실패
             return "login";
         } else {
             session.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
-            return "redirect:/board";
+            return "redirect:" + redirectURL;
         }
     }
 

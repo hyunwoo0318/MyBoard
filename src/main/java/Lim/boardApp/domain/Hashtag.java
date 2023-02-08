@@ -19,5 +19,6 @@ public class Hashtag {
     @Column(name = "hashtag_id")
     private Long id;
 
+    @Column(unique = true)
     private String name;
 }

@@ -2002,7 +2002,7 @@ textarea.form-control {
       display: inline-block; }
     .form-inline .input-group,
     .form-inline .custom-select {
-      width: auto; }
+      width: 20%; }
     .form-inline .form-check {
       display: -webkit-box;
       display: -ms-flexbox;

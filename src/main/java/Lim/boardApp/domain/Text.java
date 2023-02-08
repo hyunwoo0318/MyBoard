@@ -3,11 +3,13 @@ package Lim.boardApp.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Text extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

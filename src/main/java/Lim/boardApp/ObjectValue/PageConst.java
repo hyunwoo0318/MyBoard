@@ -1,6 +1,6 @@
-package Lim.boardApp;
+package Lim.boardApp.ObjectValue;
 
 public abstract class PageConst {
     public static final int PAGE_BLOCK_SIZE =5;
-    public static final int PAGE_SIZE = 3;
+    public static final int PAGE_SIZE = 10;
 }

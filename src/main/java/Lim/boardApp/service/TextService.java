@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ public class TextService {
     private final TextRepository textRepository;
     private final TextHashtagRepository textHashtagRepository;
     private final CustomerRepository customerRepository;
+    private final HashtagService hashtagService;
 
     public PageForm pagingByAll(int page,int pageSize,int blockSize){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
@@ -38,14 +40,13 @@ public class TextService {
 
     public PageForm pagingBySearch(int page, int pageSize, int blockSize, String searchKey, String type){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
-        type = "all";
-        if(type == "all"){
+        if(type.equals("all")){
             Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
-        } else if(type == "content"){
+        } else if(type.equals("content")){
             Page<Text> findPage = textRepository.searchTextByContent(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
-        } else if(type == "title"){
+        } else if(type.equals("title")){
             Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
         }else return null;
@@ -53,6 +54,9 @@ public class TextService {
 
     private PageForm makePageForm(Page<Text> findPage, int page, int blockSize){
         int lastPage = findPage.getTotalPages()-1;
+        if(lastPage == -1){
+            return new PageForm(0,0,1,0,0,new ArrayList<Text>(), true, true);
+        }
 
         int blockNo = page / blockSize;
         int start = blockNo * blockSize;
@@ -65,7 +69,7 @@ public class TextService {
         return pageForm;
     }
 
-    public Text createText(Long id, TextCreateForm textCreateForm) {
+    public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList) {
         Optional<Customer> customerOptional = customerRepository.findById(id);
         if(customerOptional.isEmpty()){
             return null;
@@ -78,14 +82,13 @@ public class TextService {
                 .build();
         textRepository.save(text);
 
-        List<Hashtag> hashtags = textCreateForm.getHashtags();
-        for (Hashtag h : hashtags) {
+        for(Hashtag h : hashtagList){
             textHashtagRepository.save(new TextHashtag(text, h));
         }
         return text;
     }
 
-    public Text updateText(Long id,TextUpdateForm textUpdateForm){
+    public Text updateText(Long id,TextUpdateForm textUpdateForm,List<Hashtag> hashtagList){
         //text 변경
         Optional<Text> textOptional = textRepository.findById(id);
         if(textOptional.isEmpty()){
@@ -97,7 +100,7 @@ public class TextService {
 
         //hashTag 변경
         textHashtagRepository.deleteAllByText(text);
-        for(Hashtag h : textUpdateForm.getHashtags()){
+        for(Hashtag h : hashtagList){
             textHashtagRepository.save(new TextHashtag(text, h));
         }
         return text;

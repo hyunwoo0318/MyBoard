@@ -1,6 +1,6 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.SessionConst;
+import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.repository.CustomerRepository;
 import org.junit.jupiter.api.DisplayName;
