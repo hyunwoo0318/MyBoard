@@ -4,23 +4,19 @@
     <title>게시판</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <link rel="stylesheet" href="/css/style.css">
-
 </head>
 <body>
 <form th:class="form-group" th:action th:object="${loginForm}" method="post">
     <div>
-        <label  for="loginId" >로그인 ID</label>
-        <input th:class="form-control" type="text" id="loginId" th:field="*{loginId}">
+        <label for="loginId" >로그인 ID</label>
+        <input th:class="input-group-text" type="text" id="loginId" th:field="*{loginId}">
     </div>
     <div>
-        <label   for="password">패스워드</label>
-        <input th:class="form-control" type="text" id="password" th:field="*{password}">
+        <label for="password">패스워드</label>
+        <input  th:class="input-group-text" type="text" id="password" th:field="*{password}">
     </div>
     <div>
         <button type="submit">로그인</button>

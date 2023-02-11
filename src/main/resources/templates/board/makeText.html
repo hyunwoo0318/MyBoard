@@ -4,32 +4,29 @@
     <title>게시판</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <link rel="stylesheet" href="/css/style.css">
-
 </head>
 <body>
 <h2>글 작성</h2>
-<form th:class="form-group" th:action th:object="${text}" th:method="post">
+
+<form th:action th:object="${text}" th:method="post">
     <div>
-        <label ㄹor="title"></label>
-            <input th:class="form-control" type ="text" id="title" th:field="*{title}" placeholder="제목을 입력하시오">
+        <label for="title"></label>
+            <input type ="text" id="title" th:field="*{title}" th:class="form-control" placeholder="제목을 입력하시오">
     </div>
     <div>
         <label for="content"></label>
-        <textarea class="form-control" rows="20"  id="content" th:field="*{content}" th:class="form-control"
-        placeholder="내용을 입력하시오"></textarea>
+        <textarea rows="15" id="content" th:field="*{content}" placeholder="내용을 입력하시오" th:class="form-control"></textarea>
     </div>
-    <div>
-        <label for="hashtags">','로 구분하여 해시태그 이름을 입력해주세요</label>
-        <input th:class="form-control" type ="text" id="hashtags" th:field="*{hashtags}">
+    <div >
+        <label for="hashtags"></label>
+        <input type ="text" id="hashtags" th:class="form-control" th:field="*{hashtags}" placeholder="','로 구분하여 해시태그 이름을 입력해주세요">
     </div>
-    <button type="submit">작성</button>
-    <button type="button" th:onclick="|location.href='@{/board}'|">취소</button>
+    <button type="submit" class="btn btn-primary">작성</button>
+    <button type="button" class="btn btn-primary" th:onclick="|location.href='@{/board}'|">취소</button>
 </form>
+
 </body>
 </html>

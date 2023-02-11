@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <link th:href="@{/css/bootstrap.min.css}"
-        href="css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    input{
-      width: 50%
-    }
-    textarea{
-      resize: none;
-      width: 50%;
-      height: 6.25em;
-    }
-  </style>
+  <title>게시판</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+
 </head>
 <body>
 <h2>글 수정</h2>
@@ -26,6 +23,10 @@
     <label for="content"></label>
     <textarea class="form-control" id="content" th:field="*{content}" th:class="form-control" th:text="${text.content}" rows="20"
     ></textarea>
+  </div>
+  <div>
+    <label for="hashtags"></label>
+    <input type="text" id="hashtags" th:field="*{hashtags}" th:class="form-control" th:placeholder="${text.hashtags}">
   </div>
   <button type="submit">수정</button>
   <button type="button" th:onclick="|location.href='@{/board}'|">취소</button>

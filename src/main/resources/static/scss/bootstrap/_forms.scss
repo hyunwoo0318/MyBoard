@@ -222,10 +222,10 @@ textarea.form-control {
 .form-check-inline {
   display: inline-flex;
   align-items: center;
-  padding-left: 0; // Override base .form-check.html
+  padding-left: 0; // Override base .form-check
   margin-right: $form-check-inline-margin-x;
 
-  // Undo .form-check.html-input defaults and add some `margin-right`.
+  // Undo .form-check-input defaults and add some `margin-right`.
   .form-check-input {
     position: static;
     margin-top: 0;

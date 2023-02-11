@@ -2,15 +2,14 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.ObjectValue.PageConst;
 import Lim.boardApp.ObjectValue.SessionConst;
+import Lim.boardApp.domain.Comment;
+import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
-import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.repository.HashtagRepository;
-import Lim.boardApp.repository.TextHashtagRepository;
-import Lim.boardApp.repository.TextRepository;
+import Lim.boardApp.repository.*;
 import Lim.boardApp.service.HashtagService;
 import Lim.boardApp.service.TextService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +27,8 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/board")
 public class TextController {
+    private final CommentRepository commentRepository;
+    private final CustomerRepository customerRepository;
     private final HashtagRepository hashtagRepository;
 
     private final TextRepository textRepository;
@@ -64,15 +65,24 @@ public class TextController {
 
     //선택한 글의 정보를 보여줌
     @GetMapping("show/{id}")
-    public String showText(@PathVariable("id") Long id, Model model) {
-        Text text = textRepository.getReferenceById(id);
-        List<Hashtag> hashtags = textHashtagRepository.findHashtagsByText(text);
-        model.addAttribute(text);
-        model.addAttribute(hashtags);
-        return "board/showtext";
+    public String showText(@PathVariable("id") Long id, @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId, Model model) {
+        Optional<Text> textOp = textRepository.findById(id);
+        //TODO : 예외처리
+        Text text = textOp.get();
+        List<Hashtag> hashtagList = textHashtagRepository.findHashtagsByText(text);
+        List<Comment> commentList = commentRepository.findCommentsByText(text);
+        model.addAttribute("text",text);
+        model.addAttribute("hashtagList", hashtagList);
+        model.addAttribute("commentList", commentList);
+        if(customerId == text.getCustomer().getId()){
+            return "board/showMyText";
+        }else{
+            return "board/showtext";
+        }
+
     }
 
-    @PostMapping("show/{id}")
+    @PostMapping("delete/{id}")
     public String deleteText(@PathVariable Long id){
         textRepository.deleteById(id);
         return "redirect:/board";
@@ -98,7 +108,7 @@ public class TextController {
     }
 
     //글 추가 메서드
-    @GetMapping("/edit/{id}")
+    @GetMapping("edit/{id}")
     public String getEditText(@PathVariable Long id, Model model) {
         Optional<Text> textOptional = textRepository.findById(id);
         //TODO : 예외처리
@@ -110,12 +120,36 @@ public class TextController {
         return "board/editText";
     }
 
-    @PostMapping("/edit/{id}")
+    @PostMapping("edit/{id}")
     public String postEditText(@ModelAttribute("text") TextUpdateForm textUpdateForm,@PathVariable Long id) {
         List<Hashtag> hashtagList = hashtagService.parseHashtag(textUpdateForm.getHashtags());
         if(textService.updateText(id, textUpdateForm,hashtagList) == null){
             System.out.println("update 실패");
         }
-        return "redirect:/board";
+        return "redirect:/board/show/" + id;
+    }
+
+    //새 댓글 추가
+    @GetMapping("/comment/new/{id}")
+    public String getNewComment(@PathVariable Long id,Model model){
+        Optional<Text> textOp = textRepository.findById(id);
+        //TODO : 예외처리
+        Text text = textOp.get();
+        List<Comment> commentList = commentRepository.findCommentsByText(text);
+        String commentContent = "";
+        model.addAttribute("text", text);
+        model.addAttribute("commentList", commentList);
+        model.addAttribute("commentContent", commentContent);
+        return "board/newComment";
+    }
+
+    @PostMapping("comment/new/{id}")
+    public String postNewComment(@PathVariable Long id,@ModelAttribute("commentContent") String commentContent,
+                                 @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId) {
+        Text text = textRepository.findById(id).get();
+        Customer customer = customerRepository.findById(customerId).get();
+        Comment comment = new Comment(text,customer,commentContent);
+        commentRepository.save(comment);
+        return "redirect:/board/show/" + id;
     }
 }

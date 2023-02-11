@@ -17,14 +17,9 @@ public interface TextRepository extends JpaRepository<Text, Long> {
     @Query("select t from Text t where t.content like %:searchKey% or t.title like %:searchKey%")
     public Page<Text> searchTextByContentTitle(@Param("searchKey") String searchKey, Pageable pageable);
 
-//    @Query("select t from Text t where t.content like %:searchKey% or t.title like %:searchKey%")
-//    public List<Text> searchTextByContentTitle(@Param("searchKey") String searchKey);
 
     @Query("select t from Text t where t.content like %:searchKey%")
     public Page<Text> searchTextByContent(@Param("searchKey") String searchKey, Pageable pageable);
-
-//    @Query("select t from Text t where t.content like %:searchKey%")
-//    public List<Text> searchTextByContent(@Param("searchKey") String searchKey);
 
     @Query("select t from Text t where t.title like %:searchKey%")
     public Page<Text> searchTextByTitle(@Param("searchKey") String searchKey, Pageable pageable);

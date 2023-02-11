@@ -4,38 +4,50 @@
     <title>게시판</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <link rel="stylesheet" href="/css/style.css">
-
 </head>
 <body>
+
+<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <div class="container-fluid">
+        <a class="navbar-brand">검색창</a>
+        <form class="d-flex" th:action = "@{/board/search/(searchKey = ${searchKey}, type= ${type})}" th:method="get">
+            <select  name="type">
+                <option value="all">전체</option>
+                <option value="title">제목</option>
+                <option value="content">내용</option>
+                <option value="hashtag">해시태그</option>
+            </select>
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchKey">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
 <section class="ftco-section">
-    <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 text-center mb-5">
                 <h2 class="heading-section">게시판</h2>
             </div>
-            <div th:if="${param.searchKey != ''}" class="col-md-2 text-left mb-2">
+            <div th:if="${searchKey != ''}" class="col-md-2 text-left mb-2">
                 <span>검색 키워드 : </span>
-                <span class="heading-section" th:text="${param.searchKey}"></span>
+                <span class="heading-section" th:text="${searchKey}"></span>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
                 <div class="table-wrap">
                     <table class="table">
                         <colgroup>
                             <col width="5%">
-                            <col width="50%">
-                            <col width="10%">
-                            <col width="10%">
+                            <col width="30%">
+                            <col width="5%">
+                            <col width="5%">
                         </colgroup>
                         <thead class="thead-primary">
-                        <tr width="90%">
+                        <tr>
                             <th >#</th>
                             <th >제목</th>
                             <th >작성자</th>
@@ -47,14 +59,15 @@
                             <td  th:text="${textStat.index} + 1"></td>
                             <td th:text="${text.title}" th:onclick="|location.href='@{/board/show/{id}(id=${text.id})}'|"></td>
                             <td  th:text="${text.customer.name}"></td>
-                            <td th:text="${text.createdTime}"></td>
+                            <td><time datetime="YYYY-MM-DDThh:mm:ssTZD" th:text="${text.createdTime}"></time></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-            <ul th:if="${param.searchKey == ''}" th:class = "pagination">
+    <div class="text-center">
+            <ul th:if="${searchKey == ''}" th:class = "pagination">
                 <li th:class="page-item">
                     <a th:if="${pageForm.isFirst == 'T'}" >prev</a>
                     <a th:if="${pageForm.isFirst == 'F'}" th:class="page-link" th:href="@{/board/(page=(${pageForm.page}-1))}" th:text="prev"></a>
@@ -67,39 +80,29 @@
                     <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/board/(page=(${pageForm.page}+1))}" th:text="next"></a>
                 </li>
             </ul>
-        <ul th:if="${param.searchKey != ''}" th:class = "pagination">
+        <ul th:align="center" th:if="${searchKey != ''}" th:class = "pagination">
             <li th:class="page-item">
                 <a th:if="${pageForm.isFirst == 'T'}" >prev</a>
-                <a th:if="${pageForm.isFirst == 'F'}" th:class="page-link" th:href="@{/board/search/(page=(${pageForm.page}-1), searchKey = (${param.searchKey}), type = (${param.type}))}" th:text="prev"></a>
+                <a th:if="${pageForm.isFirst == 'F'}" th:class="page-link" th:href="@{/board/search/(page=(${pageForm.page}-1), searchKey = (${searchKey}), type = (${type}))}" th:text="prev"></a>
             </li>
             <li th:class="page-item" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
-                <a th:class="page-link" th:href = "@{/board/search/(page=(${pg}), searchKey = (${param.searchKey}), type = (${param.type}))}" th:text="(${pg} + 1) "></a>
+                <a th:class="page-link" th:href = "@{/board/search/(page=(${pg}), searchKey = (${searchKey}), type = (${type}))}" th:text="(${pg} + 1) "></a>
             </li>
             <li th:class="page-item">
                 <a th:if="${pageForm.isLast == 'T'}" >next</a>
-                <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/board/search/(page=(${pageForm.page}+1), searchKey = (${param.searchKey}), type = (${param.type}))}" th:text="next"></a>
+                <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/board/search/(page=(${pageForm.page}+1), searchKey = (${searchKey}), type = (${type}))}" th:text="next"></a>
             </li>
         </ul>
-        <div>
-            <form class = "form-text" th:action = "@{/board/search/(searchKey = ${param.searchKey}, type= ${param.type})}" th:method="get">
-                <select name="type">
-                    <option value="all">전체</option>
-                    <option value="title">제목</option>
-                    <option value="content">내용</option>
-                </select>
-                <input type="text" name="searchKey">
-                <button type="submit">검색</button>
-            </form>
-        </div>
-        <div th:align="center">
-            <button type="button" th:onclick="|location.href='@{../../}'|">홈</button>
-            <button type="button" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button>
-            <form th:action="@{/logout}" method="post">
-                <button type="submit">로그아웃</button>
-            </form>
-        </div>
     </div>
+    <div class="text-center">
+            <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{../../}'|">홈</button>
+        <button type="button" class ="btn btn-primary" th:onclick="|location.href='@{board/new}'|">새로운 글 작성</button><br><br>
+            <form th:action="@{/logout}" method="post">
+                <button class="btn btn-success" type="submit">로그아웃</button>
+            </form>
+   </div>
 </section>
+
 
 <script src="/js/jquery.min.js"></script>
 <script src="/js/popper.js"></script>

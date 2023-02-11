@@ -9,6 +9,7 @@ import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
 import Lim.boardApp.repository.CustomerRepository;
+import Lim.boardApp.repository.HashtagRepository;
 import Lim.boardApp.repository.TextHashtagRepository;
 import Lim.boardApp.repository.TextRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class TextService {
     private final TextRepository textRepository;
     private final TextHashtagRepository textHashtagRepository;
     private final CustomerRepository customerRepository;
-    private final HashtagService hashtagService;
+    private final HashtagRepository hashtagRepository;
 
     public PageForm pagingByAll(int page,int pageSize,int blockSize){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
@@ -49,7 +50,12 @@ public class TextService {
         } else if(type.equals("title")){
             Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
-        }else return null;
+        }else if(type.equals("hashtag")){
+            searchKey = "#" + searchKey;
+            Hashtag hashtag = hashtagRepository.findByName(searchKey);
+            Page<Text> findPage = textHashtagRepository.findTextsByHashtag(hashtag, pageRequest);
+            return makePageForm(findPage, page, blockSize);
+        } else  return null;
     }
 
     private PageForm makePageForm(Page<Text> findPage, int page, int blockSize){

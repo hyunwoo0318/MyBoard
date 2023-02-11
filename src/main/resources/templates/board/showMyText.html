@@ -19,11 +19,6 @@
       <div class="col-md-8">
         <div class="table-wrap">
           <table class="table">
-            <colgroup>
-              <col width="20%">
-              <col width="5%">
-              <col width="5%">
-            </colgroup>
             <thead class="thead-primary">
             <tr>
               <th>제목</th>
@@ -46,7 +41,8 @@
             </span>
           </p><br>
           <div>
-            <table th:class="table">
+            <table th:class="table table-sm caption-top">
+              <caption>댓글</caption>
               <thead th:class="thead-light">
               <tr>
                 <th>번호</th>
@@ -68,11 +64,16 @@
               </tfoot>
             </table>
           </div>
+          <button type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
+          <form th:action="@{../delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
+            <button type="submit">글 삭제</button>
+          </form>
           <button type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
         </div>
       </div>
     </div>
 </section>
+
 <script src="/js/jquery.min.js"></script>
 <script src="/js/popper.js"></script>
 <script src="/js/bootstrap.min.js"></script>
