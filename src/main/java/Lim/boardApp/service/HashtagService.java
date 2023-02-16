@@ -46,4 +46,9 @@ public class HashtagService {
     public String mergeHashtag(List<Hashtag> hashtagList) {
         return hashtagList.stream().map(h -> h.getName().replaceAll("#","")).collect(Collectors.joining(","));
     }
+
+    public Hashtag addHashtag(String name) {
+        Hashtag hashtag = new Hashtag(name);
+        return hashtagRepository.save(hashtag);
+    }
 }

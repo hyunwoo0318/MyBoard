@@ -22,6 +22,10 @@ public class CustomerService {
         return customerRepository.findById(id).orElse(null);
     }
 
+    public Customer findCustomer(String loginId){
+        return customerRepository.findByLoginId(loginId).orElse(null);
+    }
+
     public void addCustomer(CustomerRegisterForm form, int saltSize){
         String salt = makeSalt(saltSize);
         String passwordHash = hashPassword(form.getPassword(), salt);

@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,10 +40,6 @@ class CustomerControllerTest {
     @Autowired
     CustomerService customerService;
 
-    @BeforeEach
-    public void deleteCustomer(){
-        customerRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("로그인 하지 않은 사용자가 홈 화면에 접근할때 - /")
@@ -54,6 +51,12 @@ class CustomerControllerTest {
                 .andExpect(view().name("home"))
                 .andDo(print());
     }
+
+    @BeforeEach
+    public void delete(){
+        customerRepository.deleteAll();
+    }
+
 
     @Test
     @DisplayName("로그인 한 사용자가 홈 화면에 접근할때 - /")
