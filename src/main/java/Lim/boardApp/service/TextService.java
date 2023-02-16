@@ -112,5 +112,13 @@ public class TextService {
         return text;
     }
 
+    public Text findText(Long id){
+        return textRepository.findById(id).orElse(null);
+    }
+
+    public void deleteText(Long id){
+        textRepository.deleteById(id);
+    }
+
 
 }

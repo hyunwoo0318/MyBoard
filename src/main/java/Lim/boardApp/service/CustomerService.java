@@ -18,6 +18,10 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
+    public Customer findCustomer(Long id) {
+        return customerRepository.findById(id).orElse(null);
+    }
+
     public void addCustomer(CustomerRegisterForm form, int saltSize){
         String salt = makeSalt(saltSize);
         String passwordHash = hashPassword(form.getPassword(), salt);
