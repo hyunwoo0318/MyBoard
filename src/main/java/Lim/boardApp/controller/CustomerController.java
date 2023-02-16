@@ -1,13 +1,10 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.ObjectValue.RoleConst;
 import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
-import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.service.CustomerService;
-import Lim.boardApp.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -22,10 +19,9 @@ import javax.servlet.http.HttpSession;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-public class LoginController {
+public class CustomerController {
 
-    private final CustomerRepository customerRepository;
-    private final LoginService loginService;
+    private final CustomerService customerService;
 
 
     //일반 홈 화면
@@ -51,23 +47,13 @@ public class LoginController {
     @PostMapping("/register")
     public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult) {
 
-       if(loginService.dupLoginId(customerRegisterForm))
+       if(customerService.dupLoginId(customerRegisterForm))
            bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
 
         if(bindingResult.hasErrors()){
             return "addCustomer";
         }
-
-        String newSalt = loginService.makeSalt(20);
-        String passwordHash = loginService.hashPassword(customerRegisterForm.getPassword(), newSalt);
-        Customer customer = new Customer().builder()
-                        .loginId(customerRegisterForm.getLoginId())
-                        .age(customerRegisterForm.getAge())
-                        .name(customerRegisterForm.getName())
-                        .password(passwordHash + newSalt)
-                        .role(RoleConst.USER)
-                        .build();
-        customerRepository.save(customer);
+        customerService.addCustomer(customerRegisterForm, 20);
         return "home";
     }
 
@@ -81,7 +67,7 @@ public class LoginController {
     @PostMapping("/login")
     public String login(@RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,
             @ModelAttribute LoginForm form,HttpSession session) {
-        Customer loginCustomer = loginService.login(form.getLoginId(), form.getPassword());
+        Customer loginCustomer = customerService.login(form.getLoginId(), form.getPassword());
         if (loginCustomer == null) { //로그인 실패
             return "login";
         } else {
@@ -92,7 +78,7 @@ public class LoginController {
 
     @PostMapping("/logout")
     public String logout(HttpServletRequest request){
-        loginService.logout(request);
+        customerService.logout(request);
         return "redirect:/";
     }
 }

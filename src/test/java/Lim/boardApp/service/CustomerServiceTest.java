@@ -18,17 +18,17 @@ import java.security.NoSuchAlgorithmException;
 
 @SpringBootTest
 @Transactional
-class LoginServiceTest {
+class CustomerServiceTest {
 
     @Autowired CustomerRepository customerRepository;
 
     @Autowired
-    LoginService loginService;
+    CustomerService customerService;
 
     private void registerNormalCustomer(){
         String password = "pw123123";
         String salt = "salt123123";
-        String passwordHash = loginService.hashPassword(password,salt);
+        String passwordHash = customerService.hashPassword(password,salt);
         Customer regCustomer = Customer.builder()
                 .loginId("id123123")
                 .name("hyeonwoo")
@@ -49,7 +49,7 @@ class LoginServiceTest {
         String correctId = "id123123";
         String correctPassword = "pw123123";
 
-        Customer result = loginService.login(correctId, correctPassword);
+        Customer result = customerService.login(correctId, correctPassword);
 
         assertThat(result.getLoginId()).isEqualTo(correctId);
         assertThat(result.getAge()).isEqualTo(26);
@@ -68,9 +68,9 @@ class LoginServiceTest {
         String incorrectId = "id456456";
         String incorrectPassword = "pw456456";
 
-        Customer incorrectPasswordCustomer = loginService.login(correctId, incorrectPassword);
-        Customer incorrectIdCustomer = loginService.login(incorrectPassword, correctPassword);
-        Customer incorrectIdAndPasswordCustomer = loginService.login(incorrectId, incorrectPassword);
+        Customer incorrectPasswordCustomer = customerService.login(correctId, incorrectPassword);
+        Customer incorrectIdCustomer = customerService.login(incorrectPassword, correctPassword);
+        Customer incorrectIdAndPasswordCustomer = customerService.login(incorrectId, incorrectPassword);
 
         assertThat(incorrectPasswordCustomer).isNull();
         assertThat(incorrectIdCustomer).isNull();
@@ -83,7 +83,7 @@ class LoginServiceTest {
         registerNormalCustomer();
         CustomerRegisterForm customer = new CustomerRegisterForm("id456456", "pw123123", "john", 12);
 
-        boolean result = loginService.dupLoginId(customer);
+        boolean result = customerService.dupLoginId(customer);
 
         assertThat(result).isFalse();
     }
@@ -94,7 +94,7 @@ class LoginServiceTest {
         registerNormalCustomer();
         CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw2", "hy", 21);
 
-        boolean result = loginService.dupLoginId(dupCustomer);
+        boolean result = customerService.dupLoginId(dupCustomer);
 
         assertThat(result).isTrue();
     }
@@ -103,7 +103,7 @@ class LoginServiceTest {
     @Test
     @DisplayName("makeSaltTest")
     public void makeSaltTest(){
-        String pw = loginService.makeSalt(20);
+        String pw = customerService.makeSalt(20);
         System.out.println(pw);
         assertThat(pw.length()).isEqualTo(20);
     }
@@ -127,7 +127,7 @@ class LoginServiceTest {
         String passwordHash = builder.toString();
         System.out.println("passwordHash.length() = " + passwordHash.length());
 
-        String result = loginService.hashPassword(password,salt);
+        String result = customerService.hashPassword(password,salt);
 
         assertThat(result).isEqualTo(passwordHash);
     }
