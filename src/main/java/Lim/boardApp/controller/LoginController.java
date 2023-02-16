@@ -6,6 +6,7 @@ import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
 import Lim.boardApp.repository.CustomerRepository;
+import Lim.boardApp.service.CustomerService;
 import Lim.boardApp.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +57,14 @@ public class LoginController {
         if(bindingResult.hasErrors()){
             return "addCustomer";
         }
+
+        String newSalt = loginService.makeSalt(20);
+        String passwordHash = loginService.hashPassword(customerRegisterForm.getPassword(), newSalt);
         Customer customer = new Customer().builder()
                         .loginId(customerRegisterForm.getLoginId())
                         .age(customerRegisterForm.getAge())
                         .name(customerRegisterForm.getName())
-                        .password(customerRegisterForm.getPassword())
+                        .password(passwordHash + newSalt)
                         .role(RoleConst.USER)
                         .build();
         customerRepository.save(customer);

@@ -4,10 +4,12 @@ import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.utility.RandomString;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Service
@@ -15,18 +17,19 @@ import java.util.Optional;
 public class LoginService {
 
     private final CustomerRepository customerRepository;
-    public Customer login(String loginId, String password){
-        Optional<Customer> customerOptional = customerRepository.findByLoginId(loginId);
+    public Customer login(String inputLoginId, String inputPassword){
+        Optional<Customer> customerOptional = customerRepository.findByLoginId(inputLoginId);
         if(customerOptional.isEmpty()) {
             return null;
         }
         Customer customer = customerOptional.get();
-        if(customer.getPassword().equals(password)){
+        PasswordPair passwordPair = parsePasswordHash(customer.getPassword());
+        String inputPasswordHash = hashPassword(inputPassword, passwordPair.salt);
+        if(passwordPair.passwordHash.equals(inputPasswordHash)){
             return customer;
         }else{
             return null;
         }
-
     }
 
     //로그아웃
@@ -40,4 +43,42 @@ public class LoginService {
         else return true;
     }
 
+    //비밀번호 해시화
+    public String makeSalt(int length){
+        RandomString salt = new RandomString(length);
+        return salt.nextString();
+    }
+
+    public String hashPassword(String password, String salt){
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update((password + salt).getBytes());
+            byte[] digest = md.digest();
+            StringBuilder builder = new StringBuilder();
+            for (byte b : digest) {
+                builder.append(String.format("%02X", b));
+            }
+            return builder.toString();
+        }catch(NoSuchAlgorithmException e){
+            e.getMessage();
+            return null;
+        }
+    }
+
+    public PasswordPair parsePasswordHash(String passwordHash){
+        return new PasswordPair(passwordHash.substring(0, 64), passwordHash.substring(64));
+    }
+
+    private class PasswordPair {
+        public String passwordHash;
+        public String salt;
+
+        private PasswordPair(String passwordHash, String salt){
+            this.passwordHash= passwordHash;
+            this.salt = salt;
+        }
+    }
+
 }
+
+

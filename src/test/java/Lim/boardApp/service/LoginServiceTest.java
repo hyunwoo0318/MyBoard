@@ -12,6 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import Lim.boardApp.form.CustomerRegisterForm;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 
 @SpringBootTest
 @Transactional
@@ -23,10 +26,13 @@ class LoginServiceTest {
     LoginService loginService;
 
     private void registerNormalCustomer(){
+        String password = "pw123123";
+        String salt = "salt123123";
+        String passwordHash = loginService.hashPassword(password,salt);
         Customer regCustomer = Customer.builder()
                 .loginId("id123123")
                 .name("hyeonwoo")
-                .password("pw123123")
+                .password(passwordHash + salt)
                 .age(26)
                 .build();
 
@@ -46,7 +52,6 @@ class LoginServiceTest {
         Customer result = loginService.login(correctId, correctPassword);
 
         assertThat(result.getLoginId()).isEqualTo(correctId);
-        assertThat(result.getPassword()).isEqualTo(correctPassword);
         assertThat(result.getAge()).isEqualTo(26);
         assertThat(result.getName()).isEqualTo("hyeonwoo");
     }
@@ -94,5 +99,37 @@ class LoginServiceTest {
         assertThat(result).isTrue();
     }
     //TODO : 로그아웃 테스트
+
+    @Test
+    @DisplayName("makeSaltTest")
+    public void makeSaltTest(){
+        String pw = loginService.makeSalt(20);
+        System.out.println(pw);
+        assertThat(pw.length()).isEqualTo(20);
+    }
+
+    @Test
+    @DisplayName("hashPasswordTest")
+    public void hashPasswordTest() throws NoSuchAlgorithmException {
+        /**
+         * expect result = SHA256(password + salt)
+         */
+        String password = "pw123123";
+        String salt = "a123456789987654321";
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update((password + salt).getBytes());
+        byte[] digest = md.digest();
+        StringBuilder builder = new StringBuilder();
+        for (byte b : digest) {
+            builder.append(String.format("%02X", b));
+        }
+        String passwordHash = builder.toString();
+        System.out.println("passwordHash.length() = " + passwordHash.length());
+
+        String result = loginService.hashPassword(password,salt);
+
+        assertThat(result).isEqualTo(passwordHash);
+    }
 }
 

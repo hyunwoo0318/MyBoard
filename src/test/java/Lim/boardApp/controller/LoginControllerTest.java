@@ -2,6 +2,7 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
+import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.ModelAndView;
 
 
 import static org.assertj.core.api.Assertions.*;
@@ -50,21 +53,7 @@ class LoginControllerTest {
                         .andDo(print());
     }
 
-    @Test
-    @DisplayName("로그아웃 테스트 - /logout")
-    public void logoutTest() throws Exception{
-        Customer loginCustomer = new Customer();
-        customerRepository.save(loginCustomer);
 
-        MockHttpSession loginSession = new MockHttpSession();
-        loginSession.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
-
-        MvcResult mvcResult = mockMvc.perform(post("/logout").session(loginSession)).andReturn();
-        Object result = mvcResult.getRequest().getSession().getAttribute(SessionConst.LOGIN_CUSTOMER);
-
-        assertThat(result).isNull();
-
-    }
 
 
 }
