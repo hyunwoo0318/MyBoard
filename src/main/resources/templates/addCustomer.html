@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
+
 <div class="row justify-content-center">
     <form th:class="form-group" th:action th:object="${customer}" th:method="post">
         <div th:if="${#fields.hasGlobalErrors()}">
@@ -46,6 +47,7 @@
         </div>
     </form>
 </div>
+
 
 </body>
 </html>

@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,8 +97,11 @@ public class TextController {
     }
 
     @PostMapping("/new")
-    public String postNewText(@ModelAttribute("text") TextCreateForm textCreateForm,
+    public String postNewText(@Validated @ModelAttribute("text") TextCreateForm textCreateForm, BindingResult bindingResult,
                               @SessionAttribute(name= SessionConst.LOGIN_CUSTOMER) Long id) {
+        if (bindingResult.hasErrors()) {
+            return "board/makeText";
+        }
         List<Hashtag> hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
         if(textService.createText(id, textCreateForm,hashtagList) == null){
             System.out.println("create 오류");
@@ -105,7 +110,6 @@ public class TextController {
         return "redirect:/board";
     }
 
-    //글 추가 메서드
     @GetMapping("edit/{id}")
     public String getEditText(@PathVariable Long id, Model model) {
         Text text = textService.findText(id);
@@ -120,7 +124,10 @@ public class TextController {
     }
 
     @PostMapping("edit/{id}")
-    public String postEditText(@ModelAttribute("text") TextUpdateForm textUpdateForm,@PathVariable Long id) {
+    public String postEditText(@Validated @ModelAttribute("text") TextUpdateForm textUpdateForm, BindingResult bindingResult, @PathVariable Long id) {
+        if (bindingResult.hasErrors()) {
+            return "redirect:/board/edit" + id;
+        }
         List<Hashtag> hashtagList = hashtagService.parseHashtag(textUpdateForm.getHashtags());
         if(textService.updateText(id, textUpdateForm,hashtagList) == null){
             System.out.println("update 실패");

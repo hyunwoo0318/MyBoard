@@ -17,19 +17,21 @@
     <form th:action th:object="${text}" th:method="post">
       <div>
         <label for="title"></label>
-        <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:placeholder="${text.title}">
+        <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:errorclass="field-error" th:placeholder="${text.title}">
+        <div class="field-error" th:errors="*{title}">
+          제목 오류
+        </div>
       </div>
       <div>
         <label for="content"></label>
-        <textarea class="form-control" id="content" th:field="*{content}" th:class="form-control" th:text="${text.content}" rows="20"
+        <textarea class="form-control" id="content" th:field="*{content}" th:errorclass="field-error" th:class="form-control" th:text="${text.content}" rows="20"
         ></textarea>
-      </div>
-      <div>
-        <label for="hashtags"></label>
-        <input type="text" id="hashtags" th:field="*{hashtags}" th:class="form-control" th:placeholder="${text.hashtags}">
-      </div>
+        <div class="field-error" th:errors="*{content}">
+          내용 오류
+        </div>
       <button type="submit">수정</button>
       <button type="button" th:onclick="|location.href='@{/board}'|">취소</button>
+      </div>
     </form>
   </div>
 </div>

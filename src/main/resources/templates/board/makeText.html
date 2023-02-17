@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
+
 <div class="row justify-content-center">
     <div class="col-md-6 text-center">
         <h1>글 작성</h1>
@@ -16,20 +17,21 @@
         <form th:action th:object="${text}" th:method="post">
             <div>
                 <label for="title"></label>
-                <input type ="text" id="title" th:field="*{title}" th:class="form-control" placeholder="제목을 입력하시오">
+                <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:errorclass="field-error" placeholder="제목을 입력하시오">
+                <div class="field-error" th:errors="*{title}">
+                    제목 오류
+                </div>
             </div>
             <div>
                 <label for="content"></label>
-                <textarea rows="15" id="content" th:field="*{content}" placeholder="내용을 입력하시오" th:class="form-control"></textarea>
-            </div>
-            <div >
-                <label for="hashtags"></label>
-                <input type ="text" id="hashtags" th:class="form-control" th:field="*{hashtags}" placeholder="','로 구분하여 해시태그 이름을 입력해주세요">
-            </div>
+                <textarea rows="15" id="content" th:field="*{content}" placeholder="내용을 입력하시오" th:errorclass="field-error" th:class="form-control"></textarea>
+                <div class="field-error" th:errors="*{content}">
+                    내용 오류
+                </div>
             <button type="submit" class="btn btn-primary">작성</button>
             <button type="button" class="btn btn-primary" th:onclick="|location.href='@{/board}'|">취소</button>
+            </div>
         </form>
-    </div>
 </div>
 </body>
 </html>

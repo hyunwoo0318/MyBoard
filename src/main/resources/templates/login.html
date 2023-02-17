@@ -7,13 +7,23 @@
 </head>
 <body>
 <form th:class="form-group" th:action th:object="${loginForm}" method="post">
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <small class="global-error" th:each="err : ${#fields.globalErrors()}"
+               th:text="${err}">글로벌 오류 메시지</small>
+    </div>
     <div>
         <label for="loginId" >로그인 ID</label>
-        <input th:class="input-group-text" type="text" id="loginId" th:field="*{loginId}">
+        <input th:class="input-group-text" type="text" id="loginId" th:errorclass="field-error" th:field="*{loginId}">
+        <small class="field-error" th:errors="*{loginId}">
+            아이디 오류
+        </small>
     </div>
     <div>
         <label for="password">패스워드</label>
-        <input  th:class="input-group-text" type="text" id="password" th:field="*{password}">
+        <input  th:class="input-group-text" type="text" id="password" th:errorclass="field-error" th:field="*{password}">
+        <small class="field-error" th:errors="*{password}">
+            비밀번호 오류
+        </small>
     </div>
     <div>
         <button class="btn btn-primary" type="submit">로그인</button>

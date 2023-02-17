@@ -65,10 +65,14 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,
-            @ModelAttribute LoginForm form,HttpSession session) {
+    public String login(@Validated @ModelAttribute LoginForm form,BindingResult bindingResult,
+                        @RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,HttpSession session) {
+        if (bindingResult.hasFieldErrors()) {
+            return "login";
+        }
         Customer loginCustomer = customerService.login(form.getLoginId(), form.getPassword());
         if (loginCustomer == null) { //로그인 실패
+            bindingResult.reject("loginFail","존재하지 않는 아이디이거나 잘못된 비밀번호입니다.");
             return "login";
         } else {
             session.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
