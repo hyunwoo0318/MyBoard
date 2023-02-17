@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,20 +28,41 @@ public class Comment extends BaseEntity {
 
     private String content;
 
-    @Column(name = "parent_comment_id")
-    private Long parentCommentId=-1L;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="parent_id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<Comment> childCommentList;
+
+    public Comment(Text text, Customer customer, String content,Comment parent) {
+        this.text = text;
+        this.customer = customer;
+        this.content = content;
+        this.parent = parent;
+    }
 
     public Comment(Text text, Customer customer, String content) {
         this.text = text;
         this.customer = customer;
         this.content = content;
-        this.parentCommentId = this.id;
     }
 
-    public Comment(Text text, Customer customer, String content, Long parentCommentId) {
-        this.text = text;
+    public void setCustomer(Customer customer) {
         this.customer = customer;
-        this.content = content;
-        this.parentCommentId =parentCommentId;
+        customer.getCommentList().add(this);
     }
+
+    public void setText(Text text){
+        this.text= text;
+        text.getCommentList().add(this);
+    }
+
+    public void setChildCommentList(Comment parent) {
+        this.parent = parent;
+        parent.getChildCommentList().add(this);
+    }
+
+
+
 }

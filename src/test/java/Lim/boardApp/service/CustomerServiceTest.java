@@ -98,7 +98,6 @@ class CustomerServiceTest {
 
         assertThat(result).isTrue();
     }
-    //TODO : 로그아웃 테스트
 
     @Test
     @DisplayName("makeSaltTest")

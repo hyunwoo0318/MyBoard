@@ -1,26 +1,24 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.domain.Customer;
-import Lim.boardApp.domain.Hashtag;
-import Lim.boardApp.domain.Text;
-import Lim.boardApp.domain.TextHashtag;
+import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
-import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.repository.HashtagRepository;
-import Lim.boardApp.repository.TextHashtagRepository;
-import Lim.boardApp.repository.TextRepository;
+import Lim.boardApp.repository.*;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +34,15 @@ class TextServiceTest {
     private HashtagRepository hashtagRepository;
     @Autowired
     private TextHashtagRepository textHashtagRepository;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    EntityManager em;
+
+    @BeforeEach
+    public void init(){
+        em.clear();
+    }
 
     @Test
     @DisplayName("textCreateForm을 입력받아 정상적으로 text를 만드는 경우")
@@ -112,6 +119,41 @@ class TextServiceTest {
         assertThat(textHashtagRepository.findHashtagsByText(result).size()).isEqualTo(6);
         assertThat(textHashtagRepository.findHashtagsByText(result)).isEqualTo(resultHashtagList);
 
+    }
+
+  //  @Test
+   // @DisplayName("deleteTextTest")
+    public void deleteTextTest(){
+
+        //글 작성
+        addText(3);
+        List<Text> textList = textRepository.findAll();
+        Text text = textList.get(0);
+        addHashTags(3);
+        List<Hashtag> hashtagList = hashtagRepository.findAll();
+        List<Long> textHashtagList = new ArrayList<>();
+        for (Hashtag hashtag : hashtagList) {
+            TextHashtag textHashtag = new TextHashtag(text, hashtag);
+            textHashtagRepository.save(textHashtag);
+            textHashtagList.add(textHashtag.getId());
+        }
+
+        //댓글작성
+        Customer customer1 = text.getCustomer();
+        Customer customer2 = new Customer("id123", "pw123", "c2", 23, "USER");
+        customerRepository.save(customer2);
+        commentRepository.save(new Comment(text, customer1, "comment1"));
+        commentRepository.save(new Comment(text, customer1, "comment2"));
+        commentRepository.save(new Comment(text, customer2, "comment11"));
+        commentRepository.save(new Comment(text, customer2, "comment22"));
+
+        textService.deleteText(text.getId());
+
+        assertThat(textRepository.findById(text.getId())).isEmpty();
+        for (Long id : textHashtagList) {
+            Optional<TextHashtag> textHashtagOptional = textHashtagRepository.findById(id);
+            assertThat(textHashtagOptional).isEmpty();
+        }
     }
 
     private void addText(int num){

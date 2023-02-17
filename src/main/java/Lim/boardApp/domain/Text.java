@@ -2,10 +2,11 @@ package Lim.boardApp.domain;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -21,9 +22,16 @@ public class Text extends BaseEntity {
 
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CUSTOMER_ID")
     private Customer customer;
+
+    @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
+    private List<Comment> commentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
+    private List<TextHashtag> textHashtagList = new ArrayList<>();
+
 
     public Text() {
     }
@@ -42,7 +50,7 @@ public class Text extends BaseEntity {
 
     public void setCustomer(Customer customer){
         this.customer = customer;
-        customer.getTexts().add(this);
+        customer.getTextList().add(this);
     }
 
 }

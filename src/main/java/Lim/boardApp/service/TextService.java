@@ -1,17 +1,11 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.domain.Customer;
-import Lim.boardApp.domain.Hashtag;
-import Lim.boardApp.domain.Text;
-import Lim.boardApp.domain.TextHashtag;
+import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
-import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.repository.HashtagRepository;
-import Lim.boardApp.repository.TextHashtagRepository;
-import Lim.boardApp.repository.TextRepository;
+import Lim.boardApp.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +25,7 @@ public class TextService {
     private final TextHashtagRepository textHashtagRepository;
     private final CustomerRepository customerRepository;
     private final HashtagRepository hashtagRepository;
+    private final CommentRepository commentRepository;
 
     public PageForm pagingByAll(int page,int pageSize,int blockSize){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
@@ -105,7 +100,7 @@ public class TextService {
         textRepository.save(text);
 
         //hashTag 변경
-        textHashtagRepository.deleteAllByText(text);
+        textHashtagRepository.deleteByText(text);
         for(Hashtag h : hashtagList){
             textHashtagRepository.save(new TextHashtag(text, h));
         }
@@ -123,6 +118,4 @@ public class TextService {
     public void deleteText(Long id){
         textRepository.deleteById(id);
     }
-
-
 }

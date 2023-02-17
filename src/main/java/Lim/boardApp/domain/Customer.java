@@ -8,9 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Entity
@@ -34,8 +32,10 @@ public class Customer  extends BaseEntity {
     private String role;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    private List<Text> texts = new ArrayList<>();
+    private List<Text> textList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Comment> commentList = new ArrayList<>();
 
     public Customer(){}
     @Builder
@@ -45,6 +45,10 @@ public class Customer  extends BaseEntity {
         this.name = name;
         this.age = age;
         this.role = role;
+    }
+
+    public void updateTextList(List<Text> textList){
+        this.textList = textList;
     }
 
 

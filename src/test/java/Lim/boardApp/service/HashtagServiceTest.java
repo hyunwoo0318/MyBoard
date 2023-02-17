@@ -2,12 +2,14 @@ package Lim.boardApp.service;
 
 import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.repository.HashtagRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,14 @@ class HashtagServiceTest {
 
     @Autowired private HashtagService hashtagService;
     @Autowired private HashtagRepository hashtagRepository;
+
+    @Autowired
+    EntityManager em;
+
+    @BeforeEach
+    public void init(){
+        em.clear();
+    }
 
     @Test
     @DisplayName("parseHashtag 테스트")

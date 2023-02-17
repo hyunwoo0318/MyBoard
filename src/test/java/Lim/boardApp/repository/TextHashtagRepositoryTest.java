@@ -4,25 +4,20 @@ import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.domain.TextHashtag;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
-@Transactional
+@DataJpaTest
 class TextHashtagRepositoryTest {
 
-    @Autowired TextHashtagRepository repo;
+    @Autowired TextHashtagRepository textHashtagRepository;
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
@@ -47,10 +42,10 @@ class TextHashtagRepositoryTest {
         List<Hashtag> hashtags = hashtagRepository.findAll();
 
         for(Hashtag h : hashtags){
-            repo.save(new TextHashtag(text,h));
+            textHashtagRepository.save(new TextHashtag(text,h));
         }
 
-        List<Hashtag> result = repo.findHashtagsByText(text);
+        List<Hashtag> result = textHashtagRepository.findHashtagsByText(text);
 
         assertThat(result.size()).isEqualTo(5 + prevSize);
         assertThat(result).isEqualTo(hashtags);
@@ -76,15 +71,44 @@ class TextHashtagRepositoryTest {
             Text text = new Text("content","t" + i,c);
             textRepository.save(text);
             if(i>=5 && i<=8){
-                repo.save(new TextHashtag(text,h1));
+                textHashtagRepository.save(new TextHashtag(text,h1));
                 resultTextList.add(text);
             }
         }
 
 
-        List<Text> result = repo.findTextsByHashtag(h1);
+        List<Text> result = textHashtagRepository.findTextsByHashtag(h1);
 
         assertThat(result.size()).isEqualTo(4);
         assertThat(result).isEqualTo(resultTextList);
     }
+
+    @Test
+    @DisplayName("deleteByText 테스트")
+    public void deleteByTextTest(){
+        Customer customer = new Customer("id123", "pw123", "name123", 23, "USER");
+        customerRepository.save(customer);
+
+        Text text1 = new Text("content123", "title123", customer);
+        Text text2 = new Text("content456", "title456", customer);
+        textRepository.save(text1);
+        textRepository.save(text2);
+
+        for(int i=1;i<=10;i++){
+            Hashtag hashtag = new Hashtag("h" + i);
+            hashtagRepository.save(hashtag);
+            if(i<=5){
+                textHashtagRepository.save(new TextHashtag(text1, hashtag));
+            }else{
+                textHashtagRepository.save(new TextHashtag(text2, hashtag));
+            }
+        }
+
+        textHashtagRepository.deleteByText(text1);
+
+        assertThat(textHashtagRepository.findAll().size()).isEqualTo(5);
+        assertThat(textHashtagRepository.findAllByText(text1).size()).isEqualTo(0);
+        assertThat(textHashtagRepository.findAllByText(text2).size()).isEqualTo(5);
+    }
+
 }

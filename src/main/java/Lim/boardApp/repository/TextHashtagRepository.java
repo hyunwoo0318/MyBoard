@@ -14,6 +14,8 @@ import java.util.List;
 
 public interface TextHashtagRepository extends JpaRepository<TextHashtag, Long> {
 
+    public List<TextHashtag> findAllByText(Text text);
+
     @Query("select th.hashtag from TextHashtag th where th.text = :text")
     public List<Hashtag> findHashtagsByText(@Param("text") Text text);
 
@@ -23,5 +25,5 @@ public interface TextHashtagRepository extends JpaRepository<TextHashtag, Long> 
     @Query("select th.text from TextHashtag th where th.hashtag = :hashtag")
     public Page<Text> findTextsByHashtag(@Param("hashtag") Hashtag hashtag, Pageable pageable);
 
-    public void deleteAllByText(Text text);
+    public void deleteByText(Text text);
 }

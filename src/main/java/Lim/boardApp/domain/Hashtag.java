@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,4 +23,7 @@ public class Hashtag {
 
     @Column(unique = true)
     private String name;
+
+    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL)
+    private List<TextHashtag> textHashtagList = new ArrayList<>();
 }
