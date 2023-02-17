@@ -3,49 +3,49 @@
 <head>
     <title>게시판</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
-<form th:class="form-group" th:action th:object="${customer}" th:method="post">
-    <div th:if="${#fields.hasGlobalErrors()}">
-        <p class="field-error" th:each="err : ${#fields.globalErrors()}"
-           th:text="${err}">글로벌 오류 메시지</p>
-    </div>
-    <div>
-        <label for="loginId">로그인 ID</label>
-        <input type="text" id="loginId" th:field="*{loginId}" th:errorclass="field-error" th:class="input-group-text">
-        <div class="field-error" th:errors="*{loginId}">
-            아이디 오류
+<div class="row justify-content-center">
+    <form th:class="form-group" th:action th:object="${customer}" th:method="post">
+        <div th:if="${#fields.hasGlobalErrors()}">
+            <p class="field-error" th:each="err : ${#fields.globalErrors()}"
+               th:text="${err}">글로벌 오류 메시지</p>
         </div>
-    </div>
-    <div>
-        <label for="password">비밀번호</label>
-        <input type="text" id="password"  th:field="*{password}"  th:errorclass="field-error" th:class="input-group-text">
-        <div class="field-error" th:errors="*{password}">
-            비밀번호 오류
+        <div>
+            <label for="loginId">로그인 ID</label>
+            <input type="text" id="loginId" th:field="*{loginId}" th:errorclass="field-error" th:class="input-group-text">
+            <div class="field-error" th:errors="*{loginId}">
+                아이디 오류
+            </div>
         </div>
-    </div>
-    <div>
-        <label for="name">이름</label>
-        <input type="text" id="name" th:field="*{name}"  th:errorclass="field-error" th:class="input-group-text">
-        <div class="field-error" th:errors="*{name}">
-            이름 오류
+        <div>
+            <label for="password">비밀번호</label>
+            <input type="text" id="password"  th:field="*{password}"  th:errorclass="field-error" th:class="input-group-text">
+            <div class="field-error" th:errors="*{password}">
+                비밀번호 오류
+            </div>
         </div>
-    </div>
-    <div>
-        <label for="age">나이</label>
-        <input type="text" id="age" th:field="*{age}" th:errorclass="field-error" th:class="input-group-text">
-        <div class="field-error" th:errors="*{age}">
-            나이 오류
+        <div>
+            <label for="name">이름</label>
+            <input type="text" id="name" th:field="*{name}"  th:errorclass="field-error" th:class="input-group-text">
+            <div class="field-error" th:errors="*{name}">
+                이름 오류
+            </div>
         </div>
-    </div>
-    <div>
-        <button type="submit">회원가입</button>
-    </div>
-</form>
-    <button type="button" th:onclick="|location.href='@{/}'|">취소</button>
+        <div>
+            <label for="age">나이</label>
+            <input type="text" id="age" th:field="*{age}" th:errorclass="field-error" th:class="input-group-text">
+            <div class="field-error" th:errors="*{age}">
+                나이 오류
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-primary" type="submit">회원가입</button>
+            <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/}'|">취소</button>
+        </div>
+    </form>
+</div>
+
 </body>
 </html>

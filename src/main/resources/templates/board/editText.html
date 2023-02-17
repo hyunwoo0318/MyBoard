@@ -3,33 +3,35 @@
 <head>
   <title>게시판</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/bootstrap.css">
 
 </head>
 <body>
-<h2>글 수정</h2>
-<form th:action th:object="${text}" th:method="post">
-  <div>
-    <label for="title"></label>
-    <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:placeholder="${text.title}">
+<div class="row justify-content-center">
+  <div class="col-md-6 text-center">
+    <h1>글 작성</h1>
   </div>
-  <div>
-    <label for="content"></label>
-    <textarea class="form-control" id="content" th:field="*{content}" th:class="form-control" th:text="${text.content}" rows="20"
-    ></textarea>
+</div>
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <form th:action th:object="${text}" th:method="post">
+      <div>
+        <label for="title"></label>
+        <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:placeholder="${text.title}">
+      </div>
+      <div>
+        <label for="content"></label>
+        <textarea class="form-control" id="content" th:field="*{content}" th:class="form-control" th:text="${text.content}" rows="20"
+        ></textarea>
+      </div>
+      <div>
+        <label for="hashtags"></label>
+        <input type="text" id="hashtags" th:field="*{hashtags}" th:class="form-control" th:placeholder="${text.hashtags}">
+      </div>
+      <button type="submit">수정</button>
+      <button type="button" th:onclick="|location.href='@{/board}'|">취소</button>
+    </form>
   </div>
-  <div>
-    <label for="hashtags"></label>
-    <input type="text" id="hashtags" th:field="*{hashtags}" th:class="form-control" th:placeholder="${text.hashtags}">
-  </div>
-  <button type="submit">수정</button>
-  <button type="button" th:onclick="|location.href='@{/board}'|">취소</button>
-</form>
+</div>
 </body>
 </html>

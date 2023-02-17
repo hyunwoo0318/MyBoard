@@ -3,14 +3,11 @@
 <head>
     <title>게시판</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
 
-<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+<nav class="navbar navbar-light"  >
     <div class="container-fluid">
         <a class="navbar-brand">검색창</a>
         <form class="d-flex" th:action = "@{/board/search/(searchKey = ${searchKey}, type= ${type})}" th:method="get">
@@ -103,11 +100,6 @@
    </div>
 </section>
 
-
-<script src="/js/jquery.min.js"></script>
-<script src="/js/popper.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/main.js"></script>
-
+<script src="/js/bootstrap.js"></script>
 </body>
 </html>

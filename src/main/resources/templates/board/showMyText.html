@@ -3,10 +3,7 @@
 <head>
   <title>게시판</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
 <section class="ftco-section">
@@ -40,30 +37,23 @@
               <span th:class="badge" th:text="${hashtag.name}"></span>
             </span>
           </p><br>
-          <div>
-            <table th:class="table table-sm caption-top">
-              <caption>댓글</caption>
-              <thead th:class="thead-light">
-              <tr>
-                <th>번호</th>
-                <th>내용</th>
-                <th>작성자</th>
-              </tr>
-              </thead>
-              <tbody th:class="text-body">
-              <tr th:each="comment, commentStat : ${commentList}">
-                <td th:text="${commentStat.index} + 1">1</td>
-                <td th:text="${comment.content}">123</td>
-                <td th:text="${comment.customer.name}">이름</td>
-              </tr>
-              </tbody>
-              <tfoot>
-              <tr>
-                <td><button type="button" th:onclick="|location.href='@{../../board/comment/new/{id}(id=${text.id})}'|">댓글작성</button></td>
-              </tr>
-              </tfoot>
-            </table>
+          <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#comments" aria-expanded="false" aria-controls="comments">
+            댓글
+          </button>
+          <div class="collapse" id="comments">
+            <div class="card" th:each="comment : ${commentList}">
+              <div class="card-header float-lg-start">
+                <div class="card-header-pills float-lg-start" th:text="${comment.customer.name}"></div>
+                <div class="card-header-pills float-lg-end" th:text="${comment.createdTime}"></div>
+              </div>
+              <div class="card-body">
+                <div class="card-text" th:text="${comment.content}">내용</div>
+              </div>
+            </div>
           </div>
+          <button class="btn btn-primary" type="button" th:onclick="|location.href='@{../../board/comment/new/{id}(id=${text.id})}'|">댓글작성</button>
+          <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
+        </div>
           <button type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
           <form th:action="@{../delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
             <button type="submit">글 삭제</button>
@@ -74,9 +64,7 @@
     </div>
 </section>
 
-<script src="/js/jquery.min.js"></script>
-<script src="/js/popper.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/main.js"></script>
+<script src="/js/bootstrap.js"></script>
+
 </body>
 </html>
