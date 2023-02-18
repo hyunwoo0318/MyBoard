@@ -25,7 +25,6 @@ public class TextService {
     private final TextHashtagRepository textHashtagRepository;
     private final CustomerRepository customerRepository;
     private final HashtagRepository hashtagRepository;
-    private final CommentRepository commentRepository;
 
     public PageForm pagingByAll(int page,int pageSize,int blockSize){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
@@ -46,14 +45,16 @@ public class TextService {
             Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
         }else if(type.equals("hashtag")){
-            searchKey = "#" + searchKey;
+            if(!searchKey.isBlank()){
+                searchKey = "#" + searchKey;
+            }
             Hashtag hashtag = hashtagRepository.findByName(searchKey);
             Page<Text> findPage = textHashtagRepository.findTextsByHashtag(hashtag, pageRequest);
             return makePageForm(findPage, page, blockSize);
         } else  return null;
     }
 
-    private PageForm makePageForm(Page<Text> findPage, int page, int blockSize){
+    public PageForm makePageForm(Page<Text> findPage, int page, int blockSize){
         int lastPage = findPage.getTotalPages()-1;
         if(lastPage == -1){
             return new PageForm(0,0,1,0,0,new ArrayList<Text>(), true, true);

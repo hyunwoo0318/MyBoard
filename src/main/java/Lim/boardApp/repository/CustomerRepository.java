@@ -11,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     public Optional<Customer> findByLoginId(String loginId);
+
+    public Optional<Customer> findByKakaoId(Long kakaoId);
 }

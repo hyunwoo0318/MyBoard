@@ -100,7 +100,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("회원가입 테스트(정상적인 회원가입) - /register")
     public void registerSuccessTest() throws Exception{
-        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123", "hyunwoo", 23);
+        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
         MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form)).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
@@ -121,7 +121,7 @@ class CustomerControllerTest {
         Customer customer = new Customer("id123123", "pw123123", "hyunwoo", 23, "USER");
         customerRepository.save(customer);
 
-        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123456", "john", 25);
+        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123456","pw123456", "john", 25);
 
         MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form)).andReturn();
 
@@ -134,11 +134,24 @@ class CustomerControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입 테스트(유효하지 않은 입력으로 회원가입 시도) - /register")
-    public void registerInvalidateFormTest() throws Exception{
+    @DisplayName("회원가입 테스트(비밀번호와 비밀번호 입력이 다른경우) - /register")
+    public void registerInvalidPasswordCheck() throws Exception{
         customerRepository.deleteAll();
-        CustomerRegisterForm formNoName = new CustomerRegisterForm("id123123", "pw123456", "", 25);
-        CustomerRegisterForm formNoPw = new CustomerRegisterForm("id123123", "", "john", 25);
+        CustomerRegisterForm formDiffer = new CustomerRegisterForm("id123123", "pw123123", "pw456456", "hyunwoo", 23);
+
+        MvcResult result = mockMvc.perform(post("/register").flashAttr("customer", formDiffer)).andReturn();
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(result.getModelAndView().getViewName()).isEqualTo("addCustomer");
+    }
+
+
+    @Test
+    @DisplayName("회원가입 테스트(유효하지 않은 입력으로 회원가입 시도) - /register")
+    public void registerInvalidateFormTest() throws Exception {
+        customerRepository.deleteAll();
+        CustomerRegisterForm formNoName = new CustomerRegisterForm("id123123", "pw123456", "pw123456", "", 25);
+        CustomerRegisterForm formNoPw = new CustomerRegisterForm("id123123", "", "pw123456", "john", 25);
 
         MvcResult result1 = mockMvc.perform(post("/register").flashAttr("customer", formNoName)).andReturn();
         MvcResult result2 = mockMvc.perform(post("/register").flashAttr("customer", formNoPw)).andReturn();
@@ -165,7 +178,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("로그인(성공) 테스트 - /login")
     public void loginSuccess() throws Exception{
-        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123", "hyunwoo", 23);
+        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
         customerService.addCustomer(form,20);
         Long id = customerRepository.findByLoginId("id123123").get().getId();
 
@@ -183,7 +196,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("로그인(잘못된 아이디/비밀번호) 테스트")
     public void loginFail() throws Exception{
-        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123", "hyunwoo", 23);
+        CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
         customerService.addCustomer(form,20);
 
         LoginForm wrongPw = new LoginForm("id123123", "pw456456");

@@ -14,7 +14,7 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final List<String> loginWhiteList = Arrays.asList("/css/**","/*.ico","/error", "/", "/login", "/logout", "/register");
+    private final List<String> loginWhiteList = Arrays.asList("/css/**","/*.ico","/error", "/", "/login", "/logout", "/register","/oauth/**","/kakao/**");
     private final List<String> textCheckList = Arrays.asList("/board/edit/**", "/board/delete/**");
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

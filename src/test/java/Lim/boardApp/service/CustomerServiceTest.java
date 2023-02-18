@@ -81,7 +81,7 @@ class CustomerServiceTest {
     @DisplayName("정상적인 회원가입 시도")
     public void regCustomer(){
         registerNormalCustomer();
-        CustomerRegisterForm customer = new CustomerRegisterForm("id456456", "pw123123", "john", 12);
+        CustomerRegisterForm customer = new CustomerRegisterForm("id456456", "pw123123","pw123123", "john", 12);
 
         boolean result = customerService.dupLoginId(customer);
 
@@ -92,7 +92,7 @@ class CustomerServiceTest {
     @DisplayName("이미 존재하는 아이디로 회원가입 시도")
     public void regCustomerExistLoginId(){
         registerNormalCustomer();
-        CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw2", "hy", 21);
+        CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hy", 21);
 
         boolean result = customerService.dupLoginId(dupCustomer);
 

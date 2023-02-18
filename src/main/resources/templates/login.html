@@ -6,28 +6,39 @@
     <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
-<form th:class="form-group" th:action th:object="${loginForm}" method="post">
-    <div th:if="${#fields.hasGlobalErrors()}">
-        <small class="global-error" th:each="err : ${#fields.globalErrors()}"
-               th:text="${err}">글로벌 오류 메시지</small>
+<br><br><br><br>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+    <form th:class="form-control" th:action th:object="${loginForm}" method="post">
+        <h2 class="heading-section">로그인</h2>
+        <div th:if="${#fields.hasGlobalErrors()}">
+            <small class="text-danger" th:each="err : ${#fields.globalErrors()}"
+                   th:text="${err}">글로벌 오류 메시지</small>
+        </div>
+        <div th:if="${loginFail}">
+            <small class="text-danger" th:text="${loginFail}">카카오 로그인 실패</small>
+        </div>
+        <div class="form-group">
+            <label for="loginId" >로그인 ID</label>
+            <input  type="text" id="loginId" class="form-control" th:errorclass="field-error" th:field="*{loginId}">
+            <small class="field-error text-danger" th:errors="*{loginId}">
+                아이디 오류
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="password">패스워드</label>
+            <input   type="password" id="password" class="form-control" th:errorclass="field-error" th:field="*{password}">
+            <small class="field-error text-danger" th:errors="*{password}">
+                비밀번호 오류
+            </small>
+        </div><br>
+        <div>
+            <button class="btn btn-primary" type="submit">로그인</button>
+            <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/kakao/login}'|">카카오 로그인</button>
+            <button class="btn btn-secondary" type="button" th:onclick="|location.href='@{/}'|">홈으로</button>
+        </div>
+    </form>
     </div>
-    <div>
-        <label for="loginId" >로그인 ID</label>
-        <input th:class="input-group-text" type="text" id="loginId" th:errorclass="field-error" th:field="*{loginId}">
-        <small class="field-error" th:errors="*{loginId}">
-            아이디 오류
-        </small>
-    </div>
-    <div>
-        <label for="password">패스워드</label>
-        <input  th:class="input-group-text" type="text" id="password" th:errorclass="field-error" th:field="*{password}">
-        <small class="field-error" th:errors="*{password}">
-            비밀번호 오류
-        </small>
-    </div>
-    <div>
-        <button class="btn btn-primary" type="submit">로그인</button>
-    </div>
-</form>
+</div>
 </body>
 </html>

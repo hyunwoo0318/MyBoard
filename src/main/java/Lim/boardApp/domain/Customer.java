@@ -31,6 +31,9 @@ public class Customer  extends BaseEntity {
 
     private String role;
 
+    @Column(unique = true)
+    private Long kakaoId;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Text> textList = new ArrayList<>();
 
@@ -38,6 +41,16 @@ public class Customer  extends BaseEntity {
     private List<Comment> commentList = new ArrayList<>();
 
     public Customer(){}
+    @Builder
+    public Customer(String loginId, String password, String name, Integer age, String role, Long kakaoId) {
+        this.loginId = loginId;
+        this.password = password;
+        this.name = name;
+        this.age = age;
+        this.role = role;
+        this.kakaoId = kakaoId;
+    }
+
     @Builder
     public Customer(String loginId, String password, String name, Integer age, String role) {
         this.loginId = loginId;

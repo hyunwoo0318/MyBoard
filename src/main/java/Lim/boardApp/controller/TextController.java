@@ -20,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,7 +103,10 @@ public class TextController {
         if (bindingResult.hasErrors()) {
             return "board/makeText";
         }
-        List<Hashtag> hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
+        List<Hashtag> hashtagList = new ArrayList<>();
+        if(textCreateForm.getHashtags().length()!=0){
+            hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
+        }
         if(textService.createText(id, textCreateForm,hashtagList) == null){
             System.out.println("create 오류");
             return "redirect:/board/new";

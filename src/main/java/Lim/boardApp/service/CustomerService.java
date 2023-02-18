@@ -29,7 +29,7 @@ public class CustomerService {
     public void addCustomer(CustomerRegisterForm form, int saltSize){
         String salt = makeSalt(saltSize);
         String passwordHash = hashPassword(form.getPassword(), salt);
-        Customer customer = new Customer(form.getLoginId(), passwordHash + salt, form.getName(), form.getAge(), "USER");
+        Customer customer = new Customer(form.getLoginId(), passwordHash + salt, form.getName(), form.getAge(), "USER",form.getKakaoId());
         customerRepository.save(customer);
     }
     public Customer login(String inputLoginId, String inputPassword){
@@ -78,6 +78,13 @@ public class CustomerService {
             e.getMessage();
             return null;
         }
+    }
+
+    //카카오 로그인
+
+    public Customer findKakao(Long kakaoId){
+        Optional<Customer> customerOptional = customerRepository.findByKakaoId(kakaoId);
+        return customerOptional.orElse(null);
     }
 
     public PasswordPair parsePasswordHash(String passwordHash){
