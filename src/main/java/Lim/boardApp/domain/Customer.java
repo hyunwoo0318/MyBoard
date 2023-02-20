@@ -34,6 +34,9 @@ public class Customer  extends BaseEntity {
     @Column(unique = true)
     private Long kakaoId;
 
+    private String email;
+
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Text> textList = new ArrayList<>();
 

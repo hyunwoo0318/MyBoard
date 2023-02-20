@@ -5,10 +5,14 @@ import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
+import Lim.boardApp.form.RegisterFormCache;
 import Lim.boardApp.service.CustomerService;
+import Lim.boardApp.service.EmailService;
 import Lim.boardApp.service.OauthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,7 +31,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final OauthService oauthService;
-
+    private final EmailService emailService;
 
     //일반 홈 화면
     @GetMapping("/")
@@ -41,11 +46,12 @@ public class CustomerController {
 
     //회원가입 화면
     @GetMapping("/register")
-    public String getAddCustomer(@RequestParam(value = "kakaoId", required = false) Long kakaoId, Model model) {
+    public String getAddCustomer(@RequestParam(value = "kakaoId", required = false) Long kakaoId ,
+                                 @RequestParam(value="email", required = false) String email, Model model) {
         CustomerRegisterForm customerRegisterForm = new CustomerRegisterForm();
-        if(kakaoId ==null) {
-            kakaoId = 0L;
-        }
+        customerRegisterForm.setEmail(email);
+        kakaoId = (kakaoId == null) ? 0L : kakaoId;
+
         if(kakaoId == -1L){
             model.addAttribute("regFail", "이미 등록된 카카오 계정입니다.");
         }else if(kakaoId != 0L){
@@ -149,11 +155,53 @@ public class CustomerController {
         if (customer == null) {
            attributes.addAttribute("kakaoId", kakaoId);
         }else{
+            //이미 해당 카카오 아이디로 연동된 계정이 있으면 -1을 보냄
             attributes.addAttribute("kakaoId", -1L);
         }
         return "redirect:/register";
     }
 
 
+    //이메일 인증
+    @GetMapping("/auth/email")
+    public String emailAuthView (@RequestParam(value = "email", required = false) String email ,Model model){
+        String emailAuth = "";
+        Boolean isEmail = emailService.checkEmailForm(email);
+        if(email==null){
+            //첫시도
+            model.addAttribute("email","");
+        }else if(!isEmail){
+            //잘못된 이메일 입력을 하는경우
+            model.addAttribute("emailFormError", "정확한 형식의 이메일을 입력해주세요.");
+            model.addAttribute("email", email);
+        }else if(!emailService.findPrevAuth(email)){
+            //인증메일을 보내지 않아 보내야하는경우
+            try{
+                emailService.sendEmailAuth(email);
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            model.addAttribute("email", email);
+        }else{
+            //이미 인증메일을 보내고 유효시간내인경우
+            model.addAttribute("email", email);
+        }
+        model.addAttribute("emailAuth", emailAuth);
+        return "emailAuth";
+    }
+
+    @PostMapping("/auth/email")
+    public String emailAuthCheck(@RequestParam("email") String email, @ModelAttribute("emailAuth") String emailAuth, BindingResult bindingResult,
+                                 RedirectAttributes attributes) {
+        if(!emailService.checkEmailAuth(email,emailAuth)){
+            //인증 실패
+            bindingResult.reject("authFail", "이메일 인증에 실패하였습니다. 다시 정확하게 입력해주세요.");
+            return "emailAuth";
+        }else{
+            //인증 성공
+            attributes.addAttribute("email", email);
+            return "redirect:/register";
+        }
+    }
 
 }

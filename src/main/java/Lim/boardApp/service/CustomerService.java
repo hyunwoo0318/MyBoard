@@ -5,19 +5,23 @@ import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-
     public Customer findCustomer(Long id) {
         return customerRepository.findById(id).orElse(null);
     }
@@ -58,6 +62,13 @@ public class CustomerService {
         else return true;
     }
 
+    //카카오 로그인
+
+    public Customer findKakao(Long kakaoId){
+        Optional<Customer> customerOptional = customerRepository.findByKakaoId(kakaoId);
+        return customerOptional.orElse(null);
+    }
+
     //비밀번호 해시화
     public String makeSalt(int length){
         RandomString salt = new RandomString(length);
@@ -78,13 +89,6 @@ public class CustomerService {
             e.getMessage();
             return null;
         }
-    }
-
-    //카카오 로그인
-
-    public Customer findKakao(Long kakaoId){
-        Optional<Customer> customerOptional = customerRepository.findByKakaoId(kakaoId);
-        return customerOptional.orElse(null);
     }
 
     public PasswordPair parsePasswordHash(String passwordHash){

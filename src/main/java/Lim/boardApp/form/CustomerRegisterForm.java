@@ -32,6 +32,8 @@ public class CustomerRegisterForm {
 
     private Long kakaoId;
 
+    private String email;
+
     public CustomerRegisterForm(String loginId, String password, String passwordCheck, String name, Integer age) {
         this.loginId = loginId;
         this.password = password;

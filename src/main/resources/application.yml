@@ -29,6 +29,26 @@ spring:
   jdbc:
     url :
 
+  # Naver smtp server 사용
+
+  mail:
+    host: smtp.naver.com
+    port: 587
+    username: whskwock
+    password: naverboard123
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
+          timeout: 5000
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+
+
 logging level:
   org.hibernate.SQL : debug
 
@@ -37,3 +57,4 @@ admin:
 
 kakao:
   key: 5119b65b42c4da50a4c3bb23eb9a7dd6
+

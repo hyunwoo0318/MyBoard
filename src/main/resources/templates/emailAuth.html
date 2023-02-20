@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>게시판</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body>
+<br><br><br><br>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="heading-section">이메일 인증</h2>
+        <form th:class="form-control" th:action method="get">
+            <div class="form-group">
+                <label for="email" >이메일</label>
+                <input type="text" id="email" class="form-control" th:text="${email}" th:name="email" th:value="${email}">
+                <div th:if="${emailFormError}">
+                    <small class="text-danger" th:text="${emailFormError}"></small>
+                </div>
+                <button class= "btn btn-sm" type="submit">인증메일 발송</button>
+            </div>
+        </form>
+        <form th:class="form-control" th:action method="post">
+            <div class="form-group">
+                <label for="emailAuth">인증번호</label>
+                <input type="text" id="emailAuth" class="form-control" th:name="emailAuth" th:value="${emailAuth}">
+            </div><br>
+            <div>
+                <button class="btn btn-primary" type="submit">인증</button>
+                <button class="btn btn-secondary" type="button" th:onclick="|location.href='@{/}'|">홈으로</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

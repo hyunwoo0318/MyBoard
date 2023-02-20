@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<nav class="navbar navbar-light"  >
+<nav class="navbar navbar-dark"  >
     <div class="container-fluid">
         <a class="navbar-brand">검색창</a>
         <form class="d-flex" th:action = "@{/board/search/(searchKey = ${searchKey}, type= ${type})}" th:method="get">
