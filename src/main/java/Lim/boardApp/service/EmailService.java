@@ -1,7 +1,6 @@
 package Lim.boardApp.service;
 
 import lombok.RequiredArgsConstructor;
-import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -10,11 +9,8 @@ import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +18,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     //이메일 인증번호를 저장해놓는 맵
-    private Map<String, String> emailMap = ExpiringMap.builder()
-            .expirationPolicy(ExpirationPolicy.CREATED)
-            .expiration(10 , TimeUnit.MINUTES)
-            .build();
-
+    private final ExpiringMap<String, String> emailMap;
 
     public boolean checkEmailForm(String email){
         if(email==null) return false;

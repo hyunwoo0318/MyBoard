@@ -24,6 +24,4 @@ public class Hashtag {
     @Column(unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL)
-    private List<TextHashtag> textHashtagList = new ArrayList<>();
 }

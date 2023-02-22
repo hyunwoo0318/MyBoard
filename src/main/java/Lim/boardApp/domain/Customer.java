@@ -45,22 +45,24 @@ public class Customer  extends BaseEntity {
 
     public Customer(){}
     @Builder
-    public Customer(String loginId, String password, String name, Integer age, String role, Long kakaoId) {
+    public Customer(String loginId, String password, String name, Integer age, String role, Long kakaoId,String email) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.age = age;
         this.role = role;
         this.kakaoId = kakaoId;
+        this.email = email;
     }
 
     @Builder
-    public Customer(String loginId, String password, String name, Integer age, String role) {
+    public Customer(String loginId, String password, String name, Integer age, String role,String email) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.age = age;
         this.role = role;
+        this.email = email;
     }
 
     public void updateTextList(List<Text> textList){

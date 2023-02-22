@@ -86,7 +86,7 @@ class TextHashtagRepositoryTest {
     @Test
     @DisplayName("deleteByText 테스트")
     public void deleteByTextTest(){
-        Customer customer = new Customer("id123", "pw123", "name123", 23, "USER");
+        Customer customer = new Customer("id123", "pw123", "name123", 23, "USER","ex@ex.com");
         customerRepository.save(customer);
 
         Text text1 = new Text("content123", "title123", customer);

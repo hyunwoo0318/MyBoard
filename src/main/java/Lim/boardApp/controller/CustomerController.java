@@ -5,14 +5,11 @@ import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
-import Lim.boardApp.form.RegisterFormCache;
 import Lim.boardApp.service.CustomerService;
 import Lim.boardApp.service.EmailService;
 import Lim.boardApp.service.OauthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,7 +19,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,24 +42,22 @@ public class CustomerController {
 
     //회원가입 화면
     @GetMapping("/register")
-    public String getAddCustomer(@RequestParam(value = "kakaoId", required = false) Long kakaoId ,
-                                 @RequestParam(value="email", required = false) String email, Model model) {
+    public String getAddCustomer(@SessionAttribute(value = "email") String email, @SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
+                                  Model model) {
         CustomerRegisterForm customerRegisterForm = new CustomerRegisterForm();
-        customerRegisterForm.setEmail(email);
-        kakaoId = (kakaoId == null) ? 0L : kakaoId;
-
-        if(kakaoId == -1L){
-            model.addAttribute("regFail", "이미 등록된 카카오 계정입니다.");
-        }else if(kakaoId != 0L){
-            customerRegisterForm.setKakaoId(kakaoId);
-        }
         model.addAttribute("customer", customerRegisterForm);
+        model.addAttribute("email", email);
+        if(kakaoId != null){
+            model.addAttribute("kakaoId", kakaoId);
+        }
         return "addCustomer";
     }
 
     //일반회원가입
     @PostMapping("/register")
-    public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult) {
+    public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult
+                                    ,@SessionAttribute(value = "email") String email, @SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
+                                  HttpSession session) {
 
        if(customerService.dupLoginId(customerRegisterForm))
            bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
@@ -71,9 +65,23 @@ public class CustomerController {
        if(!customerRegisterForm.getPassword().equals(customerRegisterForm.getPasswordCheck()))
            bindingResult.reject("wrongPasswordInput", "입력하신 비밀번호와 비밀번호 확인이 다릅니다.");
 
+       if(kakaoId != null && customerService.findKakao(kakaoId) != null){
+           bindingResult.reject("dupKakaoId", "해당 카카오 계정으로 연동된 계정이 존재합니다.");
+       }
+
         if(bindingResult.hasErrors()){
             return "addCustomer";
         }
+
+        //정상적인 회원가입
+        if (kakaoId != null) {
+            session.removeAttribute(SessionConst.KAKAO_ID);
+            customerRegisterForm.setKakaoId(kakaoId);
+        }
+
+        customerRegisterForm.setEmail(email);
+        session.removeAttribute(SessionConst.EMAIL);
+
         customerService.addCustomer(customerRegisterForm, 20);
         return "home";
     }
@@ -145,7 +153,7 @@ public class CustomerController {
     }
 
     @GetMapping("/oauth/kakao/register")
-    public String kakaoRegister(@RequestParam("code")String code, RedirectAttributes attributes){
+    public String kakaoRegister(@RequestParam("code")String code, HttpSession session){
         String accessToken = oauthService.getKakaoToken(code,"register");
         Long kakaoId = oauthService.getUserID(accessToken);
 
@@ -153,10 +161,7 @@ public class CustomerController {
 
         //해당 카카오 계정과 연동된 아이디가 존재하지않음 -> 회원가입 가능
         if (customer == null) {
-           attributes.addAttribute("kakaoId", kakaoId);
-        }else{
-            //이미 해당 카카오 아이디로 연동된 계정이 있으면 -1을 보냄
-            attributes.addAttribute("kakaoId", -1L);
+            session.setAttribute(SessionConst.KAKAO_ID, kakaoId);
         }
         return "redirect:/register";
     }
@@ -192,14 +197,14 @@ public class CustomerController {
 
     @PostMapping("/auth/email")
     public String emailAuthCheck(@RequestParam("email") String email, @ModelAttribute("emailAuth") String emailAuth, BindingResult bindingResult,
-                                 RedirectAttributes attributes) {
+                                 HttpSession session) {
         if(!emailService.checkEmailAuth(email,emailAuth)){
             //인증 실패
             bindingResult.reject("authFail", "이메일 인증에 실패하였습니다. 다시 정확하게 입력해주세요.");
             return "emailAuth";
         }else{
             //인증 성공
-            attributes.addAttribute("email", email);
+            session.setAttribute(SessionConst.EMAIL, email);
             return "redirect:/register";
         }
     }

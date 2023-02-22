@@ -33,7 +33,7 @@ public class CustomerService {
     public void addCustomer(CustomerRegisterForm form, int saltSize){
         String salt = makeSalt(saltSize);
         String passwordHash = hashPassword(form.getPassword(), salt);
-        Customer customer = new Customer(form.getLoginId(), passwordHash + salt, form.getName(), form.getAge(), "USER",form.getKakaoId());
+        Customer customer = new Customer(form.getLoginId(), passwordHash + salt, form.getName(), form.getAge(), "USER",form.getKakaoId(),form.getEmail());
         customerRepository.save(customer);
     }
     public Customer login(String inputLoginId, String inputPassword){

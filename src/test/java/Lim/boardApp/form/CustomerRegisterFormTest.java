@@ -112,5 +112,4 @@ class CustomerRegisterFormTest {
             assertThat(v.getMessageTemplate()).isEqualTo("이름의 최대길이는 20입니다.");
         }
     }
-    //TODO : 아이디 중복 조건 확인 테스트
 }

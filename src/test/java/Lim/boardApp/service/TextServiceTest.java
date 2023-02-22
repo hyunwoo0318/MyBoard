@@ -308,7 +308,7 @@ class TextServiceTest {
 
         //댓글작성
         Customer customer1 = text.getCustomer();
-        Customer customer2 = new Customer("id123", "pw123", "c2", 23, "USER");
+        Customer customer2 = new Customer("id123", "pw123", "c2", 23, "USER","ex@ex.com");
         customerRepository.save(customer2);
         commentRepository.save(new Comment(text, customer1, "comment1"));
         commentRepository.save(new Comment(text, customer1, "comment2"));
@@ -335,7 +335,8 @@ class TextServiceTest {
     private List<Hashtag> addHashTags(int num){
         List<Hashtag> ret = new ArrayList<>();
         for(int i=1;i<=num;i++){
-            Hashtag hashtag = new Hashtag("h" + i);
+            String name = "h" + i;
+            Hashtag hashtag = new Hashtag(name);
             hashtagRepository.save(hashtag);
             ret.add(hashtag);
         }

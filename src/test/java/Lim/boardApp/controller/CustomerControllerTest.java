@@ -89,7 +89,7 @@ class CustomerControllerTest {
     public void registerViewTest() throws Exception{
         CustomerRegisterForm form = new CustomerRegisterForm();
 
-        MvcResult mvcResult = mockMvc.perform(get("/register")).andReturn();
+        MvcResult mvcResult = mockMvc.perform(get("/register").sessionAttr(SessionConst.EMAIL,"ex@ex.com")).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
         assertThat(mvcResult.getModelAndView().getModelMap().get("customer").getClass()).isEqualTo(CustomerRegisterForm.class);
@@ -98,10 +98,20 @@ class CustomerControllerTest {
     }
 
     @Test
+    @DisplayName("이메일 인증을 거치지 않고 회원가입 화면을 시도하는 경우 - /register")
+    public void registerViewWithoutEmailAuth() throws Exception{
+        MvcResult mvcResult = mockMvc.perform(get("/register")).andReturn();
+
+        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(400);
+    }
+
+
+    @Test
     @DisplayName("회원가입 테스트(정상적인 회원가입) - /register")
     public void registerSuccessTest() throws Exception{
         CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
-        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form).sessionAttr(SessionConst.EMAIL,"ex@ex.com")
+                .sessionAttr(SessionConst.KAKAO_ID, 23)).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("home");
@@ -113,17 +123,19 @@ class CustomerControllerTest {
         assertThat(c.getLoginId()).isEqualTo(form.getLoginId());
         assertThat(c.getName()).isEqualTo(form.getName());
         assertThat(c.getAge()).isEqualTo(form.getAge());
+        assertThat(c.getEmail()).isEqualTo("ex@ex.com");
+        assertThat(c.getKakaoId()).isEqualTo(23L);
     }
 
     @Test
     @DisplayName("회원가입 테스트(중복된 아이디로 회원가입 시도) - /register")
     public void registerDupLoginIdTest() throws Exception{
-        Customer customer = new Customer("id123123", "pw123123", "hyunwoo", 23, "USER");
+        Customer customer = new Customer("id123123", "pw123123", "hyunwoo", 23, "USER","ex@ex.com");
         customerRepository.save(customer);
 
         CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123456","pw123456", "john", 25);
 
-        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form).sessionAttr(SessionConst.EMAIL,"ex2@ex2.com")).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("addCustomer");
@@ -131,18 +143,20 @@ class CustomerControllerTest {
         Customer c = customerRepository.findByLoginId("id123123").get();
         assertThat(c.getAge()).isEqualTo(23);
         assertThat(c.getName()).isEqualTo("hyunwoo");
+        assertThat(c.getEmail()).isEqualTo("ex@ex.com");
     }
 
     @Test
     @DisplayName("회원가입 테스트(비밀번호와 비밀번호 입력이 다른경우) - /register")
     public void registerInvalidPasswordCheck() throws Exception{
-        customerRepository.deleteAll();
+
         CustomerRegisterForm formDiffer = new CustomerRegisterForm("id123123", "pw123123", "pw456456", "hyunwoo", 23);
 
         MvcResult result = mockMvc.perform(post("/register").flashAttr("customer", formDiffer)).andReturn();
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
         assertThat(result.getModelAndView().getViewName()).isEqualTo("addCustomer");
+        assertThat(customerRepository.findByLoginId("id123123")).isEmpty();
     }
 
 
