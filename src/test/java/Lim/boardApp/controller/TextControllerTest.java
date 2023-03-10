@@ -7,6 +7,7 @@ import Lim.boardApp.domain.Text;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
+import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.service.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -38,11 +39,13 @@ class TextControllerTest {
     @Autowired private TextHashtagService textHashtagService;
     @Autowired private HashtagService hashtagService;
 
+    @Autowired private CustomerRepository customerRepository;
+
     private Long id;
     /**
      * 100개의 임의의 text저장
      */
-    @BeforeAll
+    @BeforeEach
     public void init(){
         customerService.addCustomer(new CustomerRegisterForm("id123123","pw123123","pw123123","hyunwoo",23),20);
         Customer customer = customerService.findCustomer("id123123");
@@ -56,7 +59,12 @@ class TextControllerTest {
         }
     }
 
-    @Test
+    @AfterAll
+    public void deleteAll(){
+        customerRepository.deleteAllInBatch();
+    }
+
+   @Test
     @DisplayName("글 리스트 화면 테스트 - /board")
     public void textListViewTest() throws Exception{
         MvcResult mvcResult = mockMvc.perform(get("/board").param("page", "3")
@@ -75,7 +83,7 @@ class TextControllerTest {
         assertThat(mvcResult.getModelAndView().getModel().get("type")).isEqualTo("");
     }
 
-    @Test
+   @Test
     @DisplayName("검색 테스트(제목) - /search")
     public void searchByTitle() throws Exception{
         /**

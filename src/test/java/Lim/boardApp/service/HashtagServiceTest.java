@@ -5,6 +5,10 @@ import Lim.boardApp.repository.HashtagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,32 +20,20 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class HashtagServiceTest {
 
-    @Autowired private HashtagService hashtagService;
-    @Autowired private HashtagRepository hashtagRepository;
+    @InjectMocks
+    private HashtagService hashtagService;
 
-    @Autowired
-    EntityManager em;
-
-    @BeforeEach
-    public void init(){
-        em.clear();
-    }
+    @Mock private HashtagRepository hashtagRepository;
 
     @Test
     @DisplayName("parseHashtag 테스트")
     public void parseHashtagTest(){
         /**
          * a,b,c,d,e,f,g를 입력
-         * a,b,c는 이미 있는 상황 가정
-         */
-
-        hashtagRepository.save(new Hashtag("#a"));
-        hashtagRepository.save(new Hashtag("#b"));
-        hashtagRepository.save(new Hashtag("#c"));
+         **/
 
         String input = "a,b,c,d,e,f,g";
         List<String> resultInput = Arrays.asList("#a","#b","#c","#d","#e","#f","#g");
@@ -58,15 +50,15 @@ class HashtagServiceTest {
         /**
          *  #a,#b,#c,#d,#e,#f,#g -> a,b,c,d,e,f,g
          */
-        hashtagRepository.save(new Hashtag("#a"));
-        hashtagRepository.save(new Hashtag("#b"));
-        hashtagRepository.save(new Hashtag("#c"));
-        hashtagRepository.save(new Hashtag("#d"));
-        hashtagRepository.save(new Hashtag("#e"));
-        hashtagRepository.save(new Hashtag("#f"));
-        hashtagRepository.save(new Hashtag("#g"));
+        Hashtag a = new Hashtag("#a");
+        Hashtag b = new Hashtag("#b");
+        Hashtag c = new Hashtag("#c");
+        Hashtag d = new Hashtag("#d");
+        Hashtag e = new Hashtag("#e");
+        Hashtag f = new Hashtag("#f");
+        Hashtag g = new Hashtag("#g");
 
-        List<Hashtag> hashtagList = hashtagRepository.findAll();
+        List<Hashtag> hashtagList = Arrays.asList(a, b, c, d, e, f, g);
         String resultInput = "a,b,c,d,e,f,g";
 
         String result = hashtagService.mergeHashtag(hashtagList);

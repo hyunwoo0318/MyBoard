@@ -19,7 +19,7 @@ spring:
   jpa:
     hibernate:
       use-new-id-generator-mappings : false
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
@@ -33,7 +33,7 @@ spring:
 
   mail:
     host: smtp.naver.com
-    port: 587
+    port: 465
     username: whskwock
     password: naverboard123
     properties:

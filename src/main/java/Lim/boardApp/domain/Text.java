@@ -51,4 +51,8 @@ public class Text extends BaseEntity {
         customer.getTextList().add(this);
     }
 
+    //for test
+    public void setId(Long id){
+        this.id = id;
+    }
 }

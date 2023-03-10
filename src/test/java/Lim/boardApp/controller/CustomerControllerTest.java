@@ -31,14 +31,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@Transactional
 class CustomerControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired
-    private CustomerRepository customerRepository;
+
+    @Autowired CustomerRepository customerRepository;
 
     @Autowired
     CustomerService customerService;
+
 
 
     @Test
@@ -52,30 +54,21 @@ class CustomerControllerTest {
                 .andDo(print());
     }
 
-    @BeforeEach
-    public void delete(){
-        customerRepository.deleteAll();
-    }
 
 
     @Test
     @DisplayName("로그인 한 사용자가 홈 화면에 접근할때 - /")
     public void homeWithLogin() throws Exception {
-        Customer loginCustomer = new Customer();
-        customerRepository.save(loginCustomer);
         mockMvc.perform(get("/")
-                        .sessionAttr(SessionConst.LOGIN_CUSTOMER, loginCustomer))
+                        .sessionAttr(SessionConst.LOGIN_CUSTOMER, 1L))
                         .andExpect(redirectedUrl("/board"))
                         .andDo(print());
     }
     @Test
     @DisplayName("로그아웃 테스트 - /logout")
     public void logoutTest() throws Exception{
-        Customer loginCustomer = new Customer();
-        customerRepository.save(loginCustomer);
-
         MockHttpSession loginSession = new MockHttpSession();
-        loginSession.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
+        loginSession.setAttribute(SessionConst.LOGIN_CUSTOMER, "1L");
 
         MvcResult mvcResult = mockMvc.perform(post("/logout").session(loginSession)).andReturn();
 
@@ -152,7 +145,7 @@ class CustomerControllerTest {
 
         CustomerRegisterForm formDiffer = new CustomerRegisterForm("id123123", "pw123123", "pw456456", "hyunwoo", 23);
 
-        MvcResult result = mockMvc.perform(post("/register").flashAttr("customer", formDiffer)).andReturn();
+        MvcResult result = mockMvc.perform(post("/register").flashAttr("customer", formDiffer).sessionAttr(SessionConst.EMAIL, "ex@ex2.com")).andReturn();
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
         assertThat(result.getModelAndView().getViewName()).isEqualTo("addCustomer");
@@ -163,12 +156,13 @@ class CustomerControllerTest {
     @Test
     @DisplayName("회원가입 테스트(유효하지 않은 입력으로 회원가입 시도) - /register")
     public void registerInvalidateFormTest() throws Exception {
-        customerRepository.deleteAll();
         CustomerRegisterForm formNoName = new CustomerRegisterForm("id123123", "pw123456", "pw123456", "", 25);
         CustomerRegisterForm formNoPw = new CustomerRegisterForm("id123123", "", "pw123456", "john", 25);
 
-        MvcResult result1 = mockMvc.perform(post("/register").flashAttr("customer", formNoName)).andReturn();
-        MvcResult result2 = mockMvc.perform(post("/register").flashAttr("customer", formNoPw)).andReturn();
+        MvcResult result1 = mockMvc.perform(post("/register").flashAttr("customer", formNoName)
+                .sessionAttr(SessionConst.EMAIL, "ex@ex2.com")).andReturn();
+        MvcResult result2 = mockMvc.perform(post("/register").flashAttr("customer", formNoPw)
+                .sessionAttr(SessionConst.EMAIL, "ex@ex2.com")).andReturn();
 
         assertThat(result1.getResponse().getStatus()).isEqualTo(200);
         assertThat(result1.getModelAndView().getViewName()).isEqualTo("addCustomer");

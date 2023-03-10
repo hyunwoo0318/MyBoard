@@ -28,6 +28,11 @@
                 <div class="field-error" th:errors="*{content}">
                     내용 오류
                 </div>
+                <label for="hashtags"></label>
+                <input type="text" id="hashtags" th:field="*{hashtags}" th:class="form-control" th:errorclass="field-error" placeholder="해시태그를 입력해주세요.">
+                <div class="field-error" th:errors="*{hashtags}">
+                    해시태그 오류
+                </div>
             <button type="submit" class="btn btn-primary">작성</button>
             <button type="button" class="btn btn-primary" th:onclick="|location.href='@{/board}'|">취소</button>
             </div>

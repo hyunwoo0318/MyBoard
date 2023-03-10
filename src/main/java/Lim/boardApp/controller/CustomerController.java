@@ -31,11 +31,11 @@ public class CustomerController {
 
     //일반 홈 화면
     @GetMapping("/")
-    public String home(@SessionAttribute(name = SessionConst.LOGIN_CUSTOMER, required = false) Customer loginCustomer, Model model) {
-        if (loginCustomer == null) {
+    public String home(@SessionAttribute(name = SessionConst.LOGIN_CUSTOMER, required = false) Long id, Model model) {
+        if (id == null) {
             return "home";
         }else {
-            model.addAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
+            model.addAttribute(SessionConst.LOGIN_CUSTOMER, id);
             return "redirect:/board";
         }
     }

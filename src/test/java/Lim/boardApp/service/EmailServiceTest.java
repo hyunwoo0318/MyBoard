@@ -4,6 +4,10 @@ import Lim.boardApp.repository.CustomerRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,13 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
-    @Autowired EmailService emailService;
-    @Autowired
-    CustomerRepository customerRepository;
+    @InjectMocks
+    EmailService emailService;
+
 
     @Test
     @DisplayName("정확한 이메일 형식 입력시 판별")

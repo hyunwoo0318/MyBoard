@@ -20,9 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 class CommentRepositoryTest {
 
-    @Autowired CommentRepository commentRepository;
-    @Autowired CustomerRepository customerRepository;
-    @Autowired TextRepository textRepository;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private TextRepository textRepository;
 
     @Test
     @DisplayName("findCommentsByText 테스트")

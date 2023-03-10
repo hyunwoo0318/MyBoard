@@ -69,5 +69,8 @@ public class Customer  extends BaseEntity {
         this.textList = textList;
     }
 
-
+    //for test
+    public void setId(Long id){
+        this.id = id;
+    }
 }
