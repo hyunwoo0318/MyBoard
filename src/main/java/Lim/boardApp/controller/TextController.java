@@ -111,7 +111,11 @@ public class TextController {
         }
 
         UploadFile uploadFile = uploadFileService.storeFile(textCreateForm.getFile());
-        if(textService.createText(id, textCreateForm,hashtagList,uploadFile.getStoredFileName()) == null){
+        String fileName = null;
+        if (uploadFile != null) {
+            fileName = uploadFile.getStoredFileName();
+        }
+        if(textService.createText(id, textCreateForm,hashtagList,fileName) == null){
             System.out.println("create 오류");
             return "redirect:/board/new";
         }

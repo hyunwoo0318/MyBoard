@@ -1,6 +1,8 @@
 spring:
   messages:
     basename: application, errors
+  config:
+    import: local.yml
 
   datasource:
      url :  jdbc:h2:tcp://localhost/~/test
@@ -34,8 +36,6 @@ spring:
   mail:
     host: smtp.naver.com
     port: 465
-    username: whskwock
-    password: naverboard123
     properties:
       mail:
         smtp:
@@ -55,9 +55,16 @@ logging level:
 admin:
   password: admin123123
 
-kakao:
-  key: 5119b65b42c4da50a4c3bb23eb9a7dd6
 
 file:
   dir: /Users/lim/boardApp/src/main/resources/static/images/
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    algorithm: PBEWithMD5AndDES
+    pool-size: 2
+    string-output-type: base64
+    key-obtention-iterations: 100000
+    password: password
 

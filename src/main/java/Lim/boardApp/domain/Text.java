@@ -32,6 +32,8 @@ public class Text extends BaseEntity {
     @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
+    private List<TextHashtag> textHashtagList = new ArrayList<>();
 
 
     public Text() {

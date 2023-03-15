@@ -35,7 +35,7 @@
           <div th:align="center"><img th:src="|/images/${text.getFileName()}|" width="300" height="300"></div>
           <p>
             <span th:each = "hashtag : ${hashtagList}">
-              <span th:class="badge" th:text="${hashtag.name}"></span>
+              <span th:text="${hashtag.name}"></span>
             </span>
           </p><br>
           <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#comments" aria-expanded="false" aria-controls="comments">
