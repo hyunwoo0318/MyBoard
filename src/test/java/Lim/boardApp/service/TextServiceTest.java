@@ -175,7 +175,7 @@ class TextServiceTest {
 
         given(customerRepository.findById(1L)).willReturn(Optional.of(customer));
 
-        Text text = textService.createText(customer.getId(), form,hashtags);
+        Text text = textService.createText(customer.getId(), form,hashtags,null);
 
         assertThat(text.getTitle()).isEqualTo("title123");
         assertThat(text.getContent()).isEqualTo("content123");

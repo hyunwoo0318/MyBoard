@@ -2,13 +2,11 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.ObjectValue.PageConst;
 import Lim.boardApp.ObjectValue.SessionConst;
-import Lim.boardApp.domain.Comment;
-import Lim.boardApp.domain.Customer;
-import Lim.boardApp.domain.Hashtag;
-import Lim.boardApp.domain.Text;
+import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
+import Lim.boardApp.form.UploadFileForm;
 import Lim.boardApp.repository.*;
 import Lim.boardApp.service.*;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +34,7 @@ public class TextController {
     private final CustomerService customerService;
     private final TextHashtagService textHashtagService;
     private final HashtagService hashtagService;
+    private final UploadFileService uploadFileService;
 
     //글 리스트 전체를 보여주는 페이지
     @GetMapping
@@ -51,11 +51,14 @@ public class TextController {
     }
 
 
+
+
     @GetMapping("/search")
-    public String searchText( @RequestParam(value = "searchKey") String searchKey,
-                              @RequestParam(value = "type",required = false) String type,
-                              @RequestParam(value = "page", defaultValue = "0",required = false) int page,
-                              Model model){
+    public String searchText(@RequestParam(value = "searchKey") String searchKey,
+                             @RequestParam(value = "type", required = false) String type,
+                             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                             Model model) {
+
         String newSearchKey = "";
         PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, type);
         model.addAttribute("pageForm", pageForm);
@@ -88,7 +91,6 @@ public class TextController {
         textService.deleteText(id);
         return "redirect:/board";
     }
-
     //글 추가 메서드
     @GetMapping("/new")
     public String getNewText(Model model) {
@@ -99,7 +101,7 @@ public class TextController {
 
     @PostMapping("/new")
     public String postNewText(@Validated @ModelAttribute("text") TextCreateForm textCreateForm, BindingResult bindingResult,
-                              @SessionAttribute(name= SessionConst.LOGIN_CUSTOMER) Long id) {
+                              @SessionAttribute(name= SessionConst.LOGIN_CUSTOMER) Long id) throws IOException {
         if (bindingResult.hasErrors()) {
             return "board/makeText";
         }
@@ -107,7 +109,9 @@ public class TextController {
         if(textCreateForm.getHashtags().length()!=0){
             hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
         }
-        if(textService.createText(id, textCreateForm,hashtagList) == null){
+
+        UploadFile uploadFile = uploadFileService.storeFile(textCreateForm.getFile());
+        if(textService.createText(id, textCreateForm,hashtagList,uploadFile.getStoredFileName()) == null){
             System.out.println("create 오류");
             return "redirect:/board/new";
         }

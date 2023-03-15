@@ -71,7 +71,7 @@ public class TextService {
         return pageForm;
     }
 
-    public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList) {
+    public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList,String fileName) {
         Optional<Customer> customerOptional = customerRepository.findById(id);
         if(customerOptional.isEmpty()){
             return null;
@@ -81,6 +81,7 @@ public class TextService {
                 .title(textCreateForm.getTitle())
                 .content(textCreateForm.getContent())
                 .customer(customer)
+                .fileName(fileName)
                 .build();
         textRepository.save(text);
 
@@ -97,7 +98,7 @@ public class TextService {
             return null;
         }
         Text text = textOptional.get();
-        text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle());
+        //text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle());
         textRepository.save(text);
 
         //hashTag 변경

@@ -55,7 +55,7 @@ class TextControllerTest {
         for(int i=1;i<=100;i++){
             Hashtag hashtag = hashtagService.addHashtag("h" + i);
             hashtagList.add(hashtag);
-            textService.createText(id, new TextCreateForm("title" + i, "content" + (100 - i)), hashtagList);
+            textService.createText(id, new TextCreateForm("title" + i, "content" + (100 - i)), hashtagList,null);
         }
     }
 

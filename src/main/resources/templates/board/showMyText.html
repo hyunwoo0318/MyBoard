@@ -32,6 +32,7 @@
             </tbody>
           </table>
           <div th:align="center" th:width="80" th:height="20" th:text="${text.content}">글</div>
+          <div th:align="center"><img th:src="|/images/${text.getFileName()}|" width="300" height="300"></div>
           <p>
             <span th:each = "hashtag : ${hashtagList}">
               <span th:class="badge" th:text="${hashtag.name}"></span>

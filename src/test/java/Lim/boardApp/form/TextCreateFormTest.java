@@ -39,7 +39,7 @@ class TextCreateFormTest {
     @Test
     @DisplayName("정상적인 글 작성")
     public void normalTextCreate(){
-        TextCreateForm form = new TextCreateForm("title1", "content1", "h1,h2,h3,h4");
+        TextCreateForm form = new TextCreateForm("title1", "content1", "h1,h2,h3,h4",null);
         TextCreateForm formNoHashtags = new TextCreateForm("title1", "content1");
         Set<ConstraintViolation<TextCreateForm>> result1 = validator.validate(form);
         Set<ConstraintViolation<TextCreateForm>> result2 = validator.validate(formNoHashtags);

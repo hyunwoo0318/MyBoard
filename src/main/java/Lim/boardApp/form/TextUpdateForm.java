@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
@@ -22,6 +23,8 @@ public class TextUpdateForm {
     @NotBlank(message = "내용을 입력해주세요")
     private String content;
     private String hashtags;
+
+    private MultipartFile file;
 
     public TextUpdateForm(Text text){
         this.title = text.getTitle();

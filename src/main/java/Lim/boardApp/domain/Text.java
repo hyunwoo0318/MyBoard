@@ -26,6 +26,9 @@ public class Text extends BaseEntity {
     @JoinColumn(name = "CUSTOMER_ID")
     private Customer customer;
 
+
+    private String fileName;
+
     @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
@@ -35,15 +38,23 @@ public class Text extends BaseEntity {
     }
 
     @Builder
+    public Text(String content, String title,String fileName ,Customer customer) {
+        this.content = content;
+        this.title = title;
+        this.customer = customer;
+        this.fileName  = fileName;
+    }
+
     public Text(String content, String title, Customer customer) {
         this.content = content;
         this.title = title;
         this.customer = customer;
     }
 
-    public void updateText(String content, String title){
+    public void updateText(String content, String title, String fileName){
         this.content = content;
         this.title = title;
+        this.fileName = fileName;
     }
 
     public void setCustomer(Customer customer){

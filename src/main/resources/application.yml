@@ -58,3 +58,6 @@ admin:
 kakao:
   key: 5119b65b42c4da50a4c3bb23eb9a7dd6
 
+file:
+  dir: /Users/lim/boardApp/src/main/resources/static/images/
+

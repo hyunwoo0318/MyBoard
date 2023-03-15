@@ -14,25 +14,26 @@
 </div>
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <form th:action th:object="${text}" th:method="post">
+        <form th:action th:object="${text}" th:method="post" enctype="multipart/form-data">
             <div>
                 <label for="title"></label>
                 <input type ="text" id="title" th:field="*{title}" th:class="form-control" th:errorclass="field-error" placeholder="제목을 입력하시오">
                 <div class="field-error" th:errors="*{title}">
                     제목 오류
                 </div>
-            </div>
-            <div>
-                <label for="content"></label>
+               <label for="content"></label>
                 <textarea rows="15" id="content" th:field="*{content}" placeholder="내용을 입력하시오" th:errorclass="field-error" th:class="form-control"></textarea>
                 <div class="field-error" th:errors="*{content}">
                     내용 오류
                 </div>
+                <label for="file"></label>
+                <input type="file" id="file" th:field="*{file}">
                 <label for="hashtags"></label>
                 <input type="text" id="hashtags" th:field="*{hashtags}" th:class="form-control" th:errorclass="field-error" placeholder="해시태그를 입력해주세요.">
                 <div class="field-error" th:errors="*{hashtags}">
                     해시태그 오류
                 </div>
+
             <button type="submit" class="btn btn-primary">작성</button>
             <button type="button" class="btn btn-primary" th:onclick="|location.href='@{/board}'|">취소</button>
             </div>

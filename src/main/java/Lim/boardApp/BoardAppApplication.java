@@ -9,12 +9,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 
+import java.io.File;
 import java.util.Calendar;
 
 @EnableJpaAuditing
 @SpringBootApplication
 public class BoardAppApplication {
 	public static void main(String[] args) {
+
+
 		SpringApplication.run(BoardAppApplication.class, args);
 	}
 
