@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -18,10 +19,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+
+    private final int saltSize = 20;
     public Customer findCustomer(Long id) {
         return customerRepository.findById(id).orElse(null);
     }
@@ -30,11 +34,23 @@ public class CustomerService {
         return customerRepository.findByLoginId(loginId).orElse(null);
     }
 
-    public void addCustomer(CustomerRegisterForm form, int saltSize){
+    public Customer findCustomerByEmail(String email) {
+        return customerRepository.findByEmail(email).orElse(null);
+    }
+
+
+    public void addCustomer(CustomerRegisterForm form){
         String salt = makeSalt(saltSize);
         String passwordHash = hashPassword(form.getPassword(), salt);
         Customer customer = new Customer(form.getLoginId(), passwordHash + salt, form.getName(), form.getAge(), "USER",form.getKakaoId(),form.getEmail());
         customerRepository.save(customer);
+    }
+
+    public void changePassword(String password, Long id) {
+        String salt  = makeSalt(saltSize);
+        String passwordHash = hashPassword(password, salt);
+        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+        optionalCustomer.get().changePassword(passwordHash + salt);
     }
     public Customer login(String inputLoginId, String inputPassword){
         Optional<Customer> customerOptional = customerRepository.findByLoginId(inputLoginId);
@@ -59,6 +75,12 @@ public class CustomerService {
     public boolean dupLoginId(CustomerRegisterForm customerRegisterForm){
         Optional<Customer> dup = customerRepository.findByLoginId(customerRegisterForm.getLoginId());
         if(dup.isEmpty()) return false;
+        else return true;
+    }
+
+    public boolean dupEmail(CustomerRegisterForm customerRegisterForm) {
+        Optional<Customer> dup = customerRepository.findByEmail(customerRegisterForm.getEmail());
+        if (dup.isEmpty()) return false;
         else return true;
     }
 

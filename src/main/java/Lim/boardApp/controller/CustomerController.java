@@ -1,10 +1,13 @@
 package Lim.boardApp.controller;
 
+import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.KakaoConst;
 import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
+import Lim.boardApp.form.EmailAuthForm;
 import Lim.boardApp.form.LoginForm;
+import Lim.boardApp.form.PasswordChangeForm;
 import Lim.boardApp.service.CustomerService;
 import Lim.boardApp.service.EmailService;
 import Lim.boardApp.service.OauthService;
@@ -18,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Slf4j
@@ -34,7 +36,7 @@ public class CustomerController {
     @GetMapping("/")
     public String home(@SessionAttribute(name = SessionConst.LOGIN_CUSTOMER, required = false) Long id, Model model) {
         if (id == null) {
-            return "home";
+            return "customer/home";
         }else {
             model.addAttribute(SessionConst.LOGIN_CUSTOMER, id);
             return "redirect:/board";
@@ -43,25 +45,28 @@ public class CustomerController {
 
     //회원가입 화면
     @GetMapping("/register")
-    public String getAddCustomer(@SessionAttribute(value = "email") String email, @SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
+    public String getAddCustomer(@SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
                                   Model model) {
         CustomerRegisterForm customerRegisterForm = new CustomerRegisterForm();
         model.addAttribute("customer", customerRegisterForm);
-        model.addAttribute("email", email);
+
         if(kakaoId != null){
             model.addAttribute("kakaoId", kakaoId);
         }
-        return "addCustomer";
+        return "customer/addCustomer";
     }
 
     //일반회원가입
     @PostMapping("/register")
     public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult
-                                    ,@SessionAttribute(value = "email") String email, @SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
+                                    , @SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
                                   HttpSession session) {
 
        if(customerService.dupLoginId(customerRegisterForm))
            bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
+
+        if(customerService.dupEmail(customerRegisterForm))
+            bindingResult.reject("dupEmail", "이미 등록된 이메일주소입니다.");
 
        if(!customerRegisterForm.getPassword().equals(customerRegisterForm.getPasswordCheck()))
            bindingResult.reject("wrongPasswordInput", "입력하신 비밀번호와 비밀번호 확인이 다릅니다.");
@@ -70,8 +75,11 @@ public class CustomerController {
            bindingResult.reject("dupKakaoId", "해당 카카오 계정으로 연동된 계정이 존재합니다.");
        }
 
+       if(!emailService.checkEmailForm(customerRegisterForm.getEmail()))
+           bindingResult.reject("invalidEmail", "유효한 이메일을 입력해주세요.");
+
         if(bindingResult.hasErrors()){
-            return "addCustomer";
+            return "customer/addCustomer";
         }
 
         //정상적인 회원가입
@@ -80,11 +88,8 @@ public class CustomerController {
             customerRegisterForm.setKakaoId(kakaoId);
         }
 
-        customerRegisterForm.setEmail(email);
-        session.removeAttribute(SessionConst.EMAIL);
-
-        customerService.addCustomer(customerRegisterForm, 20);
-        return "home";
+        customerService.addCustomer(customerRegisterForm);
+        return "customer/home";
     }
 
     @GetMapping("/login")
@@ -94,19 +99,19 @@ public class CustomerController {
             model.addAttribute("loginFail", "해당 카카오 계정으로 가입된 회원이 없습니다.");
         }
         model.addAttribute("loginForm", loginForm);
-        return "login";
+        return "customer/login";
     }
 
     @PostMapping("/login")
     public String login(@Validated @ModelAttribute LoginForm form,BindingResult bindingResult,
                         @RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,HttpSession session) {
         if (bindingResult.hasFieldErrors()) {
-            return "login";
+            return "customer/login";
         }
         Customer loginCustomer = customerService.login(form.getLoginId(), form.getPassword());
         if (loginCustomer == null) { //로그인 실패
             bindingResult.reject("loginFail","존재하지 않는 아이디이거나 잘못된 비밀번호입니다.");
-            return "login";
+            return "customer/login";
         } else {
             session.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
             return "redirect:" + redirectURL;
@@ -168,46 +173,57 @@ public class CustomerController {
     }
 
 
-    //이메일 인증
-    @GetMapping("/auth/email")
-    public String emailAuthView (@RequestParam(value = "email", required = false) String email ,Model model){
-        String emailAuth = "";
-        Boolean isEmail = emailService.checkEmailForm(email);
-        if(email==null){
-            //첫시도
-            model.addAttribute("email","");
-        }else if(!isEmail){
-            //잘못된 이메일 입력을 하는경우
-            model.addAttribute("emailFormError", "정확한 형식의 이메일을 입력해주세요.");
-            model.addAttribute("email", email);
-        }else if(!emailService.findPrevAuth(email)){
-            //인증메일을 보내지 않아 보내야하는경우
-            try{
-                emailService.sendEmailAuth(email);
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-            model.addAttribute("email", email);
-        }else{
-            //이미 인증메일을 보내고 유효시간내인경우
-            model.addAttribute("email", email);
-        }
-        model.addAttribute("emailAuth", emailAuth);
-        return "emailAuth";
+    //비밀번호 찾기 -> 이메일 인증
+    @GetMapping("/find-password")
+    public String emailAuthView (Model model){
+        EmailAuthForm emailAuthForm = new EmailAuthForm();
+        model.addAttribute("emailAuthForm", emailAuthForm);
+        return "customer/emailAuth";
     }
 
-    @PostMapping("/auth/email")
-    public String emailAuthCheck(@RequestParam("email") String email, @ModelAttribute("emailAuth") String emailAuth, BindingResult bindingResult,
-                                 HttpSession session) {
-        if(!emailService.checkEmailAuth(email,emailAuth)){
+    @PostMapping("/find-password")
+    public String emailAuthCheck(@Validated @ModelAttribute EmailAuthForm emailAuthForm, BindingResult bindingResult){
+        if(!emailService.checkEmailAuth(emailAuthForm.getEmail(), emailAuthForm.getEmailAuth())){
             //인증 실패
             bindingResult.reject("authFail", "이메일 인증에 실패하였습니다. 다시 정확하게 입력해주세요.");
-            return "emailAuth";
-        }else{
-            //인증 성공
-            session.setAttribute(SessionConst.EMAIL, email);
-            return "redirect:/register";
         }
+
+        if (bindingResult.hasErrors()) {
+            return "customer/emailAuth";
+            //인증 성공
+
+        }
+        Customer customer = customerService.findCustomerByEmail(emailAuthForm.getEmail());
+            Long id = customer.getId();
+            return "redirect:/new-password?id=" + id;
+
+    }
+
+    @GetMapping("/new-password")
+    public String newPassword(Model model) {
+        PasswordChangeForm form = new PasswordChangeForm();
+        model.addAttribute("form", form);
+        return "customer/newPassword";
+    }
+
+    @PostMapping("/new-password")
+    public String newPasswordPost(@Validated @ModelAttribute("form") PasswordChangeForm form, BindingResult bindingResult, @RequestParam("id") Long id) throws NotFoundException {
+        Customer customer = customerService.findCustomer(id);
+        if (customer == null) {
+            throw new NotFoundException();
+        }
+        if (!form.getPassword().equals(form.getPasswordCheck())) {
+            bindingResult.reject("wrongPasswordInput","입력하신 비밀번호와 비밀번호 입력이 동일하지 않습니다. 다시 입력해주세요");
+        }
+
+        if (bindingResult.hasErrors()) {
+            return "customer/newPassword";
+        }
+
+        customerService.changePassword(form.getPassword(), id);
+        return "customer/changePasswordSuccess";
     }
 
 }
+
+

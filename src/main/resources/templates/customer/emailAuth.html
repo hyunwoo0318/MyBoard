@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>게시판</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+
+<body>
+<br><br><br><br>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="heading-section">비밀번호 찾기</h2>
+        <form th:class="form-control" th:action th:object="${emailAuthForm}" method="post">
+            <div th:if="${#fields.hasGlobalErrors()}">
+                <p class="text-danger" th:each="err : ${#fields.globalErrors()}"
+                   th:text="${err}">글로벌 오류 메시지</p>
+            </div>
+            <div class="form-group">
+                <label for="email" >이메일</label>
+                <input type="text" id="email" class="form-control" th:name="email" th:field="*{email}">
+                <button class= "btn btn-sm btn-outline-dark" type="button" onclick="emailAuthFun(document.getElementById('email').value)">인증메일 발송</button><br>
+                <label for="emailAuth">인증번호</label>
+                <input type="text" id="emailAuth" class="form-control" th:name="emailAuth" th:field="*{emailAuth}">
+            </div><br>
+            <div>
+                <button class="btn btn-primary" type="submit">인증</button>
+                <button class="btn btn-secondary" type="button" th:onclick="|location.href='@{/}'|">홈으로</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script th:inline="javascript">
+
+    var emailAuthURL = "http://localhost:8080/api/email-auth"
+    function emailAuthFun(inputEmail) {
+        let st;
+        fetch(emailAuthURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email: inputEmail,
+            }),
+        }).then((response) => {
+
+        if (response.status === 400) { //적절하지 않은 이메일 형식을 입력한 경우
+            alert("적절하지 않은 이메일 형식입니다. 정확하게 입력해주세요.");
+            return false;
+        }else if (response.status === 404) { //가입되지 않은 이메일을 입력한경우
+            alert("가입되지 않은 이메일입니다.");
+            return false;
+        }else{
+            alert("성공!");
+            return true;
+        }});
+
+    };
+
+</script>
+</body>
+
+
+
+</html>

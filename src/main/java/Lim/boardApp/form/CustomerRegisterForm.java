@@ -32,7 +32,9 @@ public class CustomerRegisterForm {
 
     private Long kakaoId;
 
+    @NotBlank(message = "이메일을 입력해주세요.")
     private String email;
+
 
     public CustomerRegisterForm(String loginId, String password, String passwordCheck, String name, Integer age) {
         this.loginId = loginId;

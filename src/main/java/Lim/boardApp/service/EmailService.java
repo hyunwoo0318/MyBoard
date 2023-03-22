@@ -9,6 +9,7 @@ import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -32,8 +33,9 @@ public class EmailService {
 
 
     public void sendEmailAuth(String email) throws MessagingException {
-        UUID uuid = UUID.randomUUID();
-        String code = uuid.toString().substring(0, 8);
+
+        Random rand = new Random();
+        String code = String.valueOf(rand.nextInt(10000));
         Address toMail = new InternetAddress(email);
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         mimeMessage.setText("인증 메일 입니다. 인증번호 = " + code, "utf-8");

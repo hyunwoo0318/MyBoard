@@ -34,6 +34,7 @@ public class Customer  extends BaseEntity {
     @Column(unique = true)
     private Long kakaoId;
 
+    @Column(unique = true)
     private String email;
 
 
@@ -56,17 +57,20 @@ public class Customer  extends BaseEntity {
     }
 
     @Builder
-    public Customer(String loginId, String password, String name, Integer age, String role,String email) {
+    public Customer(String loginId, String password, String name, Integer age, String role) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.age = age;
         this.role = role;
-        this.email = email;
     }
 
     public void updateTextList(List<Text> textList){
         this.textList = textList;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
     }
 
     //for test

@@ -47,7 +47,7 @@ class TextControllerTest {
      */
     @BeforeEach
     public void init(){
-        customerService.addCustomer(new CustomerRegisterForm("id123123","pw123123","pw123123","hyunwoo",23),20);
+        customerService.addCustomer(new CustomerRegisterForm("id123123","pw123123","pw123123","hyunwoo",23));
         Customer customer = customerService.findCustomer("id123123");
         id = customer.getId();
         List<Hashtag> hashtagList = new ArrayList<>();

@@ -170,7 +170,7 @@ class TextServiceTest {
         List<Hashtag> hashtags = hashtagList.subList(0, 6);
 
         //작성자 정보 입력
-        Customer customer = new Customer("id123123","pw123123", "hy", 23, "USER", "hy@naver.com");
+        Customer customer = new Customer("id123123","pw123123", "hy", 23, "USER");
         customer.setId(1L);
 
         given(customerRepository.findById(1L)).willReturn(Optional.of(customer));

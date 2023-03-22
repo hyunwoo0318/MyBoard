@@ -40,11 +40,14 @@ class EmailServiceTest {
     public void checkEmailFormFail(){
         String email1 = "";
         String email2 = "hyunwoo0318naver.com";
+        String email3 = "hy";
 
         boolean result1 = emailService.checkEmailForm(email1);
         boolean result2 = emailService.checkEmailForm(email2);
+        boolean result3 = emailService.checkEmailForm(email3);
 
         assertThat(result1).isFalse();
         assertThat(result2).isFalse();
+        assertThat(result3).isFalse();
     }
 }

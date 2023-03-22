@@ -82,7 +82,7 @@ class CustomerControllerTest {
     public void registerViewTest() throws Exception{
         CustomerRegisterForm form = new CustomerRegisterForm();
 
-        MvcResult mvcResult = mockMvc.perform(get("/register").sessionAttr(SessionConst.EMAIL,"ex@ex.com")).andReturn();
+        MvcResult mvcResult = mockMvc.perform(get("/register")).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
         assertThat(mvcResult.getModelAndView().getModelMap().get("customer").getClass()).isEqualTo(CustomerRegisterForm.class);
@@ -103,7 +103,7 @@ class CustomerControllerTest {
     @DisplayName("회원가입 테스트(정상적인 회원가입) - /register")
     public void registerSuccessTest() throws Exception{
         CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
-        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form).sessionAttr(SessionConst.EMAIL,"ex@ex.com")
+        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form)
                 .sessionAttr(SessionConst.KAKAO_ID, 23)).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
@@ -116,19 +116,18 @@ class CustomerControllerTest {
         assertThat(c.getLoginId()).isEqualTo(form.getLoginId());
         assertThat(c.getName()).isEqualTo(form.getName());
         assertThat(c.getAge()).isEqualTo(form.getAge());
-        assertThat(c.getEmail()).isEqualTo("ex@ex.com");
         assertThat(c.getKakaoId()).isEqualTo(23L);
     }
 
     @Test
     @DisplayName("회원가입 테스트(중복된 아이디로 회원가입 시도) - /register")
     public void registerDupLoginIdTest() throws Exception{
-        Customer customer = new Customer("id123123", "pw123123", "hyunwoo", 23, "USER","ex@ex.com");
+        Customer customer = new Customer("id123123", "pw123123", "hyunwoo", 23, "USER");
         customerRepository.save(customer);
 
         CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123456","pw123456", "john", 25);
 
-        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form).sessionAttr(SessionConst.EMAIL,"ex2@ex2.com")).andReturn();
+        MvcResult mvcResult = mockMvc.perform(post("/register").flashAttr("customer", form)).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("addCustomer");
@@ -136,7 +135,6 @@ class CustomerControllerTest {
         Customer c = customerRepository.findByLoginId("id123123").get();
         assertThat(c.getAge()).isEqualTo(23);
         assertThat(c.getName()).isEqualTo("hyunwoo");
-        assertThat(c.getEmail()).isEqualTo("ex@ex.com");
     }
 
     @Test
@@ -145,7 +143,7 @@ class CustomerControllerTest {
 
         CustomerRegisterForm formDiffer = new CustomerRegisterForm("id123123", "pw123123", "pw456456", "hyunwoo", 23);
 
-        MvcResult result = mockMvc.perform(post("/register").flashAttr("customer", formDiffer).sessionAttr(SessionConst.EMAIL, "ex@ex2.com")).andReturn();
+        MvcResult result = mockMvc.perform(post("/register").flashAttr("customer", formDiffer)).andReturn();
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
         assertThat(result.getModelAndView().getViewName()).isEqualTo("addCustomer");
@@ -160,9 +158,9 @@ class CustomerControllerTest {
         CustomerRegisterForm formNoPw = new CustomerRegisterForm("id123123", "", "pw123456", "john", 25);
 
         MvcResult result1 = mockMvc.perform(post("/register").flashAttr("customer", formNoName)
-                .sessionAttr(SessionConst.EMAIL, "ex@ex2.com")).andReturn();
+                ).andReturn();
         MvcResult result2 = mockMvc.perform(post("/register").flashAttr("customer", formNoPw)
-                .sessionAttr(SessionConst.EMAIL, "ex@ex2.com")).andReturn();
+                ).andReturn();
 
         assertThat(result1.getResponse().getStatus()).isEqualTo(200);
         assertThat(result1.getModelAndView().getViewName()).isEqualTo("addCustomer");
@@ -187,7 +185,7 @@ class CustomerControllerTest {
     @DisplayName("로그인(성공) 테스트 - /login")
     public void loginSuccess() throws Exception{
         CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
-        customerService.addCustomer(form,20);
+        customerService.addCustomer(form);
         Long id = customerRepository.findByLoginId("id123123").get().getId();
 
         String redirectURL = "/board";
@@ -205,7 +203,7 @@ class CustomerControllerTest {
     @DisplayName("로그인(잘못된 아이디/비밀번호) 테스트")
     public void loginFail() throws Exception{
         CustomerRegisterForm form = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hyunwoo", 23);
-        customerService.addCustomer(form,20);
+        customerService.addCustomer(form);
 
         LoginForm wrongPw = new LoginForm("id123123", "pw456456");
         LoginForm wrongId = new LoginForm("id456456", "pw123123");
