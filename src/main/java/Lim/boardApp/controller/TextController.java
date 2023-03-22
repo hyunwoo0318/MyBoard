@@ -1,5 +1,6 @@
 package Lim.boardApp.controller;
 
+import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
 import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.*;
@@ -68,10 +69,10 @@ public class TextController {
 
     //선택한 글의 정보를 보여줌
     @GetMapping("show/{id}")
-    public String showText(@PathVariable("id") Long id, @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId, Model model) {
+    public String showText(@PathVariable("id") Long id, @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId, Model model) throws NotFoundException {
         Text text = textService.findText(id);
         if(text == null){
-            return "board/textList";
+            throw new NotFoundException();
         }
         List<Hashtag> hashtagList = textHashtagService.findHashtagList(text);
         List<Comment> commentList = commentService.findCommentList(text);
@@ -87,7 +88,11 @@ public class TextController {
     }
 
     @PostMapping("delete/{id}")
-    public String deleteText(@PathVariable Long id){
+    public String deleteText(@PathVariable Long id) throws NotFoundException {
+        Text text = textService.findText(id);
+        if (text == null) {
+            throw new NotFoundException();
+        }
         textService.deleteText(id);
         return "redirect:/board";
     }
@@ -123,10 +128,10 @@ public class TextController {
     }
 
     @GetMapping("edit/{id}")
-    public String getEditText(@PathVariable Long id, Model model) {
+    public String getEditText(@PathVariable Long id, Model model) throws NotFoundException {
         Text text = textService.findText(id);
         if (text == null) {
-            return "/board/textList";
+            throw new NotFoundException();
         }
         String hashtags = hashtagService.mergeHashtag(textHashtagService.findHashtagList(text));
         TextUpdateForm textUpdateForm = new TextUpdateForm(text);
@@ -136,7 +141,11 @@ public class TextController {
     }
 
     @PostMapping("edit/{id}")
-    public String postEditText(@Validated @ModelAttribute("text") TextUpdateForm textUpdateForm, BindingResult bindingResult, @PathVariable Long id) {
+    public String postEditText(@Validated @ModelAttribute("text") TextUpdateForm textUpdateForm, BindingResult bindingResult, @PathVariable Long id) throws NotFoundException {
+        Text text = textService.findText(id);
+        if (text == null) {
+            throw new NotFoundException();
+        }
         if (bindingResult.hasErrors()) {
             return "redirect:/board/edit" + id;
         }
@@ -149,10 +158,10 @@ public class TextController {
 
     //새 댓글 추가
     @GetMapping("/comment/new/{id}")
-    public String getNewComment(@PathVariable Long id,Model model){
+    public String getNewComment(@PathVariable Long id,Model model) throws NotFoundException {
         Text text = textService.findText(id);
         if(text == null){
-            return "board/textList";
+            throw new NotFoundException();
         }
         List<Comment> commentList = commentService.findCommentList(text);
         String commentContent = "";
@@ -164,10 +173,10 @@ public class TextController {
 
     @PostMapping("comment/new/{id}")
     public String postNewComment(@PathVariable Long id,@ModelAttribute("commentContent") String commentContent,
-                                 @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId) {
+                                 @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId) throws NotFoundException {
         Text text = textService.findText(id);
         if(text == null){
-            return "board/textList";
+            throw new NotFoundException();
         }
         Customer customer = customerService.findCustomer(customerId);
         if(customer != null){

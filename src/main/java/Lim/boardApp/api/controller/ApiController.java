@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
+import java.util.HashMap;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,7 +31,6 @@ public class ApiController {
     })
     @PostMapping(value = "/email-auth", produces = "application/json; charset=utf8")
     public ResponseEntity sendEmail(@RequestBody EmailParam emailParam) {
-        System.out.println("sendEmail API called!");
         boolean checkEmailFormRes = emailService.checkEmailForm(emailParam.getEmail());
         if (!checkEmailFormRes) {
             return new ResponseEntity("유효하지 않은 이메일 주소입니다.",HttpStatus.BAD_REQUEST);
@@ -46,6 +46,22 @@ public class ApiController {
             return new ResponseEntity("메일 발송 실패", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @ApiOperation(value="아이디", notes = "아이디 중복 체크")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "중복되지 않은 아이디"),
+            @ApiResponse(responseCode = "400", description = "중복된 아이디")
+    })
+    @PostMapping(value = "/dup-id", produces = "application/json; charset=utf8")
+    public ResponseEntity checkDupLoginId(@RequestBody HashMap<String,String> map) {
+        String loginId = map.get("loginId");
+        boolean dupLoginIdRes = customerService.dupLoginId(loginId);
+        if(dupLoginIdRes){
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }else {
+            return new ResponseEntity(HttpStatus.OK);
+        }
     }
 
 }

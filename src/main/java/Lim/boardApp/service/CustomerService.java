@@ -72,8 +72,8 @@ public class CustomerService {
         request.getSession().invalidate();
     }
 
-    public boolean dupLoginId(CustomerRegisterForm customerRegisterForm){
-        Optional<Customer> dup = customerRepository.findByLoginId(customerRegisterForm.getLoginId());
+    public boolean dupLoginId(String loginId){
+        Optional<Customer> dup = customerRepository.findByLoginId(loginId);
         if(dup.isEmpty()) return false;
         else return true;
     }

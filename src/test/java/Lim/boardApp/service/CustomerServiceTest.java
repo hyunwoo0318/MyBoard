@@ -95,7 +95,7 @@ class CustomerServiceTest {
 
         CustomerRegisterForm customerForm = new CustomerRegisterForm("id456456", "pw123123","pw123123", "john", 12);
 
-        boolean result = customerService.dupLoginId(customerForm);
+        boolean result = customerService.dupLoginId(customerForm.getLoginId());
 
         assertThat(result).isFalse();
     }
@@ -108,7 +108,7 @@ class CustomerServiceTest {
 
         CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hy", 21);
 
-        boolean result = customerService.dupLoginId(dupCustomer);
+        boolean result = customerService.dupLoginId(dupCustomer.getLoginId());
 
         assertThat(result).isTrue();
     }

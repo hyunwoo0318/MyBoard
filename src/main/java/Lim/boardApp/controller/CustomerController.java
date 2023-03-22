@@ -45,7 +45,7 @@ public class CustomerController {
 
     //회원가입 화면
     @GetMapping("/register")
-    public String getAddCustomer(@SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
+    public String getAddCustomer(@SessionAttribute(value = SessionConst.KAKAO_ID,required = false) Long kakaoId,
                                   Model model) {
         CustomerRegisterForm customerRegisterForm = new CustomerRegisterForm();
         model.addAttribute("customer", customerRegisterForm);
@@ -59,10 +59,10 @@ public class CustomerController {
     //일반회원가입
     @PostMapping("/register")
     public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult
-                                    , @SessionAttribute(value = "kakaoId",required = false) Long kakaoId,
+                                    , @SessionAttribute(value = SessionConst.KAKAO_ID,required = false) Long kakaoId,
                                   HttpSession session) {
 
-       if(customerService.dupLoginId(customerRegisterForm))
+       if(customerService.dupLoginId(customerRegisterForm.getLoginId()))
            bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
 
         if(customerService.dupEmail(customerRegisterForm))

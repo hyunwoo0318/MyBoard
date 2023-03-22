@@ -21,6 +21,7 @@
             <div class="form-group">
                 <label for="loginId">로그인 ID</label>
                 <input type="text" id="loginId" class="form-control" th:field="*{loginId}" th:errorclass="field-error">
+                <button class="btn btn-outline-dark" type="button" onclick="dupLoginIdFun(document.getElementById('loginId').value)">아이디 중복 확인</button>
                 <div class="field-error text-danger" th:errors="*{loginId}">
                     아이디 오류
                 </div>
@@ -78,17 +79,27 @@
 </body>
 
 <script th:inline="javascript">
-    function passwordCheckFun(){
-        var p = document.getElementById('password').value();
-        var pc = document.getElementById('passwordCheck').value();
+    var dupLoginIdURL = "http://localhost:8080/api/dup-id"
+    function dupLoginIdFun(inputLoginId) {
 
-        if (p != pc) {
-            alert("비밀번호와 비밀번호 확인이 다릅니다!");
-            return false;
-        } else {
-            return true;
-        }
-    }
+        fetch(dupLoginIdURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                loginId : inputLoginId,
+            }),
+        }).then((response) => {
+            if (response.status === 400) {
+                alert("중복된 아이디입니다!");
+                return false;
+            }else{
+                alert("가입 가능한 아이디입니다!");
+                return true;
+            }});
+
+    };
 
 </script>
 </html>
