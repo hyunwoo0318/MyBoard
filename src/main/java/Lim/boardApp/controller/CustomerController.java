@@ -92,7 +92,7 @@ public class CustomerController {
         return "customer/home";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/customer-login")
     public String loginForm(Model model,@RequestParam(value = "loginFail", required = false) String loginFail) {
         LoginForm loginForm = new LoginForm();
         if(loginFail != null){
@@ -102,7 +102,7 @@ public class CustomerController {
         return "customer/login";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/customer-login")
     public String login(@Validated @ModelAttribute LoginForm form,BindingResult bindingResult,
                         @RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,HttpSession session) {
         if (bindingResult.hasFieldErrors()) {
@@ -112,10 +112,9 @@ public class CustomerController {
         if (loginCustomer == null) { //로그인 실패
             bindingResult.reject("loginFail","존재하지 않는 아이디이거나 잘못된 비밀번호입니다.");
             return "customer/login";
-        } else {
-            session.setAttribute(SessionConst.LOGIN_CUSTOMER, loginCustomer.getId());
-            return "redirect:" + redirectURL;
         }
+
+        return "redirect:" + redirectURL;
     }
 
     @PostMapping("/logout")
