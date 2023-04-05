@@ -4,10 +4,7 @@ import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
 import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.*;
-import Lim.boardApp.form.PageForm;
-import Lim.boardApp.form.TextCreateForm;
-import Lim.boardApp.form.TextUpdateForm;
-import Lim.boardApp.form.UploadFileForm;
+import Lim.boardApp.form.*;
 import Lim.boardApp.repository.*;
 import Lim.boardApp.service.*;
 import lombok.RequiredArgsConstructor;
@@ -74,17 +71,20 @@ public class TextController {
         if(text == null){
             throw new NotFoundException();
         }
+        boolean textOwn = false;
+        if(customerId.equals(text.getCustomer().getId())) {
+            textOwn = true;
+        }
         List<Hashtag> hashtagList = textHashtagService.findHashtagList(text);
-        List<Comment> commentList = commentService.findCommentList(text);
+        List<Comment> commentList = commentService.findParentCommentList(text);
         model.addAttribute("text",text);
         model.addAttribute("hashtagList", hashtagList);
         model.addAttribute("commentList", commentList);
-        if(customerId == text.getCustomer().getId()){
-            return "board/showMyText";
-        }else{
-            return "board/showtext";
-        }
+        model.addAttribute("owner", textOwn);
+        model.addAttribute("commentForm", new CommentForm());
+        model.addAttribute("textId", text.getId());
 
+        return "board/showText";
     }
 
     @PostMapping("delete/{id}")
@@ -157,31 +157,35 @@ public class TextController {
     }
 
     //새 댓글 추가
-    @GetMapping("/comment/new/{id}")
-    public String getNewComment(@PathVariable Long id,Model model) throws NotFoundException {
-        Text text = textService.findText(id);
-        if(text == null){
-            throw new NotFoundException();
-        }
-        List<Comment> commentList = commentService.findCommentList(text);
-        String commentContent = "";
-        model.addAttribute("text", text);
-        model.addAttribute("commentList", commentList);
-        model.addAttribute("commentContent", commentContent);
-        return "board/newComment";
-    }
+//    @GetMapping("/comment/new/{id}")
+//    public String getNewComment(@PathVariable Long id,Model model) throws NotFoundException {
+//        Text text = textService.findText(id);
+//        if(text == null){
+//            throw new NotFoundException();
+//        }
+//        List<Comment> commentList = commentService.findCommentList(text);
+//        String commentContent = "";
+//        model.addAttribute("text", text);
+//        model.addAttribute("commentList", commentList);
+//        model.addAttribute("commentContent", commentContent);
+//        return "board/newComment";
+//
 
-    @PostMapping("comment/new/{id}")
-    public String postNewComment(@PathVariable Long id,@ModelAttribute("commentContent") String commentContent,
+    @PostMapping("comments/new")
+    public String postNewComment(@ModelAttribute("commentForm")CommentForm commentForm,
                                  @SessionAttribute(SessionConst.LOGIN_CUSTOMER) Long customerId) throws NotFoundException {
-        Text text = textService.findText(id);
-        if(text == null){
-            throw new NotFoundException();
-        }
+        Text text = textService.findText(commentForm.getTextId());
+
         Customer customer = customerService.findCustomer(customerId);
-        if(customer != null){
-            commentService.addComment(text, customer, commentContent);
+        if (text == null || customer == null) {
+            throw new NotFoundException();
+        }else{
+            Long textId = text.getId();
+            commentService.addComment(text,customer, commentForm);
+            return "redirect:/board/show/" + textId;
         }
-        return "redirect:/board/show/" + id;
+
+
+
     }
 }

@@ -38,10 +38,7 @@
               <span th:text="${hashtag.name}"></span>
             </span>
           </p><br>
-          <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#comments" aria-expanded="false" aria-controls="comments">
-            댓글
-          </button>
-          <div class="collapse" id="comments">
+
             <div class="card" th:each="comment : ${commentList}">
               <div class="card-header float-lg-start">
                 <div class="card-header-pills float-lg-start" th:text="${comment.customer.name}"></div>
@@ -50,16 +47,41 @@
               <div class="card-body">
                 <div class="card-text" th:text="${comment.content}">내용</div>
               </div>
+              <div class="card-footer">
+                <button class="btn-sm float-lg-end" type="button" data-bs-toggle="collapse" data-bs-target="#addComment" aria-expanded="false" aria-controls="addComment">
+                  댓글 작성
+                </button>
+                <div id="addComment">
+                  <form th:action="@{../comments/new}" th:object="${commentForm}" method="post" id="commentForm">
+                    <div class="form-group">
+                      <input type="hidden"  name="parent" th:value="${comment.id}">
+                      <input type="hidden" name="textId" th:value="${text.id}">
+                      <label for="content">내용</label>
+                      <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-sm float-lg-end">작성하기</button>
+                  </form>
+                </div>
+              </div>
+              <div class="m-lg-4" th:if="${not #lists.isEmpty(comment.childCommentList)}">
+                <div class="card" th:each="childComment : ${comment.childCommentList}">
+                  <div class="card-header float-lg-start">
+                    <div class="card-header-pills float-lg-start" th:text="${childComment.customer.name}"></div>
+                    <div class="card-header-pills float-lg-end" th:text="${childComment.createdTime}"></div>
+                  </div>
+                  <div class="card-body">
+                    <div class="card-text" th:text="${childComment.content}">내용</div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
           <button class="btn btn-primary" type="button" th:onclick="|location.href='@{../../board/comment/new/{id}(id=${text.id})}'|">댓글작성</button>
           <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
         </div>
-          <button type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
-          <form th:action="@{../delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
+          <button th:if="${owner}" type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
+          <form th:if="${owner}" th:action="@{../delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
             <button type="submit">글 삭제</button>
           </form>
-          <button type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
         </div>
       </div>
     </div>
