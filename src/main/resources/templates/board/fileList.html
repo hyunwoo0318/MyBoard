@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>사진</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body>
+<section class="ftco-section">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+            <h2 class="heading-section">게시글</h2>
+        </div>
+    </div>
+    <form th:action th:object="${uploadFile}" th:method="post" enctype="multipart/form-data">
+        <ul>
+            <li>첨부파일<input type="file" th:field="*{multipartFile}"></li>
+        </ul>
+        <button th:type="submit">저장</button>
+    </form>
+<script src="/js/bootstrap.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>게시판</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body>
+<br><br><br><br>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form th:action th:object="${customer}" th:method="post">
+            <h2 class="heading-section">회원가입</h2>
+            <div th:if="${#fields.hasGlobalErrors()}">
+                <p class="text-danger" th:each="err : ${#fields.globalErrors()}"
+                   th:text="${err}">글로벌 오류 메시지</p>
+            </div>
+            <div th:if="${regFail}">
+                <p class="text-danger" th:text="${regFail}">카카오 계정 연동 오류</p>
+            </div>
+            <div class="form-group">
+                <label for="loginId">로그인 ID</label>
+                <input type="text" id="loginId" class="form-control" th:field="*{loginId}" th:errorclass="field-error">
+                <button class="btn btn-outline-dark" type="button" onclick="dupLoginIdFun(document.getElementById('loginId').value)">아이디 중복 확인</button>
+                <div class="field-error text-danger" th:errors="*{loginId}">
+                    아이디 오류
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" class="form-control"  th:field="*{password}"  th:errorclass="field-error">
+                <div class="field-error text-danger" th:errors="*{password}">
+                    비밀번호 오류
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="passwordCheck">비밀번호 확인</label>
+                <input type="password" id="passwordCheck" class="form-control"  th:field="*{passwordCheck}"  th:errorclass="field-error">
+                <div class="field-error text-danger" th:errors="*{passwordCheck}">
+                    비밀번호 확인 오류
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" class="form-control" th:field="*{name}"  th:errorclass="field-error">
+                <div class="field-error text-danger" th:errors="*{name}">
+                    이름 오류
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="age">나이</label>
+                <input type="text" id="age" class="form-control" th:field="*{age}" th:errorclass="field-error">
+                <div class="field-error text-danger" th:errors="*{age}">
+                    나이 오류
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="text" id="email" class="form-control"  th:field="*{email}"  th:errorclass="field-error" >
+                <div class="field-error text-danger" th:errors="*{email}">
+                     이메일 오류
+                </div>
+            </div>
+            <div th:if="${customer.kakaoId}">
+                <div class="text-success">카카오톡 계정 연동 완료!</div>
+            </div><br>
+            <div>
+                <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/kakao/register}'|">카카오 계정 연결</button>
+            </div><br>
+            <div>
+                <button class="btn btn-primary" type="submit" onclick="passwordCheckFun()">회원가입</button>
+                <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/}'|">취소</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+</body>
+
+<script th:inline="javascript">
+    var dupLoginIdURL = "http://localhost:8080/api/dup-id"
+    function dupLoginIdFun(inputLoginId) {
+
+        fetch(dupLoginIdURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                loginId : inputLoginId,
+            }),
+        }).then((response) => {
+            if (response.status === 400) {
+                alert("중복된 아이디입니다!");
+                return false;
+            }else{
+                alert("가입 가능한 아이디입니다!");
+                return true;
+            }});
+
+    };
+
+</script>
+</html>
+
