@@ -8,56 +8,60 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.*;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-
+import static org.mockito.Mockito.mock;
 import Lim.boardApp.form.CustomerRegisterForm;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.transaction.Transactional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 class CustomerServiceTest {
-    @Mock
+    @Autowired
     private CustomerRepository customerRepository;
 
-    @InjectMocks
+    @Autowired
     private CustomerService customerService;
 
-    @Mock
-    private AuthenticationManagerBuilder authenticationManager;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     private Customer customer;
 
     @BeforeEach
-    public void registerNormalCustomer(){
-        String password = "pw123123";
-        String salt = "salt123123";
-        String passwordHash = customerService.hashPassword(password,salt);
-        customer = Customer.builder()
+    public void registerNormalCustomer() throws Exception {
+        customerRepository.deleteAllInBatch();
+        Customer customer = Customer.builder()
+                .role("USER")
                 .loginId("id123123")
-                .name("hyeonwoo")
-                .password(passwordHash + salt)
                 .age(26)
-                .build();
+                .name("hyeonwoo")
+                .password(passwordEncoder.encode("pw123123"))
+                .email("ex@naver.com").build();
+        customerRepository.save(customer);
     }
-
 
     @Test
     @DisplayName("정상적인 로그인")
-    public void loginSuccess(){
-
-        given(customerRepository.findByLoginId(customer.getLoginId()))
-                .willReturn(Optional.of(customer));
+    public void loginSuccess() throws Exception {
 
         String correctId = "id123123";
         String correctPassword = "pw123123";
@@ -69,12 +73,11 @@ class CustomerServiceTest {
         assertThat(result.getName()).isEqualTo("hyeonwoo");
     }
 
+
     @Test
     @DisplayName("ID혹은 비밀번호가 틀린 경우 로그인 상황")
-    public void loginFail(){
-
-        given(customerRepository.findByLoginId(customer.getLoginId()))
-                .willReturn(Optional.of(customer));
+    @Transactional
+    public void loginFail() {
 
         String correctId = "id123123";
         String correctPassword = "pw123123";
@@ -93,12 +96,10 @@ class CustomerServiceTest {
 
     @Test
     @DisplayName("정상적인 회원가입 시도")
-    public void regCustomer(){
+    public void regCustomer() {
 
-        given(customerRepository.findByLoginId("id456456"))
-                .willReturn(Optional.empty());
 
-        CustomerRegisterForm customerForm = new CustomerRegisterForm("id456456", "pw123123","pw123123", "john", 12);
+        CustomerRegisterForm customerForm = new CustomerRegisterForm("id456456", "pw123123", "pw123123", "john", 12);
 
         boolean result = customerService.dupLoginId(customerForm.getLoginId());
 
@@ -107,11 +108,9 @@ class CustomerServiceTest {
 
     @Test
     @DisplayName("이미 존재하는 아이디로 회원가입 시도")
-    public void regCustomerExistLoginId(){
-        given(customerRepository.findByLoginId(customer.getLoginId()))
-                .willReturn(Optional.of(customer));
+    public void regCustomerExistLoginId() {
 
-        CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw123123","pw123123", "hy", 21);
+        CustomerRegisterForm dupCustomer = new CustomerRegisterForm("id123123", "pw123123", "pw123123", "hy", 21);
 
         boolean result = customerService.dupLoginId(dupCustomer.getLoginId());
 
@@ -120,7 +119,7 @@ class CustomerServiceTest {
 
     @Test
     @DisplayName("makeSaltTest")
-    public void makeSaltTest(){
+    public void makeSaltTest() {
         String pw = customerService.makeSalt(20);
         System.out.println(pw);
         assertThat(pw.length()).isEqualTo(20);
@@ -145,7 +144,7 @@ class CustomerServiceTest {
         String passwordHash = builder.toString();
         System.out.println("passwordHash.length() = " + passwordHash.length());
 
-        String result = customerService.hashPassword(password,salt);
+        String result = customerService.hashPassword(password, salt);
 
         assertThat(result).isEqualTo(passwordHash);
     }

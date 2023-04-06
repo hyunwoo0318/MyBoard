@@ -5,16 +5,13 @@ import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,9 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -35,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class CustomerService implements UserDetailsService {
 
     private final CustomerRepository customerRepository;
-    private final AuthenticationManagerBuilder authenticationManager;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
 
     private final int saltSize = 20;
@@ -77,16 +72,18 @@ public class CustomerService implements UserDetailsService {
     public Customer login(String inputLoginId, String inputPassword){
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(inputLoginId, inputPassword);
-        Authentication authenticate = authenticationManager.getObject().authenticate(token);
-        if (!authenticate.isAuthenticated()) {
-            return null; // 로그인 실패
+        Authentication authentication;
+        try{
+            authentication = authenticationManagerBuilder.getObject().authenticate(token);
+        }catch (BadCredentialsException e){
+            return null;
         }
 
         //로그인 성공
         Customer customer = customerRepository.findByLoginId(inputLoginId).get();
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(authenticate);
+        securityContext.setAuthentication(authentication);
 
         return customer;
     }

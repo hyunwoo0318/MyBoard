@@ -1,13 +1,14 @@
 spring:
   messages:
     basename: application, errors
-  config:
-    import: local.yml
+    config:
+      import:
+
 
   datasource:
-    url :  jdbc:h2:tcp://localhost/~/boardApp
+    url :  jdbc:h2:mem:testdb;
     username : sa
-    password : sa
+    password :
     driver-class-name : org.h2.Driver
 
 
@@ -21,3 +22,40 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: true
+
+  mail:
+    host: smtp.naver.com
+    port: 465
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
+          timeout: 5000
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+    username: whskwock
+    password: naverboard123
+
+
+logging level:
+  org.hibernate.SQL : debug
+
+admin:
+  password: admin123123
+
+
+file:
+  dir: /Users/lim/boardApp/src/main/resources/static/images/
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    algorithm: PBEWithMD5AndDES
+    pool-size: 2
+    string-output-type: base64
+    key-obtention-iterations: 100000
+    password: password
