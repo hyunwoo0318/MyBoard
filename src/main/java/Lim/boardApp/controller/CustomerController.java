@@ -16,13 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -49,24 +47,28 @@ public class CustomerController {
         }
     }
 
+    /**
+     * 회원가입 화면 -> 폼을 입력받아 회원가입을 진행하고 카카오톡 계정 연동까지 가능함
+     * TODO : 이미 가입한 카카오톡 아이디 입력시 예외처리
+     */
     //회원가입 화면
     @GetMapping("/register")
-    public String getAddCustomer(@SessionAttribute(value = SessionConst.KAKAO_ID,required = false) Long kakaoId,
+    public String getAddCustomer(@RequestParam(value = "kakao-id",required = false) Long kakaoId,
                                   Model model) {
         CustomerRegisterForm customerRegisterForm = new CustomerRegisterForm();
         model.addAttribute("customer", customerRegisterForm);
 
         if(kakaoId != null){
+            model.addAttribute("isKakao", true);
             model.addAttribute("kakaoId", kakaoId);
         }
+
         return "customer/addCustomer";
     }
 
     //일반회원가입
     @PostMapping("/register")
-    public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult
-                                    , @SessionAttribute(value = SessionConst.KAKAO_ID,required = false) Long kakaoId,
-                                  HttpSession session) {
+    public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult) {
 
        if(customerService.dupLoginId(customerRegisterForm.getLoginId()))
            bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
@@ -77,10 +79,6 @@ public class CustomerController {
        if(!customerRegisterForm.getPassword().equals(customerRegisterForm.getPasswordCheck()))
            bindingResult.reject("wrongPasswordInput", "입력하신 비밀번호와 비밀번호 확인이 다릅니다.");
 
-       if(kakaoId != null && customerService.findKakao(kakaoId) != null){
-           bindingResult.reject("dupKakaoId", "해당 카카오 계정으로 연동된 계정이 존재합니다.");
-       }
-
        if(!emailService.checkEmailForm(customerRegisterForm.getEmail()))
            bindingResult.reject("invalidEmail", "유효한 이메일을 입력해주세요.");
 
@@ -88,16 +86,15 @@ public class CustomerController {
             return "customer/addCustomer";
         }
 
-        //정상적인 회원가입
-        if (kakaoId != null) {
-            session.removeAttribute(SessionConst.KAKAO_ID);
-            customerRegisterForm.setKakaoId(kakaoId);
-        }
 
         customerService.addCustomer(customerRegisterForm);
         return "customer/home";
     }
 
+    /**
+     * 로그인 구현 -> 아이디&비밀번호, 카카오 로그인 구현
+     * 로그인 성공시 spring security에서 알아서 session을 넣어줌
+     */
     @GetMapping("/customer-login")
     public String loginForm(Model model,@RequestParam(value = "loginFail", required = false) String loginFail) {
         LoginForm loginForm = new LoginForm();
@@ -128,33 +125,9 @@ public class CustomerController {
         return "redirect:/";
     }
 
-    //카카오 로그인
-    @GetMapping("/kakao/login")
-    public String redirectionToKakaoLogin(){
-        String loginUrl = "https://kauth.kakao.com/oauth/authorize?client_id=" + KakaoConst.KEY + "&redirect_uri="
-                + KakaoConst.REDIRECT_URL_LOGIN + "&response_type=code";
-        return "redirect:"+ loginUrl;
-    }
-
-    @GetMapping("/oauth/kakao/login")
-    public String kakaoLogin(@RequestParam("code")String code,RedirectAttributes attributes,
-                          @RequestParam(value = "redirectURL", defaultValue = "/") String redirectURL,HttpSession session){
-        String accessToken = oauthService.getKakaoToken(code,"login");
-        Long kakaoId = oauthService.getUserID(accessToken);
-
-        Customer customer = customerService.findKakao(kakaoId);
-
-        //해당 카카오 계정과 연동된 아이디가 존재하지않음
-        if (customer == null) {
-            attributes.addAttribute("loginFail", "fail");
-            return "redirect:/login";
-        }else{
-            session.setAttribute(SessionConst.LOGIN_CUSTOMER, customer.getId());
-            return "redirect:/" + redirectURL;
-        }
-    }
-
-    //카카오 계정 연동
+    /**
+     * 소셜 회원가입은 직접 api 서버와 연결해서 원하는 정보를 받아옴
+     */
     @GetMapping("/kakao/register")
     public String redirectionToKakaoRegister(){
         String loginUrl = "https://kauth.kakao.com/oauth/authorize?client_id=" + KakaoConst.KEY + "&redirect_uri="
@@ -163,17 +136,19 @@ public class CustomerController {
     }
 
     @GetMapping("/oauth/kakao/register")
-    public String kakaoRegister(@RequestParam("code")String code, HttpSession session){
-        String accessToken = oauthService.getKakaoToken(code,"register");
+    public String kakaoRegister(@RequestParam("code")String code){
+        String accessToken = oauthService.getKakaoToken(code);
         Long kakaoId = oauthService.getUserID(accessToken);
 
         Customer customer = customerService.findKakao(kakaoId);
 
         //해당 카카오 계정과 연동된 아이디가 존재하지않음 -> 회원가입 가능
         if (customer == null) {
-            session.setAttribute(SessionConst.KAKAO_ID, kakaoId);
+            return "redirect:/register?kakao-id=" + kakaoId;
+        }else{
+            return "redirect:/register";
         }
-        return "redirect:/register";
+
     }
 
 

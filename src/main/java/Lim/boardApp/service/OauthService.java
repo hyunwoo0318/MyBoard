@@ -1,27 +1,38 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.ObjectValue.KakaoConst;
+import Lim.boardApp.domain.Customer;
+import Lim.boardApp.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 @Service
-public class OauthService {
+@RequiredArgsConstructor
+public class OauthService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>  {
 
-    public String getKakaoToken(String code, String usage){
+    private final CustomerRepository customerRepository;
+
+    public String getKakaoToken(String code){
 
         String accessToken = "";
         String refreshToken = "";
         String redirectURL = "";
 
-        if(usage == "login"){
-            redirectURL = KakaoConst.REDIRECT_URL_LOGIN;
-        }else{
+        {
             redirectURL = KakaoConst.REDIRECT_URL_REG;
         }
 
@@ -109,5 +120,16 @@ public class OauthService {
             e.printStackTrace();
         }
         return id;
+    }
+
+    @Override
+    public Customer loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+
+        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
+        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+
+        Long kakaoId = oAuth2User.getAttribute("id");
+        Customer customer = customerRepository.findByKakaoId(kakaoId).orElseThrow();
+        return customer;
     }
 }

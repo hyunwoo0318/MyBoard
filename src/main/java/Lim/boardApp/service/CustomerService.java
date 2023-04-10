@@ -113,6 +113,15 @@ public class CustomerService implements UserDetailsService {
         return customerOptional.orElse(null);
     }
 
+    public Customer loginKakao(Long kakaoId) {
+        Customer customer = findKakao(kakaoId);
+        if (customer == null) {
+            //등록되지 않은 customer
+            return null;
+        }
+       return login(customer.getLoginId(), customer.getPassword());
+    }
+
     //비밀번호 해시화
     public String makeSalt(int length){
         RandomString salt = new RandomString(length);

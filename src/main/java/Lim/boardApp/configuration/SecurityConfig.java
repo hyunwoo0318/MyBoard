@@ -1,5 +1,6 @@
 package Lim.boardApp.configuration;
 
+import Lim.boardApp.service.OauthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,14 +8,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final OauthService oauthService;
 
     private final String[] loginWhiteList = {"/css/**","/*.ico","/error", "/","/customer-login", "/logout", "/register","/oauth/**","/kakao/**","/auth/**",
             "/swagger-ui/**", "/api/**", "/find-password/**", "/new-password/**"};
@@ -31,6 +32,9 @@ public class SecurityConfig {
                 .anyRequest().authenticated().and()
                 .formLogin().loginPage("/customer-login").loginProcessingUrl("/customer-login").permitAll().disable()
                 .logout().permitAll().and()
+                .oauth2Login().userInfoEndpoint().userService(oauthService)
+                .and().and()
                 .build();
     }
+
 }
