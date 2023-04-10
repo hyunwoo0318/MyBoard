@@ -88,6 +88,7 @@ public class CustomerService implements UserDetailsService {
         return customer;
     }
 
+
     //로그아웃
     public void logout(HttpServletRequest request) {
         request.getSession().invalidate();

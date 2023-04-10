@@ -29,7 +29,8 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(loginWhiteList).permitAll()
                 .anyRequest().authenticated().and()
-                .formLogin().disable()
+                .formLogin().loginPage("/customer-login").loginProcessingUrl("/customer-login").permitAll().disable()
+                .logout().permitAll().and()
                 .build();
     }
 }

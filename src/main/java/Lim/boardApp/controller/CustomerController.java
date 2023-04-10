@@ -13,7 +13,10 @@ import Lim.boardApp.service.EmailService;
 import Lim.boardApp.service.OauthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,9 +36,12 @@ public class CustomerController {
     private final OauthService oauthService;
     private final EmailService emailService;
 
-    //일반 홈 화면
+    /**
+     * 일반 홈 화면 -> 로그인 & 회원가입
+     * 이미 로그인이 된 상태로 접근시 바로 게시판 페이지로 redirect
+     */
     @GetMapping("/")
-    public String home(@AuthenticationPrincipal Customer customer, Model model) {
+    public String home(@AuthenticationPrincipal Customer customer) {
         if (customer == null) {
             return "customer/home";
         }else {
@@ -113,7 +119,7 @@ public class CustomerController {
             return "customer/login";
         }
 
-        return "redirect:board" ;
+        return "redirect:board";
     }
 
     @PostMapping("/logout")
@@ -144,7 +150,7 @@ public class CustomerController {
             return "redirect:/login";
         }else{
             session.setAttribute(SessionConst.LOGIN_CUSTOMER, customer.getId());
-            return "redirect:/";
+            return "redirect:/" + redirectURL;
         }
     }
 
