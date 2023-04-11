@@ -2,7 +2,6 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.KakaoConst;
-import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.EmailAuthForm;
@@ -13,9 +12,7 @@ import Lim.boardApp.service.EmailService;
 import Lim.boardApp.service.OauthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,7 +20,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,7 +45,6 @@ public class CustomerController {
 
     /**
      * 회원가입 화면 -> 폼을 입력받아 회원가입을 진행하고 카카오톡 계정 연동까지 가능함
-     * TODO : 이미 가입한 카카오톡 아이디 입력시 예외처리
      */
     //회원가입 화면
     @GetMapping("/register")
@@ -59,8 +54,14 @@ public class CustomerController {
         model.addAttribute("customer", customerRegisterForm);
 
         if(kakaoId != null){
-            model.addAttribute("isKakao", true);
-            model.addAttribute("kakaoId", kakaoId);
+            Customer customerKakao = customerService.findKakao(kakaoId);
+            if (customerKakao == null) {
+                model.addAttribute("isKakao", true);
+                model.addAttribute("kakaoId", kakaoId);
+            }else{
+                model.addAttribute("dupKakao", true);
+            }
+
         }
 
         return "customer/addCustomer";
@@ -140,17 +141,12 @@ public class CustomerController {
         String accessToken = oauthService.getKakaoToken(code);
         Long kakaoId = oauthService.getUserID(accessToken);
 
-        Customer customer = customerService.findKakao(kakaoId);
-
-        //해당 카카오 계정과 연동된 아이디가 존재하지않음 -> 회원가입 가능
-        if (customer == null) {
             return "redirect:/register?kakao-id=" + kakaoId;
-        }else{
-            return "redirect:/register";
         }
 
-    }
-
+    /**
+     * 가입시 등록한 이메일을 통해 비밀번호 찾기 구현
+     */
 
     //비밀번호 찾기 -> 이메일 인증
     @GetMapping("/find-password")
@@ -178,6 +174,9 @@ public class CustomerController {
 
     }
 
+    /**
+     * 이메일 인증이 성공하면 새로운 비밀번호로 변경 (기존의 비밀번호는 알수없음)
+     */
     @GetMapping("/new-password")
     public String newPassword(Model model) {
         PasswordChangeForm form = new PasswordChangeForm();
@@ -194,11 +193,9 @@ public class CustomerController {
         if (!form.getPassword().equals(form.getPasswordCheck())) {
             bindingResult.reject("wrongPasswordInput","입력하신 비밀번호와 비밀번호 입력이 동일하지 않습니다. 다시 입력해주세요");
         }
-
         if (bindingResult.hasErrors()) {
             return "customer/newPassword";
         }
-
         customerService.changePassword(form.getPassword(), id);
         return "customer/changePasswordSuccess";
     }

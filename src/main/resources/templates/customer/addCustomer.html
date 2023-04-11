@@ -65,6 +65,9 @@
                 <div class="text-success">카카오톡 계정 연동 완료!</div>
                 <input type="hidden" name="kakaoId" th:value="${kakaoId}"></input>
             </div><br>
+            <div th:if="${dupKakao == true}">
+                <div class="text-primary">이미 등록된 카카오톡 계정입니다.</div>
+            </div>
             <div>
                 <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/kakao/register}'|">카카오 계정 연결</button>
             </div><br>

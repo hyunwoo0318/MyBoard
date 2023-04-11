@@ -30,12 +30,13 @@ public class TextController {
 
     private final TextService textService;
     private final CommentService commentService;
-    private final CustomerService customerService;
     private final TextHashtagService textHashtagService;
     private final HashtagService hashtagService;
     private final UploadFileService uploadFileService;
 
-    //글 리스트 전체를 보여주는 페이지
+    /**
+     * 게시글 리스트를 보여줌 -> 페이징 과정을 거침
+     */
     @GetMapping
     public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
 
@@ -49,9 +50,9 @@ public class TextController {
         return "board/textList";
     }
 
-
-
-
+    /**
+     * 키워드와 검색어의 종류를 입력받아 게시글 내에서 검색을 구현
+     */
     @GetMapping("/search")
     public String searchText(@RequestParam(value = "searchKey") String searchKey,
                              @RequestParam(value = "type", required = false) String type,
@@ -65,7 +66,9 @@ public class TextController {
         return "board/textList";
     }
 
-    //선택한 글의 정보를 보여줌
+    /**
+     * 특정 글의 내용,제목,작성자,댓글,대댓글을 보여줌
+    */
     @GetMapping("show/{id}")
     public String showText(@PathVariable("id") Long id, @AuthenticationPrincipal Customer customer, Model model) throws NotFoundException {
         Long customerId = customer.getId();
@@ -89,6 +92,9 @@ public class TextController {
         return "board/showText";
     }
 
+    /**
+     * 게시글을 삭제, 수정, 생성함
+     */
     @PostMapping("delete/{id}")
     public String deleteText(@PathVariable Long id) throws NotFoundException {
         Text text = textService.findText(id);
@@ -98,6 +104,7 @@ public class TextController {
         textService.deleteText(id);
         return "redirect:/board";
     }
+
     //글 추가 메서드
     @GetMapping("/new")
     public String getNewText(Model model) {
@@ -159,21 +166,9 @@ public class TextController {
         return "redirect:/board/show/" + id;
     }
 
-    //새 댓글 추가
-//    @GetMapping("/comment/new/{id}")
-//    public String getNewComment(@PathVariable Long id,Model model) throws NotFoundException {
-//        Text text = textService.findText(id);
-//        if(text == null){
-//            throw new NotFoundException();
-//        }
-//        List<Comment> commentList = commentService.findCommentList(text);
-//        String commentContent = "";
-//        model.addAttribute("text", text);
-//        model.addAttribute("commentList", commentList);
-//        model.addAttribute("commentContent", commentContent);
-//        return "board/newComment";
-//
-
+    /**
+     * 새로운 댓글을 추가
+     */
     @PostMapping("comments/new")
     public String postNewComment(@ModelAttribute("commentForm")CommentForm commentForm,
                                  @AuthenticationPrincipal Customer customer) throws NotFoundException {
@@ -187,4 +182,11 @@ public class TextController {
             return "redirect:/board/show/" + textId;
         }
     }
+
+    /**
+     * TODO : 1. 조회수 구현(단순히 들어올때 마다 오르기보다는 특정 로직을 이용해야함) -> Thread강의 듣고 구현
+     * TODO : 2. 조회수 기반으로 게시글 정렬
+     * TODO : 3. 글 상단 공지 고정(검색을 제외한 항상 맨 위에 위치하게함)
+     * TODO : DTO구현해서 전체 변경하기.
+     */
 }

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -107,20 +108,12 @@ public class CustomerService implements UserDetailsService {
     }
 
     //카카오 로그인
-
     public Customer findKakao(Long kakaoId){
         Optional<Customer> customerOptional = customerRepository.findByKakaoId(kakaoId);
+        List<Customer> all = customerRepository.findAll();
         return customerOptional.orElse(null);
     }
 
-    public Customer loginKakao(Long kakaoId) {
-        Customer customer = findKakao(kakaoId);
-        if (customer == null) {
-            //등록되지 않은 customer
-            return null;
-        }
-       return login(customer.getLoginId(), customer.getPassword());
-    }
 
     //비밀번호 해시화
     public String makeSalt(int length){
