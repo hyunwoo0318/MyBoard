@@ -1,36 +1,28 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.domain.*;
-import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
 import Lim.boardApp.repository.*;
-import org.assertj.core.api.Assertions;
+import Lim.boardApp.repository.text.TextRepository;
+import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperties;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +33,8 @@ class TextServiceTest {
     @Mock
     TextRepository textRepository;
     @Mock CustomerRepository customerRepository;
-    @Mock TextHashtagRepository textHashtagRepository;
+    @Mock
+    TextHashtagRepository textHashtagRepository;
 
 
     private List<Text> textList;

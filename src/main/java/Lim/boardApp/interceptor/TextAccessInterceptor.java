@@ -2,7 +2,7 @@ package Lim.boardApp.interceptor;
 
 import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Text;
-import Lim.boardApp.repository.TextRepository;
+import Lim.boardApp.repository.text.TextRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;

@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 public class SecurityConfig {
 
     private final OauthService oauthService;
+    private final RedisIndexedSessionRepository sessionRepository;
 
     private final String[] loginWhiteList = {"/css/**","/*.ico","/error", "/","/customer-login", "/logout", "/register","/oauth/**","/kakao/**","/auth/**",
             "/swagger-ui/**", "/api/**", "/find-password/**", "/new-password/**"};
@@ -33,8 +35,7 @@ public class SecurityConfig {
                 .formLogin().loginPage("/customer-login").loginProcessingUrl("/customer-login").permitAll().disable()
                 .logout().permitAll().and()
                 .oauth2Login().userInfoEndpoint().userService(oauthService)
-                .and().and()
-                .build();
+                .and().and().build();
     }
 
 }

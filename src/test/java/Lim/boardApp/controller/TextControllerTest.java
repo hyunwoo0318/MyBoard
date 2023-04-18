@@ -34,9 +34,7 @@ class TextControllerTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired private TextService textService;
-    @Autowired private CommentService commentService;
     @Autowired private CustomerService customerService;
-    @Autowired private TextHashtagService textHashtagService;
     @Autowired private HashtagService hashtagService;
 
     @Autowired private CustomerRepository customerRepository;

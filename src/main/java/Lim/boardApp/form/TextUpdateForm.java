@@ -1,17 +1,12 @@
 package Lim.boardApp.form;
 
-import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
-import Lim.boardApp.repository.TextHashtagRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 
 @Data

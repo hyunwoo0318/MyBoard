@@ -2,11 +2,8 @@ package Lim.boardApp.service;
 
 import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
-import Lim.boardApp.repository.TextHashtagRepository;
+import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -6,6 +6,8 @@ import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.form.TextUpdateForm;
 import Lim.boardApp.repository.*;
+import Lim.boardApp.repository.text.TextRepository;
+import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

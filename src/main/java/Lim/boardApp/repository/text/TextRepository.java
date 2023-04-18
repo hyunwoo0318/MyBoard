@@ -1,4 +1,4 @@
-package Lim.boardApp.repository;
+package Lim.boardApp.repository.text;
 
 import Lim.boardApp.domain.Text;
 import org.springframework.data.domain.Page;

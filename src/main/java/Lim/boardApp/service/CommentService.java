@@ -5,7 +5,7 @@ import Lim.boardApp.domain.Comment;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.form.CommentForm;
-import Lim.boardApp.repository.CommentRepository;
+import Lim.boardApp.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

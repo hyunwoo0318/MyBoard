@@ -14,76 +14,103 @@
     </div>
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="table-wrap">
-                <table class="table">
-                    <thead class="thead-primary">
-                    <tr>
-                        <th>제목</th>
-                        <th>작성자</th>
-                        <th>작성 일자</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td th:text="${text.title}">제목</td>
-                        <td th:text="${text.customer.name}">작성자</td>
-                        <td th:text="${text.createdTime}">작성일자</td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div th:align="center" th:width="80" th:height="20" th:text="${text.content}">글</div>
-                <div th:align="center"><img th:src="|/images/${text.getFileName()}|" width="300" height="300"></div>
-                <p>
+            <div class="container">
+                <div class="row border bg-light">
+                    <div class="col-md-12 d-flex">
+                        <h3 class="flex-grow-1" th:text="${text.title}">제목</h3>
+                        <p class="mt-auto" th:text="${text.createdTime}">작성일자</p>
+                    </div>
+                </div>
+                <div class="row border-bottom">
+                    <div class="col-md-6  d-flex">
+                        <p class="mt-auto" th:text="${text.customer.name}">작성자</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mt-4">
+                        <p th:text="${text.content}">글 내용</p>
+                    </div>
+                </div>
+            </div>
+            <p>
             <span th:each = "hashtag : ${hashtagList}">
               <span th:text="${hashtag.name}"></span>
             </span>
-                </p><br>
+            </p><br>
 
-                <div class="card" th:each="comment : ${commentList}">
-                    <div class="card-header float-lg-start">
-                        <div class="card-header-pills float-lg-start" th:text="${comment.customer.name}"></div>
-                        <div class="card-header-pills float-lg-end" th:text="${comment.createdTime}"></div>
+            <div class="container d-flex justify-content-center align-items-center">
+                <div class="col-md-6">
+                <div class="row d-flex border bg-info">
+                    <p class="mt-auto"th:text="'댓글 ' +  ${commentList.size()} + '개'" ></p>
+
+                </div>
+                    <div id="commentCollapse">
+                <div th:each="comment : ${commentList}">
+                    <div class="row border bg-light d-flex">
+                        <p class="col-auto mt-auto" th:text="${comment.customer.name}"></p>
+                        <p class="col-auto mt-auto ms-auto" th:text="${comment.createdTime}"></p>
                     </div>
-                    <div class="card-body">
-                        <div class="card-text" th:text="${comment.content}">내용</div>
+                    <div class="row border-bottom d-flex">
+                        <p class="col mt-auto" th:text="${comment.content}">내용</p>
+                        <div class="col">
+                            <button class="btn-sm float-lg-end btn" type="button" data-bs-toggle="collapse" th:data-bs-target="'#addComment' + ${comment.id}" aria-expanded="false" th:aria-controls="'addComment' + ${comment.id}">
+                                댓글 작성
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-footer">
-                        <button class="btn-sm float-lg-end" type="button" data-bs-toggle="collapse" data-bs-target="#addComment" aria-expanded="false" aria-controls="addComment">
-                            댓글 작성
-                        </button>
-                        <div id="addComment">
+                    <div class="row">
+                        <div th:id="'addComment' + ${comment.id}" class="collapse">
                             <form th:action="@{../comments/new}" th:object="${commentForm}" method="post" id="commentForm">
                                 <div class="form-group">
                                     <input type="hidden"  name="parent" th:value="${comment.id}">
                                     <input type="hidden" name="textId" th:value="${text.id}">
-                                    <label for="content">내용</label>
+                                    <label for="content">대댓글 작성</label>
                                     <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                                 </div>
                                 <button type="submit" class="btn-sm float-lg-end">작성하기</button>
                             </form>
                         </div>
                     </div>
-                    <div class="m-lg-4" th:if="${not #lists.isEmpty(comment.childCommentList)}">
-                        <div class="card" th:each="childComment : ${comment.childCommentList}">
-                            <div class="card-header float-lg-start">
-                                <div class="card-header-pills float-lg-start" th:text="${childComment.customer.name}"></div>
-                                <div class="card-header-pills float-lg-end" th:text="${childComment.createdTime}"></div>
+                    <div style="margin-left : 30px" th:if="${not #lists.isEmpty(comment.childCommentList)}">
+                        <div th:each="childComment : ${comment.childCommentList}">
+                            <div class="row border bg-light d-flex">
+                                <p class="col-auto mt-auto" th:text="${childComment.customer.name}"></p>
+                                <p class="col-auto mt-auto ms-auto" th:text="${childComment.createdTime}"></p>
                             </div>
-                            <div class="card-body">
-                                <div class="card-text" th:text="${childComment.content}">내용</div>
+                            <div class="row border-bottom d-flex">
+                                <p class="col mt-auto" th:text="${childComment.content}">내용</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-primary" type="button" th:onclick="|location.href='@{../../board/comment/new/{id}(id=${text.id})}'|">댓글작성</button>
-                <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
+                <div id="firstComment">
+                    <form th:action="@{../comments/new}" th:object="${commentForm}" method="post">
+                        <div class="form-group">
+                            <input type="hidden" name="textId" th:value="${text.id}">
+                            <label for="content">댓글 내용</label>
+                            <textarea class="form-control" name="content" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-sm float-lg-end">작성하기</button>
+                    </form>
+                </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/board}'|">목록으로</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-secondary" th:if="${owner}" type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
+                        </div>
+                        <div class="col">
+                            <form th:if="${owner}" th:action="@{../delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
+                                <button class="btn btn-secondary " type="submit">글 삭제</button>
+                            </form>
+                        </div>
+                    </div>
             </div>
-            <button th:if="${owner}" type="button" th:onclick="|location.href='@{/board/edit/{id}(id=${text.id})}'|">글 수정</button>
-            <form th:if="${owner}" th:action="@{../delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
-                <button type="submit">글 삭제</button>
-            </form>
+            </div>
+
         </div>
-    </div>
     </div>
 </section>
 

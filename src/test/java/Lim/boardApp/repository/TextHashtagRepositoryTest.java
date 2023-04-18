@@ -4,6 +4,8 @@ import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Hashtag;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.domain.TextHashtag;
+import Lim.boardApp.repository.text.TextRepository;
+import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 class TextHashtagRepositoryTest {
 
-    @Autowired TextHashtagRepository textHashtagRepository;
+    @Autowired
+    TextHashtagRepository textHashtagRepository;
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired

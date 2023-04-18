@@ -2,32 +2,25 @@ package Lim.boardApp.repository;
 
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
-import org.aspectj.lang.annotation.Before;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
+import Lim.boardApp.repository.text.TextRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class TextRepositoryTest {
 
-    @Autowired TextRepository textRepository;
+    @Autowired
+    TextRepository textRepository;
     @Autowired
     private CustomerRepository customerRepository;
 
