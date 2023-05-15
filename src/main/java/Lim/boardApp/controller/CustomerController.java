@@ -36,11 +36,7 @@ public class CustomerController {
      */
     @GetMapping("/")
     public String home(@AuthenticationPrincipal Customer customer) {
-        if (customer == null) {
-            return "customer/home";
-        }else {
-            return "redirect:/board";
-        }
+        return "customer/home";
     }
 
     /**
@@ -117,7 +113,7 @@ public class CustomerController {
             return "customer/login";
         }
 
-        return "redirect:board";
+        return "redirect:/";
     }
 
     @PostMapping("/logout")

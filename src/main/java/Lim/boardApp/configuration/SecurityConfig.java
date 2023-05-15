@@ -19,8 +19,8 @@ public class SecurityConfig {
     private final OauthService oauthService;
     private final RedisIndexedSessionRepository sessionRepository;
 
-    private final String[] loginWhiteList = {"/css/**","/*.ico","/error", "/","/customer-login", "/logout", "/register","/oauth/**","/kakao/**","/auth/**",
-            "/swagger-ui/**", "/api/**", "/find-password/**", "/new-password/**"};
+    private final String[] loginWhiteList = {"/static/**","/css/**","/*.ico","/error", "/","/customer-login", "/logout", "/register","/oauth/**","/kakao/**","/auth/**",
+            "/swagger-ui/**", "/api/**", "/find-password/**", "/new-password/**", "/#"};
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
