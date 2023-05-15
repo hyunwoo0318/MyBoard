@@ -6,7 +6,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -26,17 +28,19 @@ public class Text extends BaseEntity {
     @JoinColumn(name = "CUSTOMER_ID")
     private Customer customer;
 
-
     private String fileName;
 
-    @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "text", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
     private List<TextHashtag> textHashtagList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "text", cascade = CascadeType.ALL)
+    private List<Bookmark> bookmarkList = new ArrayList<>();
 
     public Text() {
+
     }
 
     @Builder

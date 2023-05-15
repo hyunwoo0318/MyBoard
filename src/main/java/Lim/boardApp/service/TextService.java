@@ -67,7 +67,6 @@ public class TextService {
         int end;
         if(lastPage < start + blockSize-1) end = lastPage;
         else end = start + blockSize -1;
-        PageBlockForm pageBlockForm = new PageBlockForm(start, end, end - start + 1);
 
         PageForm pageForm = new PageForm(start,end, end-start + 1, page, lastPage, findPage.getContent(), findPage.isLast(), findPage.isFirst());
         return pageForm;

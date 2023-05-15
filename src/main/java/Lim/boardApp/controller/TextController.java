@@ -33,6 +33,7 @@ public class TextController {
     private final TextHashtagService textHashtagService;
     private final HashtagService hashtagService;
     private final UploadFileService uploadFileService;
+    private final BookmarkService bookmarkService;
 
     /**
      * 게시글 리스트를 보여줌 -> 페이징 과정을 거침
@@ -76,17 +77,37 @@ public class TextController {
         if(text == null){
             throw new NotFoundException();
         }
+
+        //글의 주인인지 확인
         boolean textOwn = false;
         if(customerId.equals(text.getCustomer().getId())) {
             textOwn = true;
         }
+
+        //글을 조회하는 사람이 해당 글을 북마크했는지 확인
+        boolean isBookmarked = false;
+        List<Bookmark> bookmarkList = text.getBookmarkList();
+        for (Bookmark bookmark : bookmarkList) {
+            Long bookmarkCustomerId = bookmark.getCustomer().getId();
+            if (bookmarkCustomerId.equals(customerId)) {
+                isBookmarked = true;
+                break;
+            }
+        }
+
+
         List<Hashtag> hashtagList = textHashtagService.findHashtagList(text);
-        List<Comment> commentList = commentService.findParentCommentList(text);
+        List<Comment> commentList = text.getCommentList();
+
+
         model.addAttribute("text",text);
         model.addAttribute("hashtagList", hashtagList);
         model.addAttribute("commentList", commentList);
         model.addAttribute("owner", textOwn);
+        model.addAttribute("isBookmarked", isBookmarked);
+
         model.addAttribute("commentForm", new CommentForm());
+        model.addAttribute("customerId", customerId);
         model.addAttribute("textId", text.getId());
 
         return "board/showText";
@@ -184,9 +205,28 @@ public class TextController {
     }
 
     /**
-     * TODO : 1. 조회수 구현(단순히 들어올때 마다 오르기보다는 특정 로직을 이용해야함) -> Thread강의 듣고 구현
-     * TODO : 2. 조회수 기반으로 게시글 정렬
-     * TODO : 3. 글 상단 공지 고정(검색을 제외한 항상 맨 위에 위치하게함)
-     * TODO : DTO구현해서 전체 변경하기.
+     * 북마크 실행, 취소,  TODO : 조회
      */
+
+    @PostMapping("/bookmarks/new")
+    public String postNewBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
+        Text text = textService.findText(textId);
+        if (text == null || customer == null) {
+            throw new NotFoundException();
+        }else{
+            bookmarkService.addBookmark(text, customer);
+            return "redirect:/board/show/" + textId;
+        }
+    }
+
+    @PostMapping("/bookmarks/delete")
+    public String deleteBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
+        Text text = textService.findText(textId);
+        if (text == null || customer == null) {
+            throw new NotFoundException();
+        }else{
+            bookmarkService.deleteBookmark(text, customer);
+            return "redirect:/board/show/" + textId;
+        }
+    }
 }
