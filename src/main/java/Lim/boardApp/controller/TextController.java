@@ -108,7 +108,7 @@ public class TextController {
         model.addAttribute("customerId", customerId);
         model.addAttribute("textId", text.getId());
 
-        return "board/showText";
+        return "board/temp-showText";
     }
 
     /**
