@@ -38,4 +38,8 @@ public class CommentService {
         }
         commentRepository.save(comment);
     }
+
+    public List<Comment> findCommentsByCustomer(String loginId) {
+        return commentRepository.findCommentsByCustomer(loginId);
+    }
 }

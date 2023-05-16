@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class BookmarkService {
     private final TextRepository textRepository;
     private final CustomerRepository customerRepository;
 
+    @Transactional
     public void addBookmark(Text text, Customer customer) throws NotFoundException{
 
         if (text == null || customer == null) {
@@ -37,6 +39,10 @@ public class BookmarkService {
             throw new NotFoundException();
         }
         bookmarkRepository.deleteBookmark(text, customer);
+    }
+
+    public List<Text> findBookmarkedTextsByCustomer(String loginId){
+        return bookmarkRepository.findBookmarkedTextsByCustomer(loginId);
     }
 
 }

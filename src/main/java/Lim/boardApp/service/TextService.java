@@ -118,6 +118,10 @@ public class TextService {
         return textRepository.findByTitle(title);
     }
 
+    public List<Text> findTextByCustomer(String loginId) {
+        return textRepository.queryTextByCustomer(loginId);
+    }
+
     public void deleteText(Long id){
         textRepository.deleteById(id);
     }

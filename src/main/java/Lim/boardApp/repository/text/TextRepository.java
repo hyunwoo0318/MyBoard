@@ -11,16 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TextRepository extends JpaRepository<Text, Long> {
+public interface TextRepository extends JpaRepository<Text, Long>, TextRepositoryCustom {
     public List<Text> findByTitle(String title) ;
-
-    @Query("select t from Text t where t.content like %:searchKey% or t.title like %:searchKey%")
-    public Page<Text> searchTextByContentTitle(@Param("searchKey") String searchKey, Pageable pageable);
-
-
-    @Query("select t from Text t where t.content like %:searchKey%")
-    public Page<Text> searchTextByContent(@Param("searchKey") String searchKey, Pageable pageable);
-
-    @Query("select t from Text t where t.title like %:searchKey%")
-    public Page<Text> searchTextByTitle(@Param("searchKey") String searchKey, Pageable pageable);
 }

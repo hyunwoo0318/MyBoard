@@ -6,6 +6,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static Lim.boardApp.domain.QBookmark.bookmark;
 
 @Repository
@@ -20,4 +22,13 @@ public class BookmarkRepositoryCustomImpl implements BookmarkRepositoryCustom{
                 .where(bookmark.text.eq(text).and(bookmark.customer.eq(customer)))
                 .execute();
     }
+
+    @Override
+    public List<Text> findBookmarkedTextsByCustomer(String loginId) {
+        return queryFactory.select(bookmark.text)
+                .from(bookmark)
+                .where(bookmark.customer.loginId.eq(loginId))
+                .fetch();
+    }
+
 }
