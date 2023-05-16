@@ -19,8 +19,8 @@ public class SecurityConfig {
     private final OauthService oauthService;
     private final RedisIndexedSessionRepository sessionRepository;
 
-    private final String[] loginWhiteList = {"/static/**","/css/**","/*.ico","/error", "/","/customer-login", "/logout", "/register","/oauth/**","/kakao/**","/auth/**",
-            "/swagger-ui/**", "/api/**", "/find-password/**", "/new-password/**", "/#"};
+    private final String[] loginWhiteList = {"/static/**","/css/**","/*.ico","/error", "/","/customer-login/**", "/logout/**", "/register/**","/oauth/**","/kakao/**","/auth/**",
+            "/swagger-ui/**","/js/**", "/api/**", "/find-password/**", "/new-password/**", "/#"};
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -32,10 +32,12 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(loginWhiteList).permitAll()
                 .anyRequest().authenticated().and()
-                .formLogin().loginPage("/customer-login").loginProcessingUrl("/customer-login").permitAll().disable()
-                .logout().permitAll().and()
-                .oauth2Login().userInfoEndpoint().userService(oauthService)
-                .and().and().build();
+//                .formLogin().loginPage("/customer-login").loginProcessingUrl("/customer-login").permitAll().and()
+//                .logout().permitAll().and()
+                .oauth2Login().loginPage("/customer-login")
+                .userInfoEndpoint().userService(oauthService)
+                .and().and()
+                .build();
     }
 
 }

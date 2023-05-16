@@ -2,10 +2,8 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
-import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.*;
-import Lim.boardApp.repository.*;
 import Lim.boardApp.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/board")
 public class TextController {
 
     private final TextService textService;
@@ -38,7 +34,7 @@ public class TextController {
     /**
      * 게시글 리스트를 보여줌 -> 페이징 과정을 거침
      */
-    @GetMapping
+    @GetMapping("/")
     public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
 
         String searchKey="";
@@ -97,12 +93,14 @@ public class TextController {
 
 
         List<Hashtag> hashtagList = textHashtagService.findHashtagList(text);
-        List<Comment> commentList = text.getCommentList();
+        List<Comment> commentList = commentService.findParentCommentList(text);
+        int commentCnt = text.getCommentList().size();
 
 
         model.addAttribute("text",text);
         model.addAttribute("hashtagList", hashtagList);
         model.addAttribute("commentList", commentList);
+        model.addAttribute("commentCnt", commentCnt);
         model.addAttribute("owner", textOwn);
         model.addAttribute("isBookmarked", isBookmarked);
 
@@ -123,7 +121,7 @@ public class TextController {
             throw new NotFoundException();
         }
         textService.deleteText(id);
-        return "redirect:/board";
+        return "redirect:/";
     }
 
     //글 추가 메서드
@@ -146,16 +144,16 @@ public class TextController {
             hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
         }
 
-        UploadFile uploadFile = uploadFileService.storeFile(textCreateForm.getFile());
+      /*  UploadFile uploadFile = uploadFileService.storeFile(textCreateForm.getFile());
         String fileName = null;
         if (uploadFile != null) {
             fileName = uploadFile.getStoredFileName();
-        }
-        if(textService.createText(id, textCreateForm,hashtagList,fileName) == null){
+        }*/
+        if(textService.createText(id, textCreateForm,hashtagList,null) == null){
             System.out.println("create 오류");
-            return "redirect:board/new";
+            return "redirect:/new";
         }
-        return "redirect:/board";
+        return "redirect:/";
     }
 
     @GetMapping("edit/{id}")
@@ -168,7 +166,7 @@ public class TextController {
         TextUpdateForm textUpdateForm = new TextUpdateForm(text);
         textUpdateForm.setHashtags(hashtags);
         model.addAttribute("text", textUpdateForm);
-        return "board/editText";
+        return "board/makeText";
     }
 
     @PostMapping("edit/{id}")
@@ -178,13 +176,13 @@ public class TextController {
             throw new NotFoundException();
         }
         if (bindingResult.hasErrors()) {
-            return "redirect:/board/edit" + id;
+            return "redirect:/edit" + id;
         }
         List<Hashtag> hashtagList = hashtagService.parseHashtag(textUpdateForm.getHashtags());
         if(textService.updateText(id, textUpdateForm,hashtagList) == null){
             System.out.println("update 실패");
         }
-        return "redirect:/board/show/" + id;
+        return "redirect:/show/" + id;
     }
 
     /**
@@ -200,7 +198,7 @@ public class TextController {
         }else{
             Long textId = text.getId();
             commentService.addComment(text,customer, commentForm);
-            return "redirect:/board/show/" + textId;
+            return "redirect:/show/" + textId;
         }
     }
 
@@ -215,7 +213,7 @@ public class TextController {
             throw new NotFoundException();
         }else{
             bookmarkService.addBookmark(text, customer);
-            return "redirect:/board/show/" + textId;
+            return "redirect:/show/" + textId;
         }
     }
 
@@ -226,7 +224,7 @@ public class TextController {
             throw new NotFoundException();
         }else{
             bookmarkService.deleteBookmark(text, customer);
-            return "redirect:/board/show/" + textId;
+            return "redirect:/show/" + textId;
         }
     }
 }

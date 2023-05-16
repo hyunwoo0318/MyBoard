@@ -8,4 +8,6 @@ import java.util.List;
 public interface CommentRepositoryCustom {
 
     public List<Comment> findParentComments(Text text);
+
+    public List<Comment> findCommentsByCustomer(String loginId);
 }

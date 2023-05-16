@@ -47,11 +47,7 @@ public class TextService {
             Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
         }else if(type.equals("hashtag")){
-            if(!searchKey.isBlank()){
-                searchKey = "#" + searchKey;
-            }
-            Hashtag hashtag = hashtagRepository.findByName(searchKey);
-            Page<Text> findPage = textHashtagRepository.findTextsByHashtag(hashtag, pageRequest);
+            Page<Text> findPage = textHashtagRepository.findTextsByHashtag(searchKey, pageRequest);
             return makePageForm(findPage, page, blockSize);
         } else  return null;
     }
@@ -116,6 +112,10 @@ public class TextService {
 
     public List<Text> findText(String title){
         return textRepository.findByTitle(title);
+    }
+
+    public List<Text> findTextByCustomer(String loginId) {
+        return textRepository.queryTextByCustomer(loginId);
     }
 
     public void deleteText(Long id){

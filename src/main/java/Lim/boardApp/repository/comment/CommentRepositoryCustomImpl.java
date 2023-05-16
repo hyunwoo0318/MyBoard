@@ -23,4 +23,11 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
                 .where(comment.text.eq(text))
                 .fetch();
     }
+
+    @Override
+    public List<Comment> findCommentsByCustomer(String loginId) {
+        return queryFactory.selectFrom(comment)
+                .where(comment.customer.loginId.eq(loginId))
+                .fetch();
+    }
 }

@@ -17,4 +17,6 @@ public interface TextRepositoryCustom {
 
     public Page<Text> searchTextByTitle(String searchKey, Pageable pageable);
 
+    public List<Text> queryTextByCustomer(String loginId);
+
 }

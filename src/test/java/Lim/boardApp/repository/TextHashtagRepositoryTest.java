@@ -80,7 +80,7 @@ class TextHashtagRepositoryTest {
         }
 
 
-        List<Text> result = textHashtagRepository.findTextsByHashtag(h1);
+        List<Text> result = textHashtagRepository.findTextsByHashtag("h1");
 
         assertThat(result.size()).isEqualTo(4);
         assertThat(result).isEqualTo(resultTextList);

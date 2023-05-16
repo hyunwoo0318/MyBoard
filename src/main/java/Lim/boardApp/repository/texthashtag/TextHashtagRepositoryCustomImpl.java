@@ -28,18 +28,18 @@ public class TextHashtagRepositoryCustomImpl implements TextHashtagRepositoryCus
     }
 
     @Override
-    public List<Text> findTextsByHashtag(Hashtag hashtag) {
+    public List<Text> findTextsByHashtag(String searchKey) {
         return queryFactory.select(text)
                 .from(textHashtag)
-                .where(textHashtag.hashtag.eq(hashtag))
+                .where(textHashtag.hashtag.name.eq(searchKey))
                 .fetch();
     }
 
     @Override
-    public Page<Text> findTextsByHashtag(Hashtag hashtag, Pageable pageable) {
+    public Page<Text> findTextsByHashtag(String searchKey, Pageable pageable) {
         List<Text> textList = queryFactory.select(text)
                 .from(textHashtag)
-                .where(textHashtag.hashtag.eq(hashtag))
+                .where(textHashtag.hashtag.name.eq(searchKey))
                 .fetch();
         return new PageImpl<>(textList, pageable, textList.size());
     }

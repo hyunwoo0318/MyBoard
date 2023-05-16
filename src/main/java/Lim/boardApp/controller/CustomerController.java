@@ -2,14 +2,14 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.KakaoConst;
+import Lim.boardApp.domain.Comment;
 import Lim.boardApp.domain.Customer;
+import Lim.boardApp.domain.Text;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.EmailAuthForm;
 import Lim.boardApp.form.LoginForm;
 import Lim.boardApp.form.PasswordChangeForm;
-import Lim.boardApp.service.CustomerService;
-import Lim.boardApp.service.EmailService;
-import Lim.boardApp.service.OauthService;
+import Lim.boardApp.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,14 +31,10 @@ public class CustomerController {
     private final OauthService oauthService;
     private final EmailService emailService;
 
-    /**
-     * 일반 홈 화면 -> 로그인 & 회원가입
-     * 이미 로그인이 된 상태로 접근시 바로 게시판 페이지로 redirect
-     */
-    @GetMapping("/")
-    public String home(@AuthenticationPrincipal Customer customer) {
-        return "customer/home";
-    }
+    private final TextService textService;
+    private final CommentService commentService;
+    private final BookmarkService bookmarkService;
+
 
     /**
      * 회원가입 화면 -> 폼을 입력받아 회원가입을 진행하고 카카오톡 계정 연동까지 가능함
@@ -194,6 +191,36 @@ public class CustomerController {
         }
         customerService.changePassword(form.getPassword(), id);
         return "customer/changePasswordSuccess";
+    }
+
+    /**
+     * 내 정보 확인
+     */
+    @GetMapping("/profiles/{loginId}")
+    public String getProfile(@PathVariable("loginId") String loginId,@AuthenticationPrincipal Customer customer, Model model){
+        if (!customer.getLoginId().equals(loginId)) {
+            return "redirect:/";
+        }
+
+        Customer curCustomer = customerService.findCustomer(loginId);
+
+        //아이디, 나이, 이름, 이메일, 작성 글 제목 리스트, 작성 댓글 리스트, 북마크한 글 리스트
+        model.addAttribute("loginId", curCustomer.getLoginId());
+        model.addAttribute("email", curCustomer.getEmail());
+        model.addAttribute("name", curCustomer.getName());
+        model.addAttribute("age", curCustomer.getAge());
+
+        List<Text> textList = textService.findTextByCustomer(loginId);
+        model.addAttribute("textList", textList);
+
+        List<Comment> commentList = commentService.findCommentsByCustomer(loginId);
+        model.addAttribute("commentList", commentList);
+
+        List<Text> bookmarkedTextList = bookmarkService.findBookmarkedTextsByCustomer(loginId);
+        model.addAttribute("bookmarkedTextList", bookmarkedTextList);
+
+        return "customer/profile";
+
     }
 
 }

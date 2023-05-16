@@ -17,11 +17,16 @@
                             <span class="text-dark" th:text="${#authentication.name}"></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i>내 정보</a>
+                            <a class="dropdown-item" th:onclick="|location.href='@{/profiles/{id}(id=${#authentication.name})}'|"><i class="align-middle me-1" data-feather="user"></i>내 정보</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" onclick="performLogout()">로그아웃</a>
                         </div>
                 </li>
+            </div>
+            <div sec:authorize="!isAuthenticated()">
+                <a class="nav-link d-none d-sm-inline-block" th:onclick="|location.href='@{/register}'|" >
+                    <span class="text-dark">회원가입</span>
+                </a>
             </div>
             <div sec:authorize="!isAuthenticated()">
                 <a class="nav-link d-none d-sm-inline-block" th:onclick="|location.href='@{/customer-login}'|" >

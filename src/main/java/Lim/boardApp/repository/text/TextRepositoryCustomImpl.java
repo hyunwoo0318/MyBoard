@@ -47,4 +47,10 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
         return new PageImpl<>(textList, pageable, textList.size());
     }
 
+    @Override
+    public List<Text> queryTextByCustomer(String loginId) {
+        return queryFactory.selectFrom(text)
+                .where(text.customer.loginId.eq(loginId))
+                .fetch();
+    }
 }

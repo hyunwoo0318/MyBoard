@@ -14,8 +14,8 @@ public interface TextHashtagRepositoryCustom {
     public List<Hashtag> findHashtagsByText(Text text);
 
 
-    public List<Text> findTextsByHashtag(Hashtag hashtag);
+    public List<Text> findTextsByHashtag(String searchKey);
 
 
-    public Page<Text> findTextsByHashtag(Hashtag hashtag, Pageable pageable);
+    public Page<Text> findTextsByHashtag(String searchKey, Pageable pageable);
 }
