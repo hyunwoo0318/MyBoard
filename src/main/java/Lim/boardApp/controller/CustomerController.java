@@ -73,9 +73,6 @@ public class CustomerController {
        if(!customerRegisterForm.getPassword().equals(customerRegisterForm.getPasswordCheck()))
            bindingResult.reject("wrongPasswordInput", "입력하신 비밀번호와 비밀번호 확인이 다릅니다.");
 
-       if(!emailService.checkEmailForm(customerRegisterForm.getEmail()))
-           bindingResult.reject("invalidEmail", "유효한 이메일을 입력해주세요.");
-
         if(bindingResult.hasErrors()){
             return "customer/addCustomer";
         }

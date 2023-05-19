@@ -26,15 +26,11 @@ public class ApiController {
     @ApiOperation(value = "이메일 주소", notes = "넘어온 이메일 주소로 인증코드를 보낸다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "인증 이메일 발송 성공"),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 이메일주소"),
             @ApiResponse(responseCode = "404", description = "등록되지 않은 이메일 주소")
     })
     @PostMapping(value = "/email-auth", produces = "application/json; charset=utf8")
     public ResponseEntity sendEmail(@RequestBody EmailParam emailParam) {
-        boolean checkEmailFormRes = emailService.checkEmailForm(emailParam.getEmail());
-        if (!checkEmailFormRes) {
-            return new ResponseEntity("유효하지 않은 이메일 주소입니다.",HttpStatus.BAD_REQUEST);
-        }
+
         Customer customer = customerService.findCustomerByEmail(emailParam.getEmail());
         if (customer == null) {
             return new ResponseEntity("등록되지 않은 이메일 주소입니다.", HttpStatus.NOT_FOUND);

@@ -1,5 +1,6 @@
 package Lim.boardApp.form;
 
+import Lim.boardApp.annotation.CustomEmail;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Setter
 @NoArgsConstructor
 public class EmailAuthForm {
-    @NotBlank(message = "이메일을 입력해주세요.")
+    @CustomEmail
     private String email;
 
     @NotBlank(message = "이메일 인증번호를 입력해주세요.")

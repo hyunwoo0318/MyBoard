@@ -1,5 +1,6 @@
 package Lim.boardApp.form;
 
+import Lim.boardApp.annotation.CustomEmail;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,7 @@ public class CustomerRegisterForm {
 
     private Long kakaoId;
 
-    @NotBlank(message = "이메일을 입력해주세요.")
+    @CustomEmail
     private String email;
 
 
