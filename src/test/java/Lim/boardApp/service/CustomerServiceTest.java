@@ -60,6 +60,11 @@ class CustomerServiceTest {
     }
 
     @Test
+    public void t() {
+        String s = "error";
+        assertThat(s.equals(null)).isTrue();
+    }
+    @Test
     @DisplayName("정상적인 로그인")
     public void loginSuccess() throws Exception {
 

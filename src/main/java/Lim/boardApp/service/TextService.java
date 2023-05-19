@@ -32,30 +32,53 @@ public class TextService {
     private final CustomerRepository customerRepository;
     private final HashtagRepository hashtagRepository;
 
+    private final BoardRepository boardRepository;
+
     private final RedisTemplate redisTemplate;
 
-    public PageForm pagingByAll(int page,int pageSize,int blockSize){
+    public PageForm pagingByAll(int page,int pageSize,int blockSize,String boardName){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
-        Page<Text> findPage = textRepository.findAll(pageRequest);
-
+        Page<Text> findPage = null;
+        if(boardName.equals("전체")){
+            findPage = textRepository.findAll(pageRequest);
+        }else{
+            findPage = textRepository.searchTextByBoardName(boardName, pageRequest);
+        }
         return makePageForm(findPage, page, blockSize);
     }
 
-    public PageForm pagingBySearch(int page, int pageSize, int blockSize, String searchKey, String type){
+    public PageForm pagingBySearch(int page, int pageSize, int blockSize, String searchKey, String type, String boardName){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
-        if(type.equals("all")){
-            Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey, pageRequest);
-            return makePageForm(findPage, page, blockSize);
-        } else if(type.equals("content")){
-            Page<Text> findPage = textRepository.searchTextByContent(searchKey, pageRequest);
-            return makePageForm(findPage, page, blockSize);
-        } else if(type.equals("title")){
-            Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
-            return makePageForm(findPage, page, blockSize);
-        }else if(type.equals("hashtag")){
-            Page<Text> findPage = textHashtagRepository.findTextsByHashtag(searchKey, pageRequest);
-            return makePageForm(findPage, page, blockSize);
-        } else  return null;
+        if(boardName.equals("전체")) {
+            if (type.equals("all")) {
+                Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else if (type.equals("content")) {
+                Page<Text> findPage = textRepository.searchTextByContent(searchKey, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else if (type.equals("title")) {
+                Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else if (type.equals("hashtag")) {
+                Page<Text> findPage = textHashtagRepository.findTextsByHashtag(searchKey, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else return null;
+        }else{
+            if (type.equals("all")) {
+                Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey,boardName, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else if (type.equals("content")) {
+                Page<Text> findPage = textRepository.searchTextByContent(searchKey,boardName, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else if (type.equals("title")) {
+                Page<Text> findPage = textRepository.searchTextByTitle(searchKey,boardName, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else if (type.equals("hashtag")) {
+                Page<Text> findPage = textHashtagRepository.findTextsByHashtag(searchKey, pageRequest);
+                return makePageForm(findPage, page, blockSize);
+            } else return null;
+        }
+
     }
 
     public PageForm makePageForm(Page<Text> findPage, int page, int blockSize){
@@ -76,15 +99,18 @@ public class TextService {
 
     public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList,String fileName) {
         Optional<Customer> customerOptional = customerRepository.findById(id);
-        if(customerOptional.isEmpty()){
+        Optional<Board> boardOptional = boardRepository.findByName(textCreateForm.getBoardName());
+        if (boardOptional.isEmpty() || customerOptional.isEmpty()) {
             return null;
         }
         Customer customer = customerOptional.get();
+        Board board = boardOptional.get();
         Text text = new Text().builder()
                 .title(textCreateForm.getTitle())
                 .content(textCreateForm.getContent())
                 .customer(customer)
                 .fileName(fileName)
+                .board(board)
                 .build();
         textRepository.save(text);
 

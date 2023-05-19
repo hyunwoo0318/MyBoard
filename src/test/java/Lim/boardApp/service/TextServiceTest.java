@@ -1,5 +1,6 @@
 package Lim.boardApp.service;
 
+import Lim.boardApp.ObjectValue.RoleConst;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
@@ -146,8 +147,9 @@ class TextServiceTest {
         int blockSize = 3;
         String searchKey = "title";
         String type="";
+        String boardName = "전체";
 
-        PageForm pageForm = textService.pagingBySearch(page, pageSize, blockSize, searchKey, type);
+        PageForm pageForm = textService.pagingBySearch(page, pageSize, blockSize, searchKey, type,boardName);
         assertThat(pageForm).isNull();
     }
 
@@ -186,7 +188,7 @@ class TextServiceTest {
          * text - content : afterContent, title : afterTitle, customer : customer
          *      - Hashtag : h3,h4,h5,h6,h7,h8
          */
-        Customer customer = new Customer();
+        Customer customer = new Customer("id123", "pw123", "name1", 23, RoleConst.USER, null, "ex@naver.com");
         Text prevText = new Text("prevContent", "prevTitle", customer);
         prevText.setId(1L);
         Text afterText = new Text("afterContent", "afterTitle", customer);

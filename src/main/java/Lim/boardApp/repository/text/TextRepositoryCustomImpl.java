@@ -32,6 +32,15 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
     }
 
     @Override
+    public Page<Text> searchTextByContentTitle(String searchKey, String boardName, Pageable pageable) {
+        List<Text> textList = queryFactory.selectFrom(text)
+                .where(text.content.like(searchKey).or(text.title.like(searchKey)))
+                .where(text.board.name.eq(boardName))
+                .fetch();
+        return new PageImpl<>(textList, pageable, textList.size());
+    }
+
+    @Override
     public Page<Text> searchTextByContent(String searchKey, Pageable pageable) {
         List<Text> textList = queryFactory.selectFrom(text)
                 .where(text.content.like(searchKey))
@@ -40,9 +49,27 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
     }
 
     @Override
+    public Page<Text> searchTextByContent(String searchKey, String boardName, Pageable pageable) {
+        List<Text> textList = queryFactory.selectFrom(text)
+                .where(text.content.like(searchKey))
+                .where(text.board.name.eq(boardName))
+                .fetch();
+        return new PageImpl<>(textList, pageable, textList.size());
+    }
+
+    @Override
     public Page<Text> searchTextByTitle(String searchKey, Pageable pageable) {
         List<Text> textList = queryFactory.selectFrom(text)
                 .where(text.title.like(searchKey))
+                .fetch();
+        return new PageImpl<>(textList, pageable, textList.size());
+    }
+
+    @Override
+    public Page<Text> searchTextByTitle(String searchKey, String boardName, Pageable pageable) {
+        List<Text> textList = queryFactory.selectFrom(text)
+                .where(text.title.like(searchKey))
+                .where(text.board.name.eq(boardName))
                 .fetch();
         return new PageImpl<>(textList, pageable, textList.size());
     }
@@ -60,5 +87,13 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
                 .set(text.viewCount,text.viewCount.add(viewCnt))
                 .where(text.id.eq(textId))
                 .execute();
+    }
+
+    @Override
+    public Page<Text> searchTextByBoardName(String boardName, Pageable pageable) {
+        List<Text> textList = queryFactory.selectFrom(text)
+                .where(text.board.name.eq(boardName))
+                .fetch();
+        return new PageImpl<>(textList, pageable, textList.size());
     }
 }

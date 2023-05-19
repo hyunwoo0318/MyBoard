@@ -11,7 +11,7 @@
 
         <div class="col-md-4">
             <div class="container-fluid">
-                <form class="d-flex" th:action = "@{/search/(searchKey = ${searchKey}, type= ${type})}" th:method="get">
+                <form class="d-flex" th:action = "|@{/search}|" th:method="get">
                     <select  name="type">
                         <option value="all">전체</option>
                         <option value="title">제목</option>
@@ -19,21 +19,22 @@
                         <option value="hashtag">해시태그</option>
                     </select>
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchKey">
-                    <button class="btn btn-outli0ne-success" type="submit">Search</button>
+                    <input type="hidden" name="board-name" th:value="${boardName}"/>
+                    <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </div>
         </div>
 
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-3">게시판</h1>
+                <h1 class="h3 mb-3" th:text="|${boardName} 게시판|">게시판</h1>
                 <div class="card">
                     <table class="table">
                         <thead>
                         <tr>
                             <th style="width:5%;">#</th>
                             <th style="width:50%;">제목</th>
-                            <th style="width:20%">작성자</th>
+                            <th style="width:15%">작성자</th>
                             <th class="d-none d-md-table-cell" style="width:20%">작성일자</th>
                             <th>조회수</th>
                         </tr>

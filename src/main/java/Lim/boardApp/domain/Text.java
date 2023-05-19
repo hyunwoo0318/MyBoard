@@ -37,6 +37,10 @@ public class Text extends BaseEntity {
     @ColumnDefault("0L")
     private Long viewCount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id")
+    private Board board;
+
     @OneToMany(mappedBy = "text", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Comment> commentList = new ArrayList<>();
 
@@ -51,17 +55,19 @@ public class Text extends BaseEntity {
     }
 
     @Builder
-    public Text(String content, String title,String fileName ,Customer customer) {
+    public Text(String content, String title,String fileName ,Customer customer, Board  board) {
         this.content = content;
         this.title = title;
         this.customer = customer;
         this.fileName  = fileName;
+        this.board = board;
     }
 
-    public Text(String content, String title, Customer customer) {
+    public Text(String content, String title, Customer customer, Board  board) {
         this.content = content;
         this.title = title;
         this.customer = customer;
+        this.board = board;
     }
 
     public void updateText(String content, String title, String fileName){

@@ -22,8 +22,8 @@
 											<small class="text-danger" th:each="err : ${#fields.globalErrors()}"
 												   th:text="${err}">글로벌 오류 메시지</small>
 										</div>
-										<div th:if="${loginFail}">
-											<small class="text-danger" th:text="${loginFail}">카카오 로그인 실패</small>
+										<div th:if="${kakao_user_not_found}">
+											<small class="text-danger" th:text="${kakao_user_not_found}">카카오 로그인 실패</small>
 										</div>
 										<div class="mb-3">
 											<label class="form-label">로그인 ID</label>

@@ -36,13 +36,14 @@ public class TextController {
      * 게시글 리스트를 보여줌 -> 페이징 과정을 거침
      */
     @GetMapping("/")
-    public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page, Model model, HttpServletRequest req){
-        System.out.println(req.getSession().getId());
-
+    public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page,
+                               @RequestParam(value = "board-name", defaultValue = "전체") String boardName,
+                               Model model){
         String searchKey="";
         String type="";
 
-        PageForm pageForm = textService.pagingByAll(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE);
+        PageForm pageForm = textService.pagingByAll(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, boardName);
+        model.addAttribute("boardName", boardName);
         model.addAttribute("pageForm", pageForm);
         model.addAttribute("searchKey", searchKey);
         model.addAttribute("type", type);
@@ -56,10 +57,12 @@ public class TextController {
     public String searchText(@RequestParam(value = "searchKey") String searchKey,
                              @RequestParam(value = "type", required = false) String type,
                              @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                             @RequestParam(value = "board-name", defaultValue = "전체", required = false)String boardName,
                              Model model) {
 
         String newSearchKey = "";
-        PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, type);
+        PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, type,boardName);
+        model.addAttribute("boardName", boardName);
         model.addAttribute("pageForm", pageForm);
         model.addAttribute("searchKey", newSearchKey);
         return "board/textList";

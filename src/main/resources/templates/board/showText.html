@@ -116,7 +116,7 @@
                         <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/}'|">목록으로</button>
                     </div>
                     <div class="col-md-3 text-md-end">
-                            <button class="btn btn-secondary" th:if="${owner}" type="button" th:onclick="|location.href='@{/edit/{id}(id=${text.id})}'|">글 수정</button>
+                        <button class="btn btn-secondary" th:if="${owner}" type="button" th:onclick="|location.href='@{/edit/{id}(id=${text.id})}'|">글 수정</button>
                     </div>
                     <div class="col-md-3">
                         <form th:if="${owner}" th:action="@{/delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">

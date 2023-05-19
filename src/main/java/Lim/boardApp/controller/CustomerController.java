@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,21 +88,27 @@ public class CustomerController {
      * 로그인 성공시 spring security에서 알아서 session을 넣어줌
      */
     @GetMapping("/customer-login")
-    public String loginForm(Model model,@RequestParam(value = "loginFail", required = false) String loginFail) {
-        LoginForm loginForm = new LoginForm();
-        if(loginFail != null){
-            model.addAttribute("loginFail", "해당 카카오 계정으로 가입된 회원이 없습니다.");
+    public String loginForm(@RequestParam(value = "error", required = false) String error,Model model) {
+        if(error != null && error.equals("kakao_user_not_found")){
+            model.addAttribute("kakao_user_not_found", "해당 카카오 아이디와 연동된 회원이 존재하지 않습니다.");
         }
+        LoginForm loginForm = new LoginForm();
+
         model.addAttribute("loginForm", loginForm);
         return "customer/login";
     }
 
     @PostMapping("/customer-login")
-    public String login(@Validated @ModelAttribute LoginForm form,BindingResult bindingResult){
-        if (bindingResult.hasFieldErrors()) {
+    public String login(@RequestParam(value = "error", required = false) String error
+            ,@Validated @ModelAttribute LoginForm form,BindingResult bindingResult){
+        if(error.equals("kakao-user-not-found")){
+            bindingResult.reject("kakao-user-not-found", "해당 카카오 아이디와 연동된 회원이 존재하지 않습니다.");
+        }
+        if (bindingResult.hasErrors()) {
             return "customer/login";
         }
         Customer loginCustomer = customerService.login(form.getLoginId(), form.getPassword());
+
         if (loginCustomer == null) { //로그인 실패
             bindingResult.reject("loginFail","존재하지 않는 아이디이거나 잘못된 비밀번호입니다.");
             return "customer/login";

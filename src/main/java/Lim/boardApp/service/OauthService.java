@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -129,7 +130,7 @@ public class OauthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
         Long kakaoId = oAuth2User.getAttribute("id");
-        Customer customer = customerRepository.findByKakaoId(kakaoId).orElseThrow();
+        Customer customer = customerRepository.findByKakaoId(kakaoId).orElseThrow(() -> new OAuth2AuthenticationException("not found"));
         return customer;
     }
 }

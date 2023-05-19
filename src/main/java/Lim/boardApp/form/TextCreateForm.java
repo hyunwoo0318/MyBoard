@@ -19,6 +19,8 @@ public class TextCreateForm {
     private String content;
     private String hashtags;
 
+    private String boardName;
+
     private MultipartFile file;
 
     public TextCreateForm(String title, String content) {
