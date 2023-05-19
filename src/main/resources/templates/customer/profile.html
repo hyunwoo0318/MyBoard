@@ -49,11 +49,8 @@
 									<div th:each="text : ${textList}">
 									<div class="d-flex align-items-start">
 										<div class="flex-grow-1">
-<<<<<<< HEAD
 											<a th:text="${text.getTitle()}" th:onclick="|location.href='@{/show/{id}(id=${text.id})}'|">작성글 제목</a><br />
-=======
-											<a th:text="${text.getTitle()}" th:onclick="|location.href='@{/board/show/{id}(id=${text.id})}'|">작성글 제목</a><br />
->>>>>>> a894cb0a15ba3519ff594c01c998ac802c09e583
+
 											<small class="text-muted" th:text="${text.getCreatedTime()}">글 작성 시간</small><br />
 										</div>
 										<hr />
@@ -71,11 +68,7 @@
 									<div th:each="comment : ${commentList}">
 										<div class="d-flex align-items-start">
 											<div class="flex-grow-1">
-<<<<<<< HEAD
 												<a th:text="${comment.getContent()}" th:onclick="|location.href='@{/show/{id}(id=${comment.text.id})}'|">작성 댓글 내용</a><br />
-=======
-												<a th:text="${comment.getContent()}" th:onclick="|location.href='@{/board/show/{id}(id=${comment.text.id})}'|">작성 댓글 내용</a><br />
->>>>>>> a894cb0a15ba3519ff594c01c998ac802c09e583
 												<small class="text-muted" th:text="${comment.getCreatedTime()}">글 작성 시간</small><br x/>
 											</div>
 											<hr />

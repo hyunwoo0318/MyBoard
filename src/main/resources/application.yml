@@ -10,6 +10,13 @@ spring:
      password : sa
      driver-class-name : org.h2.Driver
 
+  redis:
+    host: localhost
+    port: 6379
+
+  session:
+    store-type: redis
+
   devtools:
     livereload:
       enabled: true
@@ -66,9 +73,6 @@ spring:
             user_name_attribute: id
 
 
-logging level:
-  org.hibernate.SQL : debug
-
 admin:
   password: admin123123
 
@@ -84,4 +88,6 @@ jasypt:
     string-output-type: base64
     key-obtention-iterations: 100000
     password: password
+
+
 

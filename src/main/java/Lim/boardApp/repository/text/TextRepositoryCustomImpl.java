@@ -53,4 +53,12 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
                 .where(text.customer.loginId.eq(loginId))
                 .fetch();
     }
+
+    @Override
+    public Long updateViewCount(Long textId, Long viewCnt) {
+        return queryFactory.update(text)
+                .set(text.viewCount,text.viewCount.add(viewCnt))
+                .where(text.id.eq(textId))
+                .execute();
+    }
 }

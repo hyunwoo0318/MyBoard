@@ -19,4 +19,6 @@ public interface TextRepositoryCustom {
 
     public List<Text> queryTextByCustomer(String loginId);
 
+    public Long updateViewCount(Long textId, Long viewCnt);
+
 }

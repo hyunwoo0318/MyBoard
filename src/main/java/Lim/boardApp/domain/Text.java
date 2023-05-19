@@ -2,6 +2,9 @@ package Lim.boardApp.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -13,6 +16,7 @@ import java.util.Set;
 @Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@DynamicInsert
 public class Text extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +33,9 @@ public class Text extends BaseEntity {
     private Customer customer;
 
     private String fileName;
+
+    @ColumnDefault("0L")
+    private Long viewCount;
 
     @OneToMany(mappedBy = "text", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Comment> commentList = new ArrayList<>();

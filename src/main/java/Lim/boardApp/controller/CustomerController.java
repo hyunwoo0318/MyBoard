@@ -82,7 +82,7 @@ public class CustomerController {
 
 
         customerService.addCustomer(customerRegisterForm);
-        return "customer/home";
+        return "redirect:/";
     }
 
     /**

@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,8 @@ public class TextController {
      * 게시글 리스트를 보여줌 -> 페이징 과정을 거침
      */
     @GetMapping("/")
-    public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
+    public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page, Model model, HttpServletRequest req){
+        System.out.println(req.getSession().getId());
 
         String searchKey="";
         String type="";
@@ -80,6 +82,10 @@ public class TextController {
             textOwn = true;
         }
 
+        if (!textOwn) {
+            textService.increaseViewCnt(text, customerId);
+        }
+
         //글을 조회하는 사람이 해당 글을 북마크했는지 확인
         boolean isBookmarked = false;
         List<Bookmark> bookmarkList = text.getBookmarkList();
@@ -108,7 +114,7 @@ public class TextController {
         model.addAttribute("customerId", customerId);
         model.addAttribute("textId", text.getId());
 
-        return "board/temp-showText";
+        return "board/showText";
     }
 
     /**
