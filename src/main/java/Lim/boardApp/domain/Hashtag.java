@@ -10,7 +10,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hashtag {
 
     public Hashtag(String name) {
@@ -24,4 +23,6 @@ public class Hashtag {
     @Column(unique = true)
     private String name;
 
+    public Hashtag() {
+    }
 }

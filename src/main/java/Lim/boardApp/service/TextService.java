@@ -1,5 +1,6 @@
 package Lim.boardApp.service;
 
+import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.form.PageForm;
@@ -98,13 +99,14 @@ public class TextService {
     }
 
     public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList,String fileName) {
-        Optional<Customer> customerOptional = customerRepository.findById(id);
-        Optional<Board> boardOptional = boardRepository.findByName(textCreateForm.getBoardName());
-        if (boardOptional.isEmpty() || customerOptional.isEmpty()) {
-            return null;
-        }
-        Customer customer = customerOptional.get();
-        Board board = boardOptional.get();
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
+
+        Board board = boardRepository.findByName(textCreateForm.getBoardName()).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
+
         Text text = new Text().builder()
                 .title(textCreateForm.getTitle())
                 .content(textCreateForm.getContent())
@@ -114,32 +116,35 @@ public class TextService {
                 .build();
         textRepository.save(text);
 
+        List<TextHashtag> textHashtagList = new ArrayList<>();
         for(Hashtag h : hashtagList){
-            textHashtagRepository.save(new TextHashtag(text, h));
+            textHashtagList.add(new TextHashtag(text, h));
         }
+        textHashtagRepository.saveAll(textHashtagList);
         return text;
     }
 
     public Text updateText(Long id,TextUpdateForm textUpdateForm,List<Hashtag> hashtagList){
         //text 변경
-        Optional<Text> textOptional = textRepository.findById(id);
-        if(textOptional.isEmpty()){
-            return null;
-        }
-        Text text = textOptional.get();
+        Text text = textRepository.findById(id).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
+
         text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle(),null);
-        textRepository.save(text);
 
         //hashTag 변경
-        textHashtagRepository.deleteByText(text);
+        List<TextHashtag> textHashtagList = new ArrayList<>();
         for(Hashtag h : hashtagList){
-            textHashtagRepository.save(new TextHashtag(text, h));
+            textHashtagList.add(new TextHashtag(text, h));
         }
+        textHashtagRepository.saveAll(textHashtagList);
         return text;
     }
 
     public Text findText(Long id){
-        return textRepository.findById(id).orElse(null);
+        return textRepository.findById(id).orElseThrow(() ->{
+            throw new NotFoundException();
+        });
     }
 
     public List<Text> findText(String title){

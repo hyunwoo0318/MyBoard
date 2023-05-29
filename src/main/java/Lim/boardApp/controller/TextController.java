@@ -75,10 +75,6 @@ public class TextController {
     public String showText(@PathVariable("id") Long id, @AuthenticationPrincipal Customer customer, Model model) throws NotFoundException {
         Long customerId = customer.getId();
         Text text = textService.findText(id);
-        if(text == null){
-            throw new NotFoundException();
-        }
-
         //글의 주인인지 확인
         boolean textOwn = false;
         if(customerId.equals(text.getCustomer().getId())) {
@@ -125,10 +121,7 @@ public class TextController {
      */
     @PostMapping("delete/{id}")
     public String deleteText(@PathVariable Long id) throws NotFoundException {
-        Text text = textService.findText(id);
-        if (text == null) {
-            throw new NotFoundException();
-        }
+        textService.findText(id);
         textService.deleteText(id);
         return "redirect:/";
     }
@@ -158,19 +151,14 @@ public class TextController {
         if (uploadFile != null) {
             fileName = uploadFile.getStoredFileName();
         }*/
-        if(textService.createText(id, textCreateForm,hashtagList,null) == null){
-            System.out.println("create 오류");
-            return "redirect:/new";
-        }
+        textService.createText(id, textCreateForm,hashtagList,null);
+
         return "redirect:/";
     }
 
     @GetMapping("edit/{id}")
     public String getEditText(@PathVariable Long id, Model model) throws NotFoundException {
         Text text = textService.findText(id);
-        if (text == null) {
-            throw new NotFoundException();
-        }
         String hashtags = hashtagService.mergeHashtag(textHashtagService.findHashtagList(text));
         TextUpdateForm textUpdateForm = new TextUpdateForm(text);
         textUpdateForm.setHashtags(hashtags);
@@ -181,9 +169,6 @@ public class TextController {
     @PostMapping("edit/{id}")
     public String postEditText(@Validated @ModelAttribute("text") TextUpdateForm textUpdateForm, BindingResult bindingResult, @PathVariable Long id) throws NotFoundException {
         Text text = textService.findText(id);
-        if (text == null) {
-            throw new NotFoundException();
-        }
         if (bindingResult.hasErrors()) {
             return "redirect:/edit" + id;
         }
@@ -202,13 +187,11 @@ public class TextController {
                                  @AuthenticationPrincipal Customer customer) throws NotFoundException {
         Text text = textService.findText(commentForm.getTextId());
 
-        if (text == null || customer == null) {
-            throw new NotFoundException();
-        }else{
+
             Long textId = text.getId();
             commentService.addComment(text,customer, commentForm);
             return "redirect:/show/" + textId;
-        }
+
     }
 
     /**
@@ -218,22 +201,14 @@ public class TextController {
     @PostMapping("/bookmarks/new")
     public String postNewBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
         Text text = textService.findText(textId);
-        if (text == null || customer == null) {
-            throw new NotFoundException();
-        }else{
-            bookmarkService.addBookmark(text, customer);
-            return "redirect:/show/" + textId;
-        }
+        bookmarkService.addBookmark(text, customer);
+        return "redirect:/show/" + textId;
+
     }
 
     @PostMapping("/bookmarks/delete")
     public String deleteBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
-        Text text = textService.findText(textId);
-        if (text == null || customer == null) {
-            throw new NotFoundException();
-        }else{
-            bookmarkService.deleteBookmark(text, customer);
-            return "redirect:/show/" + textId;
-        }
+        Text text = textService.findText(textId); bookmarkService.deleteBookmark(text, customer);
+        return "redirect:/show/" + textId;
     }
 }

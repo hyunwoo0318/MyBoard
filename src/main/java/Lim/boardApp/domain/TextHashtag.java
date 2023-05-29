@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TextHashtag {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +23,9 @@ public class TextHashtag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hashtag_id")
     private Hashtag hashtag;
+
+    public TextHashtag() {
+    }
 
     public TextHashtag(Text text, Hashtag hashtag){
         this.text = text;

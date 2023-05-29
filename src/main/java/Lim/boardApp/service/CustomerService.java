@@ -1,5 +1,6 @@
 package Lim.boardApp.service;
 
+import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.repository.CustomerRepository;
@@ -40,7 +41,9 @@ public class CustomerService implements UserDetailsService {
     }
 
     public Customer findCustomer(String loginId){
-        return customerRepository.findByLoginId(loginId).orElse(null);
+        return customerRepository.findByLoginId(loginId).orElseThrow(() ->{
+            throw new NotFoundException();
+        });
     }
 
     public Customer findCustomerByEmail(String email) {

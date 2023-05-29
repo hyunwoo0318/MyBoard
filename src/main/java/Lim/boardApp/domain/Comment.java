@@ -10,7 +10,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Comment extends BaseEntity {
 
@@ -35,7 +34,10 @@ public class Comment extends BaseEntity {
     @OneToMany(mappedBy = "parent",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Comment> childCommentList;
 
-    public Comment(Text text, Customer customer, String content,Comment parent) {
+    public Comment() {
+    }
+
+    public Comment(Text text, Customer customer, String content, Comment parent) {
         this.text = text;
         this.customer = customer;
         this.content = content;

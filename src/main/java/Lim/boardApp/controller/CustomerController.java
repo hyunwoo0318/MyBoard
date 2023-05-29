@@ -184,9 +184,7 @@ public class CustomerController {
     @PostMapping("/new-password")
     public String newPasswordPost(@Validated @ModelAttribute("form") PasswordChangeForm form, BindingResult bindingResult, @RequestParam("id") Long id) throws NotFoundException {
         Customer customer = customerService.findCustomer(id);
-        if (customer == null) {
-            throw new NotFoundException();
-        }
+
         if (!form.getPassword().equals(form.getPasswordCheck())) {
             bindingResult.reject("wrongPasswordInput","입력하신 비밀번호와 비밀번호 입력이 동일하지 않습니다. 다시 입력해주세요");
         }

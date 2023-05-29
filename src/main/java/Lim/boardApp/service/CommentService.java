@@ -26,11 +26,10 @@ public class CommentService {
 
         Comment comment = null;
         if (commentForm.getParent() != null) {
-            Optional<Comment> commentOptional = commentRepository.findById(commentForm.getParent());
-            if(commentOptional.isEmpty()){
+            Comment parent = commentRepository.findById(commentForm.getParent()).orElseThrow(() -> {
                 throw new NotFoundException();
-            }
-            Comment parent = commentOptional.get();
+            });
+
             comment = new Comment(text, customer, commentForm.getContent(), parent);
             comment.setChildCommentList(parent);
         }else{

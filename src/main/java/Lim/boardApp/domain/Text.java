@@ -51,7 +51,6 @@ public class Text extends BaseEntity {
     private List<Bookmark> bookmarkList = new ArrayList<>();
 
     public Text() {
-
     }
 
     @Builder

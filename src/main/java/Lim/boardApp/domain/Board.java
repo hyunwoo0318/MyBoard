@@ -13,7 +13,6 @@ import java.util.List;
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class Board extends BaseEntity{
 
     @Id
@@ -26,6 +25,9 @@ public class Board extends BaseEntity{
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<Text> textList = new ArrayList<>();
+
+    public Board() {
+    }
 
     public Board(String name) {
         this.name = name;

@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer  extends BaseEntity implements UserDetails, OAuth2User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="customer_id")
@@ -48,6 +47,9 @@ public class Customer  extends BaseEntity implements UserDetails, OAuth2User {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
+
+    public Customer() {
+    }
 
     @Builder
     public Customer(String loginId, String password, String name, Integer age, String role, Long kakaoId,String email) {
