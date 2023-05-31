@@ -99,7 +99,7 @@ public class CustomerController {
     }
 
     @PostMapping("/customer-login")
-    public String login(@RequestParam(value = "error", required = false) String error
+    public String login(@RequestParam(value = "error", required = false, defaultValue = "") String error
             ,@Validated @ModelAttribute LoginForm form,BindingResult bindingResult){
         if(error.equals("kakao-user-not-found")){
             bindingResult.reject("kakao-user-not-found", "해당 카카오 아이디와 연동된 회원이 존재하지 않습니다.");

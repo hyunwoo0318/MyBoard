@@ -10,4 +10,6 @@ public interface CommentRepositoryCustom {
     public List<Comment> findParentComments(Text text);
 
     public List<Comment> findCommentsByCustomer(String loginId);
+
+    public int findCommentCnt(Long textId);
 }

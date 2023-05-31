@@ -99,7 +99,7 @@ public class TextController {
 
         List<Hashtag> hashtagList = textHashtagService.findHashtagList(text);
         List<Comment> commentList = commentService.findParentCommentList(text);
-        int commentCnt = text.getCommentList().size();
+        int commentCnt = commentService.findCommentCnt(text.getId());
 
 
         model.addAttribute("text",text);

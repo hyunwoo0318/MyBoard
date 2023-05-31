@@ -202,7 +202,6 @@ public class TextService {
     @Scheduled(cron = "0 0/3 * * * ?")
     @Transactional
     public void updateViewCount() {
-        log.info("updateViewStart!!!");
         Set<String> keySet = redisTemplate.keys("viewCnt*");
         Iterator<String> itr = keySet.iterator();
 

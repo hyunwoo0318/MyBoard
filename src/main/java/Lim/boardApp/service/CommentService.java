@@ -22,6 +22,10 @@ public class CommentService {
         return commentRepository.findParentComments(text);
     }
 
+    public int findCommentCnt(Long textId) {
+        return commentRepository.findCommentCnt(textId);
+    }
+
     public void addComment(Text text, Customer customer, CommentForm commentForm) throws NotFoundException {
 
         Comment comment = null;

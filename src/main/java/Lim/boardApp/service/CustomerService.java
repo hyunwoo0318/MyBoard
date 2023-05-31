@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CustomerService implements UserDetailsService {
 
@@ -73,6 +72,7 @@ public class CustomerService implements UserDetailsService {
         optionalCustomer.get().changePassword(passwordEncoder.encode(password));
         return true;
     }
+    @Transactional
     public Customer login(String inputLoginId, String inputPassword){
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(inputLoginId, inputPassword);

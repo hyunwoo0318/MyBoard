@@ -17,11 +17,18 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     @Override
     public List<Comment> findParentComments(Text text) {
-
         return queryFactory.selectFrom(comment)
                 .where(comment.parent.isNull())
                 .where(comment.text.eq(text))
                 .fetch();
+    }
+
+    @Override
+    public int findCommentCnt(Long textId) {
+        return queryFactory.selectFrom(comment)
+                .where(comment.text.id.eq(textId))
+                .fetch().size();
+
     }
 
     @Override

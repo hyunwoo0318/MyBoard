@@ -1,12 +1,17 @@
 spring:
   messages:
     basename: application, errors
-    config:
-      import:
+
+
+  redis:
+    host: localhost
+    port: 6370
+  profiles:
+    active: local
 
 
   datasource:
-    url :  jdbc:h2:mem:testdb;
+    url : jdbc:h2:mem:testdb;
     username : sa
     password :
     driver-class-name : org.h2.Driver
@@ -40,6 +45,27 @@ spring:
     username: whskwock
     password: naverboard123
 
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+            client-authentication-method: POST
+            authorization-grant-type: authorization_code
+            scope:
+            client-name: Kakao
+            client-id : 5119b65b42c4da50a4c3bb23eb9a7dd6
+        provider:
+          kakao:
+            authorization_uri: https://kauth.kakao.com/oauth/authorize
+            token_uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user_name_attribute: id
+
+
+
+
 
 logging level:
   org.hibernate.SQL : debug
@@ -59,3 +85,9 @@ jasypt:
     string-output-type: base64
     key-obtention-iterations: 100000
     password: password
+
+junit:
+  jupiter:
+    extensions:
+      autodetection:
+        enabled: true
