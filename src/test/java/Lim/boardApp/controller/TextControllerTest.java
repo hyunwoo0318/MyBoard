@@ -54,14 +54,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Sql(scripts = {"classpath:db/initUser.sql"})
 class TextControllerTest {
     @Autowired
-    private Filter springSecurityFilterChain;
-    @Autowired
     private TextService textService;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private CustomerRepository customerRepository;
     @Autowired private BoardRepository boardRepository;
 
