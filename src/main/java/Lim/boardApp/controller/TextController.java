@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class TextController {
         return "board/textList";
     }
 
+    //TODO
     /**
      * 키워드와 검색어의 종류를 입력받아 게시글 내에서 검색을 구현
      */
@@ -67,6 +69,7 @@ public class TextController {
         model.addAttribute("searchKey", newSearchKey);
         return "board/textList";
     }
+
 
     /**
      * 특정 글의 내용,제목,작성자,댓글,대댓글을 보여줌
@@ -157,8 +160,11 @@ public class TextController {
     }
 
     @GetMapping("edit/{id}")
-    public String getEditText(@PathVariable Long id, Model model) throws NotFoundException {
+    public String getEditText(@PathVariable Long id, Model model, @AuthenticationPrincipal Customer customer, HttpServletResponse response) throws NotFoundException, IOException {
         Text text = textService.findText(id);
+        if (text.getCustomer().getId() != customer.getId()) {
+            response.sendError(403);
+        }
         String hashtags = hashtagService.mergeHashtag(textHashtagService.findHashtagList(text));
         TextUpdateForm textUpdateForm = new TextUpdateForm(text);
         textUpdateForm.setHashtags(hashtags);
@@ -195,7 +201,7 @@ public class TextController {
     }
 
     /**
-     * 북마크 실행, 취소,  TODO : 조회
+     * 북마크 실행, 취소
      */
 
     @PostMapping("/bookmarks/new")

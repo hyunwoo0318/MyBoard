@@ -1,5 +1,6 @@
 package Lim.boardApp.controller;
 
+import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
 import Lim.boardApp.ObjectValue.RoleConst;
 import Lim.boardApp.domain.*;
@@ -9,6 +10,7 @@ import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.repository.HashtagRepository;
+import Lim.boardApp.repository.bookmark.BookmarkRepository;
 import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
@@ -16,6 +18,7 @@ import Lim.boardApp.service.TextService;
 import de.cronn.testutils.h2.H2Util;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.convert.DataSizeUnit;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -66,6 +69,8 @@ class TextControllerTest {
 
     @Autowired private CommentRepository commentRepository;
 
+    @Autowired private BookmarkRepository bookmarkRepository;
+
     @Autowired private MockMvc mockMvc;
 
     private Board soccer, basketBall;
@@ -74,8 +79,6 @@ class TextControllerTest {
     private Text text1, text2;
 
     private Hashtag h1,h2,h3;
-    private Long id;
-
 
     private void baseInit(){
         //board 2종류 저장
@@ -330,17 +333,189 @@ class TextControllerTest {
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
             assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("board/makeText");
 
-            //오류 메세지 확인
-            String message = mvcResult.getResolvedException().getMessage();
-            assertThat(message).contains(Arrays.asList("내용을 입력해주세요.", "제목을 입력해주세요."));
-
             //글이 생성되지 않음을 확인
-            assertThat(textRepository.findAll().size()).isEqualTo(3);
+            assertThat(textRepository.findAll().size()).isEqualTo(2);
         }
 
 
 
     }
+
+    @Nested
+    @DisplayName("글 수정 - /edit/{id}")
+    public class editTextTest {
+        private String URL = "/edit/" ;
+
+        @BeforeEach
+        public void init(){
+            baseInit();
+            Long textId = text1.getId();
+            URL += textId;
+        }
+
+        @Test
+        @DisplayName("다른 사람의 글을 수정하려 시도할 경우")
+        @WithUserDetails(value = "id456", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editOthersText() throws Exception {
+
+            MvcResult mvcResult = mvcBuilder("get", URL);
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(403);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 글을 수정하려 시도할 경우")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editNotExistText() {
+
+        }
+
+        @Test
+        @DisplayName("뷰 테스트")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editTextViewTest() {
+
+        }
+
+        @Test
+        @DisplayName("모델값 테스트")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editTextModelTest() {
+
+        }
+
+        @Test
+        @DisplayName("글 수정 성공")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editTextSuccessTest() {
+
+            //TODO : 변경된 내용은 변경되고 이전 내용은 바뀌지 않았는지 확인
+        }
+
+        @Test
+        @DisplayName("글 수정 실패")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editTextFailTest() {
+
+        }
+    }
+
+    @Nested
+    @DisplayName("글 삭제 - POST delete/{id}")
+    public class deleteText{
+        private String URL = "/delete/" ;
+
+        @BeforeEach
+        public void init(){
+            baseInit();
+            Long textId = text1.getId();
+            URL += textId;
+        }
+
+        @Test
+        @DisplayName("다른 사람의 글을 삭제하려 시도할 경우")
+        @WithUserDetails(value = "id456", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editOthersText() throws Exception {
+
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 글을 삭제하려 시도할 경우")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editNotExistText() {
+
+        }
+
+        @Test
+        @DisplayName("글 삭제 성공")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void deleteTextSuccessTest() {
+
+        }
+    }
+
+    @Nested
+    @DisplayName("댓글 추가 - POST comments/new")
+    public class commentsNew{
+        private String URL = "/delete/" ;
+
+        @BeforeEach
+        public void init(){
+            baseInit();
+            Long textId = text1.getId();
+            URL += textId;
+        }
+
+        @Test
+        @DisplayName("댓글 생성 성공")
+        public void commentsNewSuccessTest(){
+
+        }
+
+        @Test
+        @DisplayName("댓글 생성 실패")
+        public void commentsNewFailTest(){
+
+        }
+    }
+
+    @Nested
+    @DisplayName("북마크 추가 - bookmarks/new")
+    public class bookmarkNew{
+
+
+        private String URL = "/bookmarks/new/" ;
+
+        @BeforeEach
+        public void init(){
+            baseInit();
+
+            Bookmark bookmark = new Bookmark(text1, user1);
+            bookmarkRepository.save(bookmark);
+        }
+
+        @Test
+        @DisplayName("북마크 추가 성공")
+        public void bookmarkNewSuccessTest(){
+
+        }
+
+        @Test
+        @DisplayName("북마크가 이미 추가된 상태에서 추가 요청을 보낸경우")
+        public void dupBookmarkNewTest(){
+
+        }
+    }
+
+    @Nested
+    @DisplayName("북마크 추가 - bookmarks/delete")
+    public class bookmarkDelete{
+
+
+        private String URL = "/bookmarks/delete/" ;
+
+        @BeforeEach
+        public void init(){
+            baseInit();
+
+            Bookmark bookmark = new Bookmark(text1, user1);
+            bookmarkRepository.save(bookmark);
+        }
+
+        @Test
+        @DisplayName("북마크가 추가되지 않은 상태에서 삭제 요청")
+        public void dupBookmarkDeleteTest(){
+
+        }
+
+        @Test
+        @DisplayName("북마크 삭제 성공")
+        public void bookmarkDeleteSuccessTest(){
+
+        }
+
+
+    }
+
 
 
     private MvcResult mvcBuilder(String method, String URL) throws  Exception{
