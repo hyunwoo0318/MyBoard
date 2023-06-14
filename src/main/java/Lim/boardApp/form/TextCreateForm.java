@@ -1,17 +1,13 @@
 package Lim.boardApp.form;
 
-import Lim.boardApp.domain.Hashtag;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class TextCreateForm {
     @NotBlank(message = "제목을 입력해주세요.")
     private String title;
@@ -26,5 +22,13 @@ public class TextCreateForm {
     public TextCreateForm(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public TextCreateForm(String title, String content, String hashtags, String boardName, MultipartFile file) {
+        this.title = title;
+        this.content = content;
+        this.hashtags = hashtags;
+        this.boardName = boardName;
+        this.file = file;
     }
 }

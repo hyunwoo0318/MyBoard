@@ -7,6 +7,7 @@ import Lim.boardApp.domain.*;
 import Lim.boardApp.form.CommentForm;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
+import Lim.boardApp.form.TextUpdateForm;
 import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.repository.HashtagRepository;
@@ -14,6 +15,7 @@ import Lim.boardApp.repository.bookmark.BookmarkRepository;
 import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
+import Lim.boardApp.service.HashtagService;
 import Lim.boardApp.service.TextService;
 import de.cronn.testutils.h2.H2Util;
 import org.junit.jupiter.api.*;
@@ -34,13 +36,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.Filter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
@@ -56,8 +56,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ContextConfiguration
 @Sql(scripts = {"classpath:db/initUser.sql"})
 class TextControllerTest {
+
     @Autowired
     private TextService textService;
+    @Autowired private HashtagService hashtagService;
 
     @Autowired private CustomerRepository customerRepository;
     @Autowired private BoardRepository boardRepository;
@@ -365,37 +367,67 @@ class TextControllerTest {
         @Test
         @DisplayName("존재하지 않는 글을 수정하려 시도할 경우")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editNotExistText() {
-
+        public void editNotExistText() throws Exception {
+            MvcResult mvcResult = mvcBuilder("get", "/edit/-1");
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
         }
 
         @Test
         @DisplayName("뷰 테스트")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editTextViewTest() {
+        public void editTextViewTest() throws Exception {
+            MvcResult mvcResult = mvcBuilder("get", URL);
 
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
+            assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("board/makeText");
         }
 
         @Test
         @DisplayName("모델값 테스트")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editTextModelTest() {
+        public void editTextModelTest() throws Exception {
+            MvcResult mvcResult = mvcBuilder("get", URL);
+            TextUpdateForm textUpdateForm = (TextUpdateForm) mvcResult.getModelAndView().getModel().get("text");
+            assertThat(textUpdateForm.getContent()).isEqualTo(text1.getContent());
+            assertThat(textUpdateForm.getTitle()).isEqualTo(text1.getTitle());
+          //  assertThat(textUpdateForm.getFile().getOriginalFilename()).isEqualTo(text1.getFileName());
 
+            String hashtags = hashtagService.mergeHashtag(textHashtagRepository.findHashtagsByText(text1));
+            assertThat(textUpdateForm.getHashtags()).isEqualTo(hashtags);
         }
 
         @Test
         @DisplayName("글 수정 성공")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editTextSuccessTest() {
+        public void editTextSuccessTest() throws Exception {
 
-            //TODO : 변경된 내용은 변경되고 이전 내용은 바뀌지 않았는지 확인
+            TextUpdateForm newForm = new TextUpdateForm("newTitle1", "newContent1", "11,22,33,44", null);
+
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("text", newForm)).andReturn();
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text1.getId());
+
+            Text text = textRepository.findById(text1.getId()).orElseThrow();
+
+            assertThat(text.getTitle()).isEqualTo("newTitle1");
+            assertThat(text.getContent()).isEqualTo("newContent1");
+//            assertThat(text.getFileName()).isEqualTo(null);
+            String hashtags = hashtagService.mergeHashtag(textHashtagRepository.findHashtagsByText(text));
+            assertThat(hashtags).isEqualTo("11,22,33,44");
         }
 
         @Test
         @DisplayName("글 수정 실패")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editTextFailTest() {
+        public void editTextFailTest() throws Exception {
+            TextUpdateForm newForm = new TextUpdateForm("", "", "", null);
 
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("text", newForm)).andReturn();
+
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo(URL);
+
+            Text text = textRepository.findById(text1.getId()).orElseThrow();
+            assertThat(text.equals(text1)).isTrue();
         }
     }
 

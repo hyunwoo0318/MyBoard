@@ -4,6 +4,7 @@ import Lim.boardApp.ObjectValue.SessionConst;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
+import Lim.boardApp.form.TextCreateForm;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.service.CustomerService;
 import Lim.boardApp.service.EmailService;

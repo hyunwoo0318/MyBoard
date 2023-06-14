@@ -20,7 +20,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(boardTypesInterceptor())
                 .order(1)
-                .addPathPatterns("/**");
+                .excludePathPatterns("/css/**","/*.ico","/error","/js/**","/img/**",
+                        "/swagger-ui/**" );
     }
 
     @Bean

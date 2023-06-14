@@ -89,5 +89,12 @@ jasypt:
     key-obtention-iterations: 100000
     password: password
 
+logging:
+  level:
+    org:
+      apache:
+        coyote:
+          http11: debug
+
 
 

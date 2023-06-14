@@ -162,7 +162,8 @@ public class TextController {
     @GetMapping("edit/{id}")
     public String getEditText(@PathVariable Long id, Model model, @AuthenticationPrincipal Customer customer, HttpServletResponse response) throws NotFoundException, IOException {
         Text text = textService.findText(id);
-        if (text.getCustomer().getId() != customer.getId()) {
+        Long ownerId = text.getCustomer().getId();
+        if (!ownerId.equals(customer.getId())) {
             response.sendError(403);
         }
         String hashtags = hashtagService.mergeHashtag(textHashtagService.findHashtagList(text));
