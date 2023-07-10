@@ -51,6 +51,8 @@ dependencies {
 	implementation 'net.jodah:expiringmap:0.5.10'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	implementation group: 'it.ozimov', name: 'embedded-redis' ,version:'0.7.2'
+	implementation 'org.jsoup:jsoup'
+	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 	testImplementation 'org.projectlombok:lombok:1.18.22'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly("org.springframework.boot:spring-boot-devtools")

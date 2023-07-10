@@ -1,8 +1,11 @@
 package Lim.boardApp.configuration;
 
+import Lim.boardApp.ObjectValue.RoleConst;
 import Lim.boardApp.domain.Board;
+import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.UploadFile;
 import Lim.boardApp.repository.BoardRepository;
+import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.repository.UploadFileRepository;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ public class StartConfig {
 
     private final UploadFileRepository uploadFileRepository;
     private final BoardRepository boardRepository;
+    private final CustomerRepository customerRepository;
 //
 //    @Value("${file.dir}")
 //    private String dirPath;
@@ -42,6 +46,10 @@ public class StartConfig {
         if (boardRepository.findByName("soccer").isEmpty()) {
             boardRepository.save(new Board("soccer"));
             boardRepository.save(new Board("basketball"));
+        }
+        if (customerRepository.findByName("auto-bot").isEmpty()) {
+            Customer customer = new Customer("cus1", "cus1", "auto-bot", null, RoleConst.USER, null, "ex@naver.com");
+            customerRepository.save(customer);
         }
     }
 }

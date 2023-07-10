@@ -283,7 +283,6 @@ class TextControllerTest {
     @DisplayName("글 작성 - /new")
     public class makeText {
 
-        //TODO : form이 안넘어가는 현상 해결해야함.
         private String URL = "/new";
 
         @BeforeEach
@@ -447,40 +446,65 @@ class TextControllerTest {
         @DisplayName("다른 사람의 글을 삭제하려 시도할 경우")
         @WithUserDetails(value = "id456", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void editOthersText() throws Exception {
-
+            MvcResult mvcResult = mvcBuilder("post", URL);
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(403);
         }
 
         @Test
         @DisplayName("존재하지 않는 글을 삭제하려 시도할 경우")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editNotExistText() {
-
+        public void editNotExistText() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", "/delete/-1");
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
         }
 
         @Test
         @DisplayName("글 삭제 성공")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void deleteTextSuccessTest() {
+        public void deleteTextSuccessTest() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL);
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
 
+            Optional<Text> textOptional = textRepository.findById(text1.getId());
+            assertThat(textOptional.isEmpty()).isTrue();
         }
     }
 
     @Nested
     @DisplayName("댓글 추가 - POST comments/new")
     public class commentsNew{
-        private String URL = "/delete/" ;
+        private String URL = "/comments/new" ;
+        private Long textId;
+        private Comment comment1, comment2, comment3;
 
         @BeforeEach
         public void init(){
             baseInit();
-            Long textId = text1.getId();
+            textId = text1.getId();
+
+            /**
+             * 3개의 댓글 추가
+             * comment1
+             *    ㄴ comment2
+             * comment3
+             */
+            comment1 = new Comment(text1, user1, "comment1");
+            comment2 = new Comment(text1, user1, "comment2", comment1);
+            comment3 = new Comment(text1, user1, "comment3");
+
+            commentRepository.saveAllAndFlush(Arrays.asList(comment1, comment2, comment3));
+
             URL += textId;
         }
 
         @Test
         @DisplayName("댓글 생성 성공")
-        public void commentsNewSuccessTest(){
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void commentsNewSuccessTest() throws Exception {
+            CommentForm commentForm = new CommentForm("new Comment1", comment1.getId(), textId);
+            MvcResult mvcResult = mvcBuilder("get", URL);
 
+            assertThat(commentRepository.findCommentsByCustomer(user1.getLoginId()).size()).isEqualTo(4); // 3 + 1
         }
 
         @Test

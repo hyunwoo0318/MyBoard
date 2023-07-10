@@ -32,6 +32,7 @@ public class TextController {
     private final HashtagService hashtagService;
     private final UploadFileService uploadFileService;
     private final BookmarkService bookmarkService;
+    private final CrawlingService crawlingService;
 
     /**
      * 게시글 리스트를 보여줌 -> 페이징 과정을 거침
@@ -194,11 +195,9 @@ public class TextController {
                                  @AuthenticationPrincipal Customer customer) throws NotFoundException {
         Text text = textService.findText(commentForm.getTextId());
 
-
-            Long textId = text.getId();
-            commentService.addComment(text,customer, commentForm);
-            return "redirect:/show/" + textId;
-
+        Long textId = text.getId();
+        commentService.addComment(text,customer, commentForm);
+        return "redirect:/show/" + textId;
     }
 
     /**
@@ -217,5 +216,14 @@ public class TextController {
     public String deleteBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
         Text text = textService.findText(textId); bookmarkService.deleteBookmark(text, customer);
         return "redirect:/show/" + textId;
+    }
+
+    /**
+     * 네이버 뉴스 크롤링 기능
+     */
+    @GetMapping("/news")
+    public String crawlingNews(/*@RequestParam("type") String type*/) throws IOException {
+        crawlingService.crawlingNews();
+        return "redirect:/";
     }
 }

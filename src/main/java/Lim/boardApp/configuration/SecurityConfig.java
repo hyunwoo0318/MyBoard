@@ -21,7 +21,7 @@ public class SecurityConfig {
     private final RedisIndexedSessionRepository sessionRepository;
 
     private final String[] loginWhiteList = {"/static/**","/css/**","/*.ico","/error", "/","/customer-login/**", "/logout/**", "/register/**","/oauth/**","/kakao/**","/auth/**",
-            "/swagger-ui/**","/js/**", "/api/**", "/find-password/**", "/new-password/**", "/#"};
+            "/swagger-ui/**","/js/**", "/api/**", "/find-password/**", "/new-password/**", "/#", "/news", "/img/**"};
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
