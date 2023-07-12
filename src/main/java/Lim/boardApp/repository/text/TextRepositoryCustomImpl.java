@@ -24,54 +24,48 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Text> searchTextByContentTitle(String searchKey, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.content.like(searchKey).or(text.title.like(searchKey)))
+    public List<Text> searchTextByContentTitle(String searchKey) {
+        return queryFactory.selectFrom(text)
+                .where(text.content.contains(searchKey).or(text.title.contains(searchKey)))
                 .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
     }
 
     @Override
-    public Page<Text> searchTextByContentTitle(String searchKey, String boardName, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.content.like(searchKey).or(text.title.like(searchKey)))
+    public List<Text> searchTextByContentTitle(String searchKey, String boardName) {
+        return queryFactory.selectFrom(text)
+                .where(text.content.contains(searchKey).or(text.title.contains(searchKey)))
                 .where(text.board.name.eq(boardName))
                 .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
     }
 
     @Override
-    public Page<Text> searchTextByContent(String searchKey, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.content.like(searchKey))
+    public List<Text> searchTextByContent(String searchKey) {
+        return queryFactory.selectFrom(text)
+                .where(text.content.contains(searchKey))
                 .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
     }
 
     @Override
-    public Page<Text> searchTextByContent(String searchKey, String boardName, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.content.like(searchKey))
+    public List<Text> searchTextByContent(String searchKey, String boardName) {
+        return queryFactory.selectFrom(text)
+                .where(text.content.contains(searchKey))
                 .where(text.board.name.eq(boardName))
                 .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
     }
 
     @Override
-    public Page<Text> searchTextByTitle(String searchKey, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.title.like(searchKey))
+    public List<Text> searchTextByTitle(String searchKey) {
+        return queryFactory.selectFrom(text)
+                .where(text.title.contains(searchKey))
                 .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
     }
 
     @Override
-    public Page<Text> searchTextByTitle(String searchKey, String boardName, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.title.like(searchKey))
+    public List<Text> searchTextByTitle(String searchKey, String boardName) {
+        return queryFactory.selectFrom(text)
+                .where(text.title.contains(searchKey))
                 .where(text.board.name.eq(boardName))
                 .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
     }
 
     @Override
@@ -89,11 +83,4 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
                 .execute();
     }
 
-    @Override
-    public Page<Text> searchTextByBoardName(String boardName, Pageable pageable) {
-        List<Text> textList = queryFactory.selectFrom(text)
-                .where(text.board.name.eq(boardName))
-                .fetch();
-        return new PageImpl<>(textList, pageable, textList.size());
-    }
 }

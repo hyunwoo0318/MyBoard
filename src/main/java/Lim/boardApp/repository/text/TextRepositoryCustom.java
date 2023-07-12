@@ -11,21 +11,19 @@ import java.util.List;
 
 public interface TextRepositoryCustom {
 
-    public Page<Text> searchTextByContentTitle(String searchKey, Pageable pageable);
-    public Page<Text> searchTextByContentTitle(String searchKey,String boardName, Pageable pageable);
+    public List<Text> searchTextByContentTitle(String searchKey);
+    public List<Text> searchTextByContentTitle(String searchKey,String boardName);
 
 
 
-    public Page<Text> searchTextByContent(String searchKey, Pageable pageable);
-    public Page<Text> searchTextByContent(String searchKey,String boardName, Pageable pageable);
+    public List<Text> searchTextByContent(String searchKey);
+    public List<Text> searchTextByContent(String searchKey,String boardName);
 
-    public Page<Text> searchTextByTitle(String searchKey,String boardName, Pageable pageable);
-    public Page<Text> searchTextByTitle(String searchKey, Pageable pageable);
+    public List<Text> searchTextByTitle(String searchKey,String boardName);
+    public List<Text> searchTextByTitle(String searchKey);
 
     public List<Text> queryTextByCustomer(String loginId);
 
     public Long updateViewCount(Long textId, Long viewCnt);
-
-    public Page<Text> searchTextByBoardName(String boardName, Pageable pageable);
 
 }

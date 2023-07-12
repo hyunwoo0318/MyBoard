@@ -12,6 +12,7 @@ import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -43,42 +44,46 @@ public class TextService {
         if(boardName.equals("전체")){
             findPage = textRepository.findAll(pageRequest);
         }else{
-            findPage = textRepository.searchTextByBoardName(boardName, pageRequest);
+            Board board = boardRepository.findByName(boardName).orElseThrow(() -> {
+                throw new NotFoundException();
+            });
+
+            findPage = textRepository.findByBoard(board, pageRequest);
+            //findPage = textRepository.searchTextByBoardName(boardName, pageRequest);
         }
         return makePageForm(findPage, page, blockSize);
     }
 
     public PageForm pagingBySearch(int page, int pageSize, int blockSize, String searchKey, String type, String boardName){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
+        List<Text> resultList = new ArrayList<>();
         if(boardName.equals("전체")) {
             if (type.equals("all")) {
-                Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textRepository.searchTextByContentTitle(searchKey);
             } else if (type.equals("content")) {
-                Page<Text> findPage = textRepository.searchTextByContent(searchKey, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textRepository.searchTextByContent(searchKey);
             } else if (type.equals("title")) {
-                Page<Text> findPage = textRepository.searchTextByTitle(searchKey, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textRepository.searchTextByTitle(searchKey);
             } else if (type.equals("hashtag")) {
-                Page<Text> findPage = textHashtagRepository.findTextsByHashtag(searchKey, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textHashtagRepository.findTextsByHashtag(searchKey);
             } else return null;
         }else{
             if (type.equals("all")) {
-                Page<Text> findPage = textRepository.searchTextByContentTitle(searchKey,boardName, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textRepository.searchTextByContentTitle(searchKey,boardName);
             } else if (type.equals("content")) {
-                Page<Text> findPage = textRepository.searchTextByContent(searchKey,boardName, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textRepository.searchTextByContent(searchKey,boardName);
             } else if (type.equals("title")) {
-                Page<Text> findPage = textRepository.searchTextByTitle(searchKey,boardName, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textRepository.searchTextByTitle(searchKey,boardName);
             } else if (type.equals("hashtag")) {
-                Page<Text> findPage = textHashtagRepository.findTextsByHashtag(searchKey, pageRequest);
-                return makePageForm(findPage, page, blockSize);
+                resultList = textHashtagRepository.findTextsByHashtag(searchKey);
             } else return null;
         }
+
+        int first = Math.min(new Long(pageRequest.getOffset()).intValue(), resultList.size());
+        int last = Math.min(first + pageRequest.getPageSize(), resultList.size());
+
+        Page<Text> findPage = new PageImpl<Text>(resultList.subList(first, last), pageRequest, blockSize);
+        return makePageForm(findPage, page, blockSize);
 
     }
 
@@ -147,9 +152,6 @@ public class TextService {
         });
     }
 
-    public List<Text> findText(String title){
-        return textRepository.findByTitle(title);
-    }
 
     public List<Text> findTextByCustomer(String loginId) {
         return textRepository.queryTextByCustomer(loginId);

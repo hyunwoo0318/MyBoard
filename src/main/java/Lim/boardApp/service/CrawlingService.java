@@ -56,7 +56,7 @@ public class CrawlingService {
             }
 
             Customer autoBot = customerRepository.findByName("auto-bot").get();
-            Board board = boardRepository.findByName("basketball").get();
+            Board board = boardRepository.findByName("농구").get();
             Text text = new Text(content, title, null, autoBot, board);
             textList.add(text);
         }
@@ -72,6 +72,7 @@ public class CrawlingService {
     //TODO : 글을 관리자도 작성가능하게 하여 관리자의 글은 설정시 항시 상단 고정
 
     //TODO : 관리자 페이지 구현(유저 관리, 관리자는 모든 글,댓글 삭제 가능) -> 관리자의 기능 생각해보기
+    //TODO : 테스트 코드 구현하기
 
     //TODO : Docker로 컨테이너화를 거쳐서 배포
     //TODO : 각각의 기능에 대해서 문서화를 진행

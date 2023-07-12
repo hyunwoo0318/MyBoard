@@ -43,9 +43,13 @@ public class StartConfig {
 
     @Bean
     public void init(){
-        if (boardRepository.findByName("soccer").isEmpty()) {
-            boardRepository.save(new Board("soccer"));
-            boardRepository.save(new Board("basketball"));
+        if (boardRepository.findByName("축구").isEmpty()) {
+            boardRepository.save(new Board("축구"));
+            boardRepository.save(new Board("야구"));
+            boardRepository.save(new Board("배구"));
+            boardRepository.save(new Board("골프"));
+            boardRepository.save(new Board("일반"));
+            boardRepository.save(new Board("농구"));
         }
         if (customerRepository.findByName("auto-bot").isEmpty()) {
             Customer customer = new Customer("cus1", "cus1", "auto-bot", null, RoleConst.USER, null, "ex@naver.com");
