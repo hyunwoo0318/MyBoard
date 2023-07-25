@@ -1,5 +1,6 @@
 package Lim.boardApp.service;
 
+import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.domain.Board;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
@@ -27,10 +28,16 @@ public class CrawlingService {
     private final BoardRepository boardRepository;
 
     private final String baseURL = "https://sports.news.naver.com/";
-    private String category;
 
-    public void crawlingNews() throws IOException {
-        String url = baseURL + "basketball/index";
+    public void crawlingNews(String boardName) throws IOException {
+        boardRepository.findByName(boardName).orElseThrow(() ->{
+            throw new NotFoundException();
+        });
+        String urlName = findUrl(boardName);
+        if (urlName == null) {
+            throw new NotFoundException();
+        }
+        String url = baseURL + urlName +  "/index";
         Document doc = Jsoup.connect(url).get();
 
         Elements elements = doc.select("div.home_news > ul.home_news_list > li > a");
@@ -56,17 +63,30 @@ public class CrawlingService {
             }
 
             Customer autoBot = customerRepository.findByName("auto-bot").get();
-            Board board = boardRepository.findByName("농구").get();
+            Board board = boardRepository.findByName(boardName).get();
             Text text = new Text(content, title, null, autoBot, board);
             textList.add(text);
         }
         textRepository.saveAll(textList);
     }
 
-    //TODO : 원하는 종류의 기사를 크롤링 하게함(해외축구, 국내축구, 농구 등등 네이버 기준에 맞춰서)
+    private String findUrl(String boardName) {
+        if (boardName.equals(URLName.BASEBALL.inputName)) {
+            return URLName.BASEBALL.urlName;
+        } else if (boardName.equals(URLName.BASKETBALL.inputName)) {
+            return URLName.BASKETBALL.urlName;
+        } else if (boardName.equals(URLName.VOLLEYBALL.inputName)) {
+            return URLName.VOLLEYBALL.urlName;
+        } else if (boardName.equals(URLName.GOLF.inputName)) {
+            return URLName.GOLF.urlName;
+        } else if (boardName.equals(URLName.SOCCER.inputName)) {
+            return URLName.SOCCER.urlName;
+        }
+        return null;
+    }
+
+    //TODO : 글이 길어지면 영역을 침범하면서 잘라지는 현상
     //TODO : 기사게시판, 사진게시판, 글 게시판을 구별함(크게 각각을 만들고 그 안에서 축구,농구 등등으로 구별하기)
-    //TODO : /news를 POST로 변경하고 버튼 만들기
-    //TODO : 페이징이 세로로 세워지는 문제 해결
     //TODO ; 사진 게시판 생성
     //TODO : remember-me 기능 구현
     //TODO : 글을 관리자도 작성가능하게 하여 관리자의 글은 설정시 항시 상단 고정
@@ -76,4 +96,23 @@ public class CrawlingService {
 
     //TODO : Docker로 컨테이너화를 거쳐서 배포
     //TODO : 각각의 기능에 대해서 문서화를 진행
+
+
+    private enum URLName{
+
+        SOCCER("축구", "wfootball"),
+        BASKETBALL("농구", "basketball"),
+        GOLF("골프", "golf"),
+        VOLLEYBALL("배구", "volleyball"),
+        BASEBALL("야구", "wbaseball"),
+        ;
+
+        private String inputName;
+        private String urlName;
+
+        URLName(String inputName, String urlName) {
+            this.inputName = inputName;
+            this.urlName = urlName;
+        }
+    };
 }

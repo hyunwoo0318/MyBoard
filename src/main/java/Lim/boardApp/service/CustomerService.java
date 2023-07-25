@@ -78,7 +78,9 @@ public class CustomerService implements UserDetailsService {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(inputLoginId, inputPassword);
         Authentication authentication;
         try{
-            authentication = authenticationManagerBuilder.getObject().authenticate(token);
+            AuthenticationManager object = authenticationManagerBuilder.getObject();
+            authentication = object.authenticate(token);
+//            authentication = authenticationManagerBuilder.getObject().authenticate(token);
         }catch (BadCredentialsException e){
             return null;
         }

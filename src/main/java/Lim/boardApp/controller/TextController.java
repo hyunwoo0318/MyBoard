@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -222,8 +223,9 @@ public class TextController {
      * 네이버 뉴스 크롤링 기능
      */
     @GetMapping("/news")
-    public String crawlingNews(/*@RequestParam("type") String type*/) throws IOException {
-        crawlingService.crawlingNews();
+    public String crawlingNews(@RequestParam("board-name") String boardName, RedirectAttributes attr) throws IOException {
+        crawlingService.crawlingNews(boardName);
+        attr.addAttribute("board-name", boardName);
         return "redirect:/";
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
@@ -33,8 +32,6 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(loginWhiteList).permitAll()
                 .anyRequest().authenticated().and()
-//                .formLogin().loginPage("/customer-login").loginProcessingUrl("/customer-login").permitAll().and()
-//                .logout().permitAll().and()
                 .oauth2Login().loginPage("/customer-login")
                 .failureHandler(customAuthenticationFailureHandler())
                 .userInfoEndpoint().userService(oauthService)
@@ -49,6 +46,8 @@ public class SecurityConfig {
             response.sendRedirect("/customer-login?error=kakao_user_not_found");
         };
     }
+
+
 
 
 }

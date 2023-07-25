@@ -27,7 +27,14 @@
 
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-3" th:text="|${boardName} 게시판|">게시판</h1>
+                <div class="row mb-2 mb-xl-3">
+                    <div class="col-auto d-none d-sm-block">
+                        <h1 class="h3 mb-3" th:text="|${boardName} 게시판|">게시판</h1>
+                    </div>
+                    <div class="col-auto ms-auto text-end mt-n1">
+                        <a class="btn btn-primary"  th:onclick="|location.href='@{/news/(board-name=${boardName})}'|">기사 가져오기</a>
+                    </div>
+                </div>
                 <div class="card">
                     <table class="table">
                         <thead>
@@ -51,28 +58,28 @@
                     </table>
                 </div>
                 <div class="text-center">
-                    <ul th:if="${searchKey == ''}" class = "pagination pagination-md" style="list-style: none">
-                        <li class="page-item">
+                    <ul th:if="${searchKey == ''}" class = "pagination pagination-md" style="list-style: none" >
+                        <li class="page-item" style="display: inline">
                             <a th:if="${pageForm.isFirst == 'T'}" >prev</a>
                             <a th:if="${pageForm.isFirst == 'F'}" class="page-link" th:href="@{/(page=(${pageForm.page}-1))}" th:text="prev"></a>
                         </li>
-                        <li class="page-item" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
+                        <li class="page-item"  style="display: inline" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
                             <a class="page-link" th:href = "@{/(page=(${pg}))}" th:text="(${pg} + 1) "></a>
                         </li>
-                        <li class="page-item">
+                        <li class="page-item" style="display: inline">
                             <a th:if="${pageForm.isLast == 'T'}" >next</a>
                             <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/(page=(${pageForm.page}+1))}" th:text="next"></a>
                         </li>
                     </ul>
-                    <ul th:align="center" th:if="${searchKey != ''}" class = "pagination" style="list-style: none">
-                        <li class="page-item">
+                    <ul th:align="center" th:if="${searchKey != ''}" class = "pagination pagination-md" style="list-style: none">
+                        <li class="page-item"  style="display: inline">
                             <a th:if="${pageForm.isFirst == 'T'}" >prev</a>
                             <a th:if="${pageForm.isFirst == 'F'}" class="page-link" th:href="@{/search/(page=(${pageForm.page}-1), searchKey = (${searchKey}), type = (${type}))}" th:text="prev"></a>
                         </li>
-                        <li class="page-item" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
+                        <li class="page-item"  style="display: inline" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
                             <a class="page-link" th:href = "@{/search/(page=(${pg}), searchKey = (${searchKey}), type = (${type}))}" th:text="(${pg} + 1) "></a>
                         </li>
-                        <li class="page-item">
+                        <li class="page-item"  style="display: inline">
                             <a th:if="${pageForm.isLast == 'T'}" >next</a>
                             <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/search/(page=(${pageForm.page}+1), searchKey = (${searchKey}), type = (${type}))}" th:text="next"></a>
                         </li>
