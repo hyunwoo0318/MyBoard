@@ -17,18 +17,15 @@ public class TextCreateForm {
 
     private String boardName;
 
-    private MultipartFile file;
-
     public TextCreateForm(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
-    public TextCreateForm(String title, String content, String hashtags, String boardName, MultipartFile file) {
+    public TextCreateForm(String title, String content, String hashtags, String boardName) {
         this.title = title;
         this.content = content;
         this.hashtags = hashtags;
         this.boardName = boardName;
-        this.file = file;
     }
 }

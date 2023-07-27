@@ -2,6 +2,7 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
+import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.*;
 import Lim.boardApp.service.*;
@@ -41,6 +42,7 @@ public class TextController {
     @GetMapping("/")
     public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page,
                                @RequestParam(value = "board-name", defaultValue = "전체") String boardName,
+                               @RequestParam(value = "textType", required = false) TextType textType,
                                Model model){
         String searchKey="";
         String type="";
@@ -150,13 +152,7 @@ public class TextController {
         if(textCreateForm.getHashtags().length()!=0){
             hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
         }
-
-      /*  UploadFile uploadFile = uploadFileService.storeFile(textCreateForm.getFile());
-        String fileName = null;
-        if (uploadFile != null) {
-            fileName = uploadFile.getStoredFileName();
-        }*/
-        textService.createText(id, textCreateForm,hashtagList,null);
+        textService.createText(id, textCreateForm,hashtagList);
 
         return "redirect:/";
     }

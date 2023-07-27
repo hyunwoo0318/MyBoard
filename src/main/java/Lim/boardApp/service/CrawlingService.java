@@ -1,6 +1,7 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.Exception.NotFoundException;
+import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.Board;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
@@ -58,13 +59,29 @@ public class CrawlingService {
             String contentHtml = document.selectFirst("div#newsEndContents").html();
             String content = Jsoup.parse(contentHtml).wholeText();
 
+            //본문 내용만 발췌
+            int idx = content.indexOf("기사제공");
+            if (idx != -1) {
+                content = content.substring(0, idx);
+            }
+
             if (!textRepository.findByTitle(title).isEmpty()) {
                 continue;
             }
 
+            //3줄 이상의 줄바꿈은 2줄 줄바꿈으로 변경
+            content = content.replaceAll("\\n{3,}", "\n\n");
+
+
             Customer autoBot = customerRepository.findByName("auto-bot").get();
             Board board = boardRepository.findByName(boardName).get();
-            Text text = new Text(content, title, null, autoBot, board);
+            Text text = Text.builder()
+                            .customer(autoBot)
+                            .title(title)
+                            .content(content)
+                            .textType(TextType.ARTICLE)
+                            .board(board)
+                            .build();
             textList.add(text);
         }
         textRepository.saveAll(textList);
@@ -85,10 +102,8 @@ public class CrawlingService {
         return null;
     }
 
-    //TODO : 글이 길어지면 영역을 침범하면서 잘라지는 현상
     //TODO : 기사게시판, 사진게시판, 글 게시판을 구별함(크게 각각을 만들고 그 안에서 축구,농구 등등으로 구별하기)
     //TODO ; 사진 게시판 생성
-    //TODO : remember-me 기능 구현
     //TODO : 글을 관리자도 작성가능하게 하여 관리자의 글은 설정시 항시 상단 고정
 
     //TODO : 관리자 페이지 구현(유저 관리, 관리자는 모든 글,댓글 삭제 가능) -> 관리자의 기능 생각해보기

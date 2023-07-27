@@ -48,7 +48,6 @@ public class StartConfig {
             boardRepository.save(new Board("야구"));
             boardRepository.save(new Board("배구"));
             boardRepository.save(new Board("골프"));
-            boardRepository.save(new Board("일반"));
             boardRepository.save(new Board("농구"));
         }
         if (customerRepository.findByName("auto-bot").isEmpty()) {

@@ -1,6 +1,7 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.Exception.NotFoundException;
+import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageBlockForm;
 import Lim.boardApp.form.PageForm;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +51,6 @@ public class TextService {
             });
 
             findPage = textRepository.findByBoard(board, pageRequest);
-            //findPage = textRepository.searchTextByBoardName(boardName, pageRequest);
         }
         return makePageForm(findPage, page, blockSize);
     }
@@ -103,7 +104,7 @@ public class TextService {
         return pageForm;
     }
 
-    public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList,String fileName) {
+    public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> {
             throw new NotFoundException();
         });
@@ -112,19 +113,17 @@ public class TextService {
             throw new NotFoundException();
         });
 
+
         Text text = new Text().builder()
                 .title(textCreateForm.getTitle())
                 .content(textCreateForm.getContent())
                 .customer(customer)
-                .fileName(fileName)
+                .textType(TextType.GENERAL)
                 .board(board)
                 .build();
         textRepository.save(text);
 
-        List<TextHashtag> textHashtagList = new ArrayList<>();
-        for(Hashtag h : hashtagList){
-            textHashtagList.add(new TextHashtag(text, h));
-        }
+        List<TextHashtag> textHashtagList = hashtagList.stream().map(h -> new TextHashtag(text, h)).collect(Collectors.toList());
         textHashtagRepository.saveAll(textHashtagList);
         return text;
     }

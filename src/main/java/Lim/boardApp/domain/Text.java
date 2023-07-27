@@ -1,5 +1,6 @@
 package Lim.boardApp.domain;
 
+import Lim.boardApp.ObjectValue.TextType;
 import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.ColumnDefault;
@@ -41,6 +42,9 @@ public class Text extends BaseEntity {
     @JoinColumn(name = "board_id")
     private Board board;
 
+    @Enumerated(EnumType.STRING)
+    private TextType textType;
+
     @OneToMany(mappedBy = "text", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Comment> commentList = new ArrayList<>();
 
@@ -54,19 +58,22 @@ public class Text extends BaseEntity {
     }
 
     @Builder
-    public Text(String content, String title,String fileName ,Customer customer, Board  board) {
+    public Text(String content, String title,String fileName ,Customer customer, Board  board, TextType textType) {
         this.content = content;
         this.title = title;
         this.customer = customer;
         this.fileName  = fileName;
         this.board = board;
+        this.textType = textType;
     }
 
-    public Text(String content, String title, Customer customer, Board  board) {
+    @Builder
+    public Text(String content, String title, Customer customer, Board  board,TextType textType) {
         this.content = content;
         this.title = title;
         this.customer = customer;
         this.board = board;
+        this.textType = textType;
     }
 
     public void updateText(String content, String title, String fileName){
