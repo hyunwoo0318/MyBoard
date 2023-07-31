@@ -12,4 +12,6 @@ public interface CommentRepositoryCustom {
     public List<Comment> findCommentsByCustomer(String loginId);
 
     public int findCommentCnt(Long textId);
+
+    public List<Comment> queryCommentByText(Long textId);
 }

@@ -19,6 +19,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.MvcResult;
@@ -46,40 +47,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@ContextConfiguration
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@ContextConfiguration
+@Sql(scripts = {"classpath:db/initUser.sql"})
 class CustomerControllerTest {
 
-    @Autowired WebApplicationContext context;
 
     @Autowired  MockMvc mockMvc;
-
     @Autowired CustomerRepository customerRepository;
-
     @Autowired PasswordEncoder passwordEncoder;
-
     @Autowired
     EmailService emailService;
 
     private Customer customer;
 
-    @BeforeEach
-    public void deleteAll() {
-        customerRepository.deleteAllInBatch();
-        customer = Customer.builder()
-                .loginId("user1")
-                .password(passwordEncoder.encode("pw1"))
-                .name("hyunwoo")
-                .age(20)
-                .email("ex@naver.com")
-                .role("USER")
-                .build();
-        customerRepository.saveAndFlush(customer);
 
-        mockMvc = MockMvcBuilders.webAppContextSetup(context)
-                .apply(springSecurity())
-                .build();
-    }
 
     @Test
     @DisplayName("로그인 한 사용자가 홈 화면에 접근할때 - /")

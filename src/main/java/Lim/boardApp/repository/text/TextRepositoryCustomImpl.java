@@ -1,5 +1,6 @@
 package Lim.boardApp.repository.text;
 
+import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,6 +23,43 @@ import static Lim.boardApp.domain.QTextHashtag.textHashtag;
 public class TextRepositoryCustomImpl implements TextRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public List<Text> queryGeneralTexts() {
+        return queryFactory.selectFrom(text)
+                .where(text.textType.eq(TextType.GENERAL))
+                .fetch();
+    }
+
+    @Override
+    public List<Text> queryGeneralTexts(String boardName) {
+        return queryFactory.selectFrom(text)
+                .where(text.textType.eq(TextType.GENERAL))
+                .where(text.board.name.eq(boardName))
+                .fetch();
+    }
+
+    @Override
+    public List<Text> queryArticleTexts() {
+        return queryFactory.selectFrom(text)
+                .where(text.textType.eq(TextType.ARTICLE))
+                .fetch();
+    }
+
+    @Override
+    public List<Text> queryArticleTexts(String boardName) {
+        return queryFactory.selectFrom(text)
+                .where(text.textType.eq(TextType.ARTICLE))
+                .where(text.board.name.eq(boardName))
+                .fetch();
+    }
+
+    @Override
+    public List<Text> queryTextByBoard(String boardName) {
+        return queryFactory.selectFrom(text)
+                .where(text.board.name.eq(boardName))
+                .fetch();
+    }
 
     @Override
     public List<Text> searchTextByContentTitle(String searchKey) {

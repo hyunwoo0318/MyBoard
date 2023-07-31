@@ -3,14 +3,12 @@ package Lim.boardApp.service;
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
-import Lim.boardApp.form.PageBlockForm;
-import Lim.boardApp.form.PageForm;
-import Lim.boardApp.form.TextCreateForm;
-import Lim.boardApp.form.TextUpdateForm;
+import Lim.boardApp.form.*;
 import Lim.boardApp.repository.*;
+import Lim.boardApp.repository.bookmark.BookmarkRepository;
+import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,32 +24,39 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Transactional
 @Slf4j
-public class TextService {
+public class TextService extends BaseService {
+    public TextService(TextRepository textRepository, CustomerRepository customerRepository, HashtagRepository hashtagRepository, BoardRepository boardRepository, CommentRepository commentRepository, TextHashtagRepository textHashtagRepository, BookmarkRepository bookmarkRepository, RedisTemplate redisTemplate) {
+        super(textRepository, customerRepository, hashtagRepository, boardRepository, commentRepository, textHashtagRepository, bookmarkRepository);
+        this.redisTemplate = redisTemplate;
+    }
 
-    private final TextRepository textRepository;
-    private final TextHashtagRepository textHashtagRepository;
-    private final CustomerRepository customerRepository;
-    private final HashtagRepository hashtagRepository;
+    private RedisTemplate redisTemplate;
 
-    private final BoardRepository boardRepository;
 
-    private final RedisTemplate redisTemplate;
-
-    public PageForm pagingByAll(int page,int pageSize,int blockSize,String boardName){
+    public PageForm pagingByAll(int page,int pageSize,int blockSize,String boardName, String textType){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
-        Page<Text> findPage = null;
+        List<Text> resultList = new ArrayList<>();
         if(boardName.equals("전체")){
-            findPage = textRepository.findAll(pageRequest);
+            if (textType == null) {
+                resultList = textRepository.findAll();
+            } else if (textType.equals(TextType.GENERAL.name())) {
+                resultList = textRepository.queryGeneralTexts();
+            } else if (textType.equals(TextType.ARTICLE.name())) {
+                resultList = textRepository.queryArticleTexts();
+            } else return null;
         }else{
-            Board board = boardRepository.findByName(boardName).orElseThrow(() -> {
-                throw new NotFoundException();
-            });
-
-            findPage = textRepository.findByBoard(board, pageRequest);
+            checkBoard(boardName);
+            if (textType == null) {
+                resultList = textRepository.queryTextByBoard(boardName);
+            } else if (textType.equals(TextType.GENERAL.name())) {
+                resultList = textRepository.queryGeneralTexts(boardName);
+            } else if (textType.equals(TextType.ARTICLE.name())
+            ) {
+                resultList = textRepository.queryArticleTexts(boardName);
+            } else return null;
         }
+        Page<Text> findPage = makePage(resultList, pageRequest, blockSize);
         return makePageForm(findPage, page, blockSize);
     }
 
@@ -80,12 +85,15 @@ public class TextService {
             } else return null;
         }
 
-        int first = Math.min(new Long(pageRequest.getOffset()).intValue(), resultList.size());
-        int last = Math.min(first + pageRequest.getPageSize(), resultList.size());
-
-        Page<Text> findPage = new PageImpl<Text>(resultList.subList(first, last), pageRequest, blockSize);
+        Page<Text> findPage = makePage(resultList, pageRequest, blockSize);
         return makePageForm(findPage, page, blockSize);
+    }
 
+    private Page<Text> makePage(List<Text> textList, PageRequest pageRequest, int blockSize) {
+        int first = Math.min(new Long(pageRequest.getOffset()).intValue(), textList.size());
+        int last = Math.min(first + pageRequest.getPageSize(), textList.size());
+
+        return new PageImpl<Text>(textList.subList(first, last), pageRequest, blockSize);
     }
 
     public PageForm makePageForm(Page<Text> findPage, int page, int blockSize){
@@ -104,16 +112,12 @@ public class TextService {
         return pageForm;
     }
 
-    public Text createText(Long id, TextCreateForm textCreateForm, List<Hashtag> hashtagList) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> {
-            throw new NotFoundException();
-        });
+    public Text createText(Long customerId, TextCreateForm textCreateForm) {
+        //입력된 회원 customerId, 게시판 이름 검증
+        Customer customer = checkCustomer(customerId);
+        Board board = checkBoard(textCreateForm.getBoardName());
 
-        Board board = boardRepository.findByName(textCreateForm.getBoardName()).orElseThrow(() -> {
-            throw new NotFoundException();
-        });
-
-
+        //글 저장
         Text text = new Text().builder()
                 .title(textCreateForm.getTitle())
                 .content(textCreateForm.getContent())
@@ -123,32 +127,68 @@ public class TextService {
                 .build();
         textRepository.save(text);
 
+        //해시태그 저장
+        List<Hashtag> hashtagList = parseHashtag(textCreateForm.getHashtags());
         List<TextHashtag> textHashtagList = hashtagList.stream().map(h -> new TextHashtag(text, h)).collect(Collectors.toList());
         textHashtagRepository.saveAll(textHashtagList);
         return text;
     }
 
-    public Text updateText(Long id,TextUpdateForm textUpdateForm,List<Hashtag> hashtagList){
-        //text 변경
-        Text text = textRepository.findById(id).orElseThrow(() -> {
-            throw new NotFoundException();
-        });
+    public Boolean isOwner(Long textId, Long customerId) {
+        Customer customer = checkCustomer(customerId);
+        Text text = checkText(textId);
+        Long ownerId = text.getCustomer().getId();
+        return ownerId == customerId;
+    }
 
-        text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle(),null);
+
+    public TextUpdateForm setTextUpdateForm(Long textId) {
+        Text text = checkText(textId);
+
+        List<Hashtag> hashtagList = textHashtagRepository.findHashtagsByText(text);
+        String hashtags = mergeHashtag(hashtagList);
+
+        return new TextUpdateForm(text.getTitle(), text.getContent(), hashtags);
+    }
+
+    @Transactional
+    public Text updateText(Long textId,TextUpdateForm textUpdateForm){
+        //text 검증
+        Text text = checkText(textId);
+
+        //텍스트 변경
+        text.updateText(textUpdateForm.getContent(), textUpdateForm.getTitle());
 
         //hashTag 변경
-        List<TextHashtag> textHashtagList = new ArrayList<>();
-        for(Hashtag h : hashtagList){
-            textHashtagList.add(new TextHashtag(text, h));
-        }
-        textHashtagRepository.saveAll(textHashtagList);
+        List<Hashtag> existedHashtagList = textHashtagRepository.findHashtagsByText(text);
+        List<Hashtag> newHashgtagList = parseHashtag(textUpdateForm.getHashtags());
+        updateHashtags(textId, existedHashtagList, newHashgtagList);
         return text;
     }
 
-    public Text findText(Long id){
-        return textRepository.findById(id).orElseThrow(() ->{
-            throw new NotFoundException();
-        });
+    @Transactional
+    public void updateHashtags(Long textId, List<Hashtag> existedHashtagList, List<Hashtag> newHashgtagList) {
+
+        //text 검증
+        Text text = checkText(textId);
+
+        //새로 저장할 해시태그 찾기 -> 기존에 존재하지 않는 해시태그들
+        List<Hashtag> addHashtagList = newHashgtagList.stream()
+                .filter(h -> !existedHashtagList.contains(h))
+                .collect(Collectors.toList());
+
+        //삭제할 해시태그 찾기 -> 기존제 존재했지만 없어진 해시태그들
+        List<Hashtag> deleteHashtagList = existedHashtagList.stream()
+                .filter(h -> !newHashgtagList.contains(h))
+                .collect(Collectors.toList());
+
+        //해시태그 해당 텍스트에 추가
+        List<TextHashtag> newTextHashtagList = addHashtagList.stream()
+                .map(h -> new TextHashtag(text, h)).collect(Collectors.toList());
+        textHashtagRepository.saveAll(newTextHashtagList);
+
+        //해시태그 해당 텍스트에서 삭제
+        textHashtagRepository.deleteTextHashtags(text, deleteHashtagList);
     }
 
 
@@ -156,8 +196,85 @@ public class TextService {
         return textRepository.queryTextByCustomer(loginId);
     }
 
-    public void deleteText(Long id){
-        textRepository.deleteById(id);
+    @Transactional
+    public void deleteText(Long textId){
+        //text 검증
+        Text text = textRepository.findById(textId).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
+
+        //해당 글에 존재하는 hashtag리스트 삭제
+        textHashtagRepository.deleteByText(text);
+
+        //글 삭제
+        textRepository.deleteById(textId);
+    }
+
+    public List<Comment> findParentCommentList(Text text) {
+        return commentRepository.findParentComments(text);
+    }
+
+    public int findCommentCnt(Long textId) {
+        return commentRepository.findCommentCnt(textId);
+    }
+
+    public void addComment(Customer customer, CommentForm commentForm, Long textId) throws NotFoundException {
+
+        //text검증
+        Text text = checkText(textId);
+
+        Comment comment = null;
+        if (commentForm.getParent() != null) {
+            Comment parent = commentRepository.findById(commentForm.getParent()).orElseThrow(() -> {
+                throw new NotFoundException();
+            });
+
+            comment = new Comment(text, customer, commentForm.getContent(), parent);
+            comment.setChildCommentList(parent);
+        }else{
+            comment = new Comment(text, customer, commentForm.getContent());
+        }
+        commentRepository.save(comment);
+    }
+
+    public List<Comment> findCommentsByCustomer(String loginId) {
+        return commentRepository.findCommentsByCustomer(loginId);
+    }
+
+    /**
+     * ,를 구분자로 받은 hashtag를 파싱해서 새로운 해시태그면 저장하는 방식
+     * @param ','를 구분자로 가지는 hashtag모음
+     * @return List<Hashtag>
+     */
+    public List<Hashtag> parseHashtag(String hashtags){
+        String[] tagList = hashtags.replaceAll(" ", "").split(",");
+        List<Hashtag> hashtagList = new ArrayList<>();
+        for (String t : tagList) {
+            Optional<Hashtag> hashtagOptional = hashtagRepository.findByName(t);
+            if(hashtagOptional.isEmpty()){
+                //새로운 hashtag
+                Hashtag newTag = new Hashtag(t);
+                hashtagRepository.save(newTag);
+                hashtagList.add(newTag);
+            }else {
+                Hashtag hashtag = hashtagOptional.get();
+                hashtagList.add(hashtag);
+            }
+        }
+        return hashtagList;
+    }
+
+    public List<Hashtag> findHashtagList(Text text) {
+        return textHashtagRepository.findHashtagsByText(text);
+    }
+
+    /**
+     * hashtagList를 다시 사용자가 수정할수 있게 원래의 형식으로 돌려놓음
+     * @param hashtagList
+     * @return String(','로 구분된 hashtag집합)
+     */
+    public String mergeHashtag(List<Hashtag> hashtagList) {
+        return hashtagList.stream().map(Hashtag::getName).collect(Collectors.joining(","));
     }
 
     /**
@@ -217,4 +334,10 @@ public class TextService {
             redisTemplate.delete(viewCntKey);
         }
     }
+
+    public Text findText(Long textId) {
+        return checkText(textId);
+    }
 }
+
+

@@ -18,4 +18,6 @@ public interface TextHashtagRepositoryCustom {
 
 
     public Page<Text> findTextsByHashtag(String searchKey, Pageable pageable);
+
+    public void deleteTextHashtags(Text text, List<Hashtag> hashtagList);
 }

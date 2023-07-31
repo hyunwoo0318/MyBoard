@@ -20,7 +20,6 @@ public class TextUpdateForm {
     private String content;
     private String hashtags;
 
-    private MultipartFile file;
 
     public TextUpdateForm(Text text){
         this.title = text.getTitle();

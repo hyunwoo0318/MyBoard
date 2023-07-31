@@ -12,7 +12,7 @@
         <div class="col-md-4">
             <div class="container-fluid">
                 <form class="d-flex" th:action = "|@{/search}|" th:method="get">
-                    <select  name="type">
+                    <select  name="searchType">
                         <option value="all">전체</option>
                         <option value="title">제목</option>
                         <option value="content">내용</option>
@@ -31,7 +31,7 @@
                     <div class="col-auto d-none d-sm-block">
                         <h1 class="h3 mb-3" th:text="|${boardName} 게시판|">게시판</h1>
                     </div>
-                    <div class="col-auto ms-auto text-end mt-n1">
+                    <div th:if="${boardName != '전체'}" class="col-auto ms-auto text-end mt-n1">
                         <a class="btn btn-primary"  th:onclick="|location.href='@{/news/(board-name=${boardName})}'|">기사 가져오기</a>
                     </div>
                 </div>
@@ -39,9 +39,6 @@
                     <div class="container">
                         <div class="collapse navbar-collapse" id="navbarNav">
                             <ul class="navbar-nav">
-                                <li class="nav-item">
-                                    <a class="nav-link" th:onclick="|location.href='@{/(board-name=${boardName}, textType=NOTICE)}'|">공지</a>
-                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" th:onclick="|location.href='@{/(board-name=${boardName}, textType=GENERAL)}'|">일반글</a>
                                 </li>
@@ -95,14 +92,14 @@
                     <ul th:align="center" th:if="${searchKey != ''}" class = "pagination pagination-md" style="list-style: none">
                         <li class="page-item"  style="display: inline">
                             <a th:if="${pageForm.isFirst == 'T'}" >prev</a>
-                            <a th:if="${pageForm.isFirst == 'F'}" class="page-link" th:href="@{/search/(page=(${pageForm.page}-1), searchKey = (${searchKey}), type = (${type}))}" th:text="prev"></a>
+                            <a th:if="${pageForm.isFirst == 'F'}" class="page-link" th:href="@{/search/(page=(${pageForm.page}-1), searchKey = (${searchKey}), searchType = (${searchType}))}" th:text="prev"></a>
                         </li>
                         <li class="page-item"  style="display: inline" th:each="pg : ${#numbers.sequence(pageForm.start, pageForm.start + pageForm.size - 1)}">
                             <a class="page-link" th:href = "@{/search/(page=(${pg}), searchKey = (${searchKey}), type = (${type}))}" th:text="(${pg} + 1) "></a>
                         </li>
                         <li class="page-item"  style="display: inline">
                             <a th:if="${pageForm.isLast == 'T'}" >next</a>
-                            <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/search/(page=(${pageForm.page}+1), searchKey = (${searchKey}), type = (${type}))}" th:text="next"></a>
+                            <a th:if="${pageForm.isLast =='F'}" th:class="page-link" th:href="@{/search/(page=(${pageForm.page}+1), searchKey = (${searchKey}), searchType = (${searchType}))}" th:text="next"></a>
                         </li>
                     </ul>
                 </div>

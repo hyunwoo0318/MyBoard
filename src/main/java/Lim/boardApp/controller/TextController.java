@@ -17,10 +17,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -29,10 +27,6 @@ import java.util.List;
 public class TextController {
 
     private final TextService textService;
-    private final CommentService commentService;
-    private final TextHashtagService textHashtagService;
-    private final HashtagService hashtagService;
-    private final UploadFileService uploadFileService;
     private final BookmarkService bookmarkService;
     private final CrawlingService crawlingService;
 
@@ -42,32 +36,31 @@ public class TextController {
     @GetMapping("/")
     public String showTextList(@RequestParam(value = "page", defaultValue = "0") int page,
                                @RequestParam(value = "board-name", defaultValue = "전체") String boardName,
-                               @RequestParam(value = "textType", required = false) TextType textType,
+                               @RequestParam(value = "textType", required = false) String textType,
                                Model model){
         String searchKey="";
-        String type="";
+        String searchType="";
 
-        PageForm pageForm = textService.pagingByAll(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, boardName);
+        PageForm pageForm = textService.pagingByAll(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, boardName, textType);
         model.addAttribute("boardName", boardName);
         model.addAttribute("pageForm", pageForm);
         model.addAttribute("searchKey", searchKey);
-        model.addAttribute("type", type);
+        model.addAttribute("searchType", searchType);
         return "board/textList";
     }
 
-    //TODO
     /**
      * 키워드와 검색어의 종류를 입력받아 게시글 내에서 검색을 구현
      */
     @GetMapping("/search")
     public String searchText(@RequestParam(value = "searchKey") String searchKey,
-                             @RequestParam(value = "type", required = false) String type,
+                             @RequestParam(value = "searchType", required = false) String searchType,
                              @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                              @RequestParam(value = "board-name", defaultValue = "전체", required = false)String boardName,
                              Model model) {
 
         String newSearchKey = "";
-        PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, type,boardName);
+        PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, searchType ,boardName);
         model.addAttribute("boardName", boardName);
         model.addAttribute("pageForm", pageForm);
         model.addAttribute("searchKey", newSearchKey);
@@ -78,35 +71,23 @@ public class TextController {
     /**
      * 특정 글의 내용,제목,작성자,댓글,대댓글을 보여줌
     */
-    @GetMapping("show/{id}")
-    public String showText(@PathVariable("id") Long id, @AuthenticationPrincipal Customer customer, Model model) throws NotFoundException {
+    @GetMapping("show/{textId}")
+    public String showText(@PathVariable("textId") Long textId, @AuthenticationPrincipal Customer customer, Model model) throws NotFoundException {
+        Text text = textService.findText(textId);
         Long customerId = customer.getId();
-        Text text = textService.findText(id);
-        //글의 주인인지 확인
-        boolean textOwn = false;
-        if(customerId.equals(text.getCustomer().getId())) {
-            textOwn = true;
-        }
+        boolean textOwn = textService.isOwner(textId, customer.getId());
 
+        //조회수 상승
         if (!textOwn) {
-            textService.increaseViewCnt(text, customerId);
+            textService.increaseViewCnt(text,customer.getId());
         }
 
         //글을 조회하는 사람이 해당 글을 북마크했는지 확인
-        boolean isBookmarked = false;
-        List<Bookmark> bookmarkList = text.getBookmarkList();
-        for (Bookmark bookmark : bookmarkList) {
-            Long bookmarkCustomerId = bookmark.getCustomer().getId();
-            if (bookmarkCustomerId.equals(customerId)) {
-                isBookmarked = true;
-                break;
-            }
-        }
+        boolean isBookmarked = bookmarkService.isBookmarked(textId, customerId);
 
-
-        List<Hashtag> hashtagList = textHashtagService.findHashtagList(text);
-        List<Comment> commentList = commentService.findParentCommentList(text);
-        int commentCnt = commentService.findCommentCnt(text.getId());
+        List<Hashtag> hashtagList = textService.findHashtagList(text);
+        List<Comment> commentList = textService.findParentCommentList(text);
+        int commentCnt = textService.findCommentCnt(text.getId());
 
 
         model.addAttribute("text",text);
@@ -124,16 +105,9 @@ public class TextController {
     }
 
     /**
-     * 게시글을 삭제, 수정, 생성함
+     * 게시글 생성, 수정, 삭제
      */
-    @PostMapping("delete/{id}")
-    public String deleteText(@PathVariable Long id) throws NotFoundException {
-        textService.findText(id);
-        textService.deleteText(id);
-        return "redirect:/";
-    }
 
-    //글 추가 메서드
     @GetMapping("/new")
     public String getNewText(Model model) {
         TextCreateForm textCreateForm = new TextCreateForm();
@@ -144,56 +118,61 @@ public class TextController {
     @PostMapping("/new")
     public String postNewText(@Validated @ModelAttribute("text") TextCreateForm textCreateForm, BindingResult bindingResult,
                               @AuthenticationPrincipal Customer customer) throws IOException {
-        Long id = customer.getId();
         if (bindingResult.hasErrors()) {
             return "board/makeText";
         }
-        List<Hashtag> hashtagList = new ArrayList<>();
-        if(textCreateForm.getHashtags().length()!=0){
-            hashtagList = hashtagService.parseHashtag(textCreateForm.getHashtags());
-        }
-        textService.createText(id, textCreateForm,hashtagList);
 
-        return "redirect:/";
+        Text text = textService.createText(customer.getId(), textCreateForm);
+
+        return "redirect:/show/" + text.getId();
     }
 
-    @GetMapping("edit/{id}")
-    public String getEditText(@PathVariable Long id, Model model, @AuthenticationPrincipal Customer customer, HttpServletResponse response) throws NotFoundException, IOException {
-        Text text = textService.findText(id);
-        Long ownerId = text.getCustomer().getId();
-        if (!ownerId.equals(customer.getId())) {
+    @GetMapping("edit/{textId}")
+    public String getEditText(@PathVariable Long textId, Model model, @AuthenticationPrincipal Customer customer, HttpServletResponse response) throws NotFoundException, IOException {
+        Boolean ownerCheck = textService.isOwner(textId, customer.getId());
+
+        //수정 요청한 회원이 글 작성 회원과 다른 경우 403 return
+        if (!ownerCheck) {
             response.sendError(403);
+        }else{
+            TextUpdateForm textUpdateForm = textService.setTextUpdateForm(textId);
+            model.addAttribute("text", textUpdateForm);
         }
-        String hashtags = hashtagService.mergeHashtag(textHashtagService.findHashtagList(text));
-        TextUpdateForm textUpdateForm = new TextUpdateForm(text);
-        textUpdateForm.setHashtags(hashtags);
-        model.addAttribute("text", textUpdateForm);
         return "board/makeText";
     }
 
-    @PostMapping("edit/{id}")
-    public String postEditText(@Validated @ModelAttribute("text") TextUpdateForm textUpdateForm, BindingResult bindingResult, @PathVariable Long id) throws NotFoundException {
-        Text text = textService.findText(id);
+    @PostMapping("edit/{textId}")
+    public String postEditText(@Validated @ModelAttribute("text") TextUpdateForm textUpdateForm, BindingResult bindingResult, @PathVariable Long textId) throws NotFoundException {
         if (bindingResult.hasErrors()) {
-            return "redirect:/edit" + id;
+            return "redirect:/edit/" + textId;
         }
-        List<Hashtag> hashtagList = hashtagService.parseHashtag(textUpdateForm.getHashtags());
-        if(textService.updateText(id, textUpdateForm,hashtagList) == null){
-            System.out.println("update 실패");
+        textService.updateText(textId, textUpdateForm);
+        return "redirect:/show/" + textId;
+    }
+
+    @PostMapping("delete/{textId}")
+    public String deleteText(@PathVariable Long textId, @AuthenticationPrincipal Customer customer,HttpServletResponse response) throws NotFoundException, IOException {
+        Boolean ownerCheck = textService.isOwner(textId, customer.getId());
+
+        //수정 요청한 회원이 글 작성 회원과 다른 경우 403 return
+        if (!ownerCheck) {
+            response.sendError(403);
+            return "error/403";
+        }else{
+            textService.deleteText(textId);
+            return "redirect:/";
         }
-        return "redirect:/show/" + id;
     }
 
     /**
      * 새로운 댓글을 추가
      */
-    @PostMapping("comments/new")
-    public String postNewComment(@ModelAttribute("commentForm")CommentForm commentForm,
-                                 @AuthenticationPrincipal Customer customer) throws NotFoundException {
-        Text text = textService.findText(commentForm.getTextId());
-
-        Long textId = text.getId();
-        commentService.addComment(text,customer, commentForm);
+    @PostMapping("text/{textId}/comments/new")
+    public String postNewComment(@Validated @ModelAttribute("commentForm")CommentForm commentForm, BindingResult bindingResult,
+                                 @PathVariable("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException {
+        if (!bindingResult.hasErrors()) {
+            textService.addComment(customer, commentForm, textId);
+        }
         return "redirect:/show/" + textId;
     }
 
@@ -203,15 +182,14 @@ public class TextController {
 
     @PostMapping("/bookmarks/new")
     public String postNewBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
-        Text text = textService.findText(textId);
-        bookmarkService.addBookmark(text, customer);
+        bookmarkService.addBookmark(textId, customer);
         return "redirect:/show/" + textId;
 
     }
 
     @PostMapping("/bookmarks/delete")
     public String deleteBookmark(@RequestParam("textId") Long textId, @AuthenticationPrincipal Customer customer) throws NotFoundException{
-        Text text = textService.findText(textId); bookmarkService.deleteBookmark(text, customer);
+        bookmarkService.deleteBookmark(textId, customer);
         return "redirect:/show/" + textId;
     }
 

@@ -1,6 +1,7 @@
 package Lim.boardApp.service;
 
 import Lim.boardApp.ObjectValue.RoleConst;
+import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
@@ -173,7 +174,7 @@ class TextServiceTest {
 
         given(customerRepository.findById(1L)).willReturn(Optional.of(customer));
 
-        Text text = textService.createText(customer.getId(), form,hashtags);
+        Text text = textService.createText(customer.getId(), form);
 
         assertThat(text.getTitle()).isEqualTo("title123");
         assertThat(text.getContent()).isEqualTo("content123");
@@ -232,7 +233,7 @@ class TextServiceTest {
         board = new Board("soccer");
         List<Text> ret = new ArrayList<>();
         for(int i=0;i<num;i++){
-            Text text = new Text("content" + i, "title" + i, customer,board);
+            Text text = new Text("content" + i, "title" + i, customer,board, TextType.GENERAL);
             ret.add(text);
         }
         return ret;

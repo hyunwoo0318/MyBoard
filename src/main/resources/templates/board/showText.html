@@ -77,7 +77,7 @@
                             </div>
                             <div class="row">
                                 <div th:id="'addComment' + ${comment.id}" class="collapse">
-                                    <form th:action="@{../comments/new}" th:object="${commentForm}" method="post" id="commentForm">
+                                    <form th:action="@{../text/{textId}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post" id="commentForm">
                                         <div class="form-group">
                                             <input type="hidden"  name="parent" th:value="${comment.id}">
                                             <input type="hidden" name="textId" th:value="${text.id}">
@@ -101,7 +101,7 @@
                             </div>
                         </div>
                         <div id="firstComment">
-                            <form th:action="@{/comments/new}" th:object="${commentForm}" method="post">
+                            <form th:action="@{/text/{textId}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post">
                                 <div class="form-group">
                                     <input type="hidden" name="textId" th:value="${text.id}">
                                     <label for="content">댓글 내용</label>

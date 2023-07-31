@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,8 +32,8 @@ public class Comment extends BaseEntity {
     @JoinColumn(name="parent_id")
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<Comment> childCommentList;
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Comment> childCommentList = new ArrayList<>();
 
     public Comment() {
     }

@@ -31,9 +31,7 @@ public class CustomerController {
     private final CustomerService customerService;
     private final OauthService oauthService;
     private final EmailService emailService;
-
     private final TextService textService;
-    private final CommentService commentService;
     private final BookmarkService bookmarkService;
 
 
@@ -215,7 +213,7 @@ public class CustomerController {
         List<Text> textList = textService.findTextByCustomer(loginId);
         model.addAttribute("textList", textList);
 
-        List<Comment> commentList = commentService.findCommentsByCustomer(loginId);
+        List<Comment> commentList = textService.findCommentsByCustomer(loginId);
         model.addAttribute("commentList", commentList);
 
         List<Text> bookmarkedTextList = bookmarkService.findBookmarkedTextsByCustomer(loginId);

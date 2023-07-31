@@ -11,14 +11,24 @@ import java.util.List;
 
 public interface TextRepositoryCustom {
 
+    public List<Text> queryGeneralTexts();
+
+    public List<Text> queryGeneralTexts(String boardName);
+
+    public List<Text> queryArticleTexts();
+
+    public List<Text> queryArticleTexts(String boardName);
+
+    public List<Text> queryTextByBoard(String boardName);
+
+
+
+
+
     public List<Text> searchTextByContentTitle(String searchKey);
     public List<Text> searchTextByContentTitle(String searchKey,String boardName);
-
-
-
     public List<Text> searchTextByContent(String searchKey);
     public List<Text> searchTextByContent(String searchKey,String boardName);
-
     public List<Text> searchTextByTitle(String searchKey,String boardName);
     public List<Text> searchTextByTitle(String searchKey);
 

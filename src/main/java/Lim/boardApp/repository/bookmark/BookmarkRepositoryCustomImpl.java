@@ -1,5 +1,6 @@
 package Lim.boardApp.repository.bookmark;
 
+import Lim.boardApp.domain.Bookmark;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static Lim.boardApp.domain.QBookmark.bookmark;
 
@@ -31,4 +33,13 @@ public class BookmarkRepositoryCustomImpl implements BookmarkRepositoryCustom{
                 .fetch();
     }
 
+    @Override
+    public Optional<Bookmark> queryBookmark(Text text, Customer customer) {
+        Bookmark findBookmark = queryFactory.selectFrom(bookmark)
+                .where(bookmark.customer.eq(customer))
+                .where(bookmark.text.eq(text))
+                .fetchFirst();
+
+        return Optional.ofNullable(findBookmark);
+    }
 }

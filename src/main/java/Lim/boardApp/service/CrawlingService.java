@@ -7,7 +7,11 @@ import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
+import Lim.boardApp.repository.HashtagRepository;
+import Lim.boardApp.repository.bookmark.BookmarkRepository;
+import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
+import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,14 +25,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
-public class CrawlingService {
-
-    private final TextRepository textRepository;
-    private final CustomerRepository customerRepository;
-    private final BoardRepository boardRepository;
+public class CrawlingService extends BaseService{
 
     private final String baseURL = "https://sports.news.naver.com/";
+
+    public CrawlingService(TextRepository textRepository, CustomerRepository customerRepository, HashtagRepository hashtagRepository, BoardRepository boardRepository, CommentRepository commentRepository, TextHashtagRepository textHashtagRepository, BookmarkRepository bookmarkRepository) {
+        super(textRepository, customerRepository, hashtagRepository, boardRepository, commentRepository, textHashtagRepository, bookmarkRepository);
+    }
 
     public void crawlingNews(String boardName) throws IOException {
         boardRepository.findByName(boardName).orElseThrow(() ->{
@@ -102,15 +105,6 @@ public class CrawlingService {
         return null;
     }
 
-    //TODO : 기사게시판, 사진게시판, 글 게시판을 구별함(크게 각각을 만들고 그 안에서 축구,농구 등등으로 구별하기)
-    //TODO ; 사진 게시판 생성
-    //TODO : 글을 관리자도 작성가능하게 하여 관리자의 글은 설정시 항시 상단 고정
-
-    //TODO : 관리자 페이지 구현(유저 관리, 관리자는 모든 글,댓글 삭제 가능) -> 관리자의 기능 생각해보기
-    //TODO : 테스트 코드 구현하기
-
-    //TODO : Docker로 컨테이너화를 거쳐서 배포
-    //TODO : 각각의 기능에 대해서 문서화를 진행
 
 
     private enum URLName{

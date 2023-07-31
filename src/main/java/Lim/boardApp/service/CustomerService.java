@@ -3,7 +3,13 @@ package Lim.boardApp.service;
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.form.CustomerRegisterForm;
+import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
+import Lim.boardApp.repository.HashtagRepository;
+import Lim.boardApp.repository.bookmark.BookmarkRepository;
+import Lim.boardApp.repository.comment.CommentRepository;
+import Lim.boardApp.repository.text.TextRepository;
+import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,12 +33,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
-public class CustomerService implements UserDetailsService {
+public class CustomerService extends BaseService implements UserDetailsService  {
+    public CustomerService(TextRepository textRepository, CustomerRepository customerRepository, HashtagRepository hashtagRepository, BoardRepository boardRepository, CommentRepository commentRepository, TextHashtagRepository textHashtagRepository, BookmarkRepository bookmarkRepository, CustomerRepository customerRepository1, AuthenticationManagerBuilder authenticationManagerBuilder, PasswordEncoder passwordEncoder) {
+        super(textRepository, customerRepository, hashtagRepository, boardRepository, commentRepository, textHashtagRepository, bookmarkRepository);
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    private final CustomerRepository customerRepository;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final PasswordEncoder passwordEncoder;
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
+    private PasswordEncoder passwordEncoder;
 
     private final int saltSize = 20;
     public Customer findCustomer(Long id) {

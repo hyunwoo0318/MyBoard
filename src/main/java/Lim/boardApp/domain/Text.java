@@ -76,10 +76,9 @@ public class Text extends BaseEntity {
         this.textType = textType;
     }
 
-    public void updateText(String content, String title, String fileName){
+    public void updateText(String content, String title){
         this.content = content;
         this.title = title;
-        this.fileName = fileName;
     }
 
     public void setCustomer(Customer customer){

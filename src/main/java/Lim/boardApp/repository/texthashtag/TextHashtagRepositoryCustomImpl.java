@@ -43,4 +43,12 @@ public class TextHashtagRepositoryCustomImpl implements TextHashtagRepositoryCus
                 .fetch();
         return new PageImpl<>(textList, pageable, textList.size());
     }
+
+    @Override
+    public void deleteTextHashtags(Text text, List<Hashtag> hashtagList) {
+        queryFactory.delete(textHashtag)
+                .where(textHashtag.text.eq(text))
+                .where(textHashtag.hashtag.in(hashtagList))
+                .execute();
+    }
 }

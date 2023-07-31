@@ -1,8 +1,7 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
-import Lim.boardApp.ObjectValue.RoleConst;
+import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.CommentForm;
 import Lim.boardApp.form.PageForm;
@@ -15,17 +14,11 @@ import Lim.boardApp.repository.bookmark.BookmarkRepository;
 import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
-import Lim.boardApp.service.HashtagService;
 import Lim.boardApp.service.TextService;
-import de.cronn.testutils.h2.H2Util;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.convert.DataSizeUnit;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,18 +26,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.Filter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -59,7 +46,6 @@ class TextControllerTest {
 
     @Autowired
     private TextService textService;
-    @Autowired private HashtagService hashtagService;
 
     @Autowired private CustomerRepository customerRepository;
     @Autowired private BoardRepository boardRepository;
@@ -78,7 +64,7 @@ class TextControllerTest {
     private Board soccer, basketBall;
     private Customer user1, user2;
 
-    private Text text1, text2;
+    private Text text1, text2,text3, text4;
 
     private Hashtag h1,h2,h3;
 
@@ -89,35 +75,54 @@ class TextControllerTest {
         boardRepository.saveAndFlush(soccer);
         boardRepository.saveAndFlush(basketBall);
 
-        List<Customer> customerList = customerRepository.findAll();
-        user1 = customerList.get(0);
-        user2 = customerList.get(1);
+        //initUser.sql에서 insert한 회원 정보 가져오기
+        user1 = customerRepository.findByLoginId("id123").get();
+        user2 = customerRepository.findByLoginId("id456").get();
 
-        //text1,2 저장 text1 -> soccer, text2 -> basketball
+        /**
+         * text1 -> soccer, general
+         * text2 -> soccer, article
+         * text3 -> basketball, general
+         * text4 -> basketball, article
+         */
         text1 = Text.builder()
                 .board(soccer)
                 .title("title1")
                 .content("content1")
+                .textType(TextType.GENERAL)
                 .customer(user1)
                 .build();
         text2 = Text.builder()
-                .board(basketBall)
+                .board(soccer)
                 .title("title2")
                 .content("content2")
+                .textType(TextType.ARTICLE)
                 .customer(user1)
                 .build();
 
-        textRepository.saveAndFlush(text1);
-        textRepository.saveAndFlush(text2);
+        text3 = Text.builder()
+                .board(basketBall)
+                .title("title3")
+                .content("content3")
+                .textType(TextType.GENERAL)
+                .customer(user1)
+                .build();
+        text4 = Text.builder()
+                .board(basketBall)
+                .title("title4")
+                .content("content4")
+                .textType(TextType.ARTICLE)
+                .customer(user1)
+                .build();
+
+        textRepository.saveAllAndFlush(Arrays.asList(text1, text2, text3, text4));
 
         //hashtag h1,h2,h3 저장
         h1 = new Hashtag("h1");
         h2 = new Hashtag("h2");
         h3 = new Hashtag("h3");
 
-        hashtagRepository.saveAndFlush(h1);
-        hashtagRepository.saveAndFlush(h2);
-        hashtagRepository.saveAndFlush(h3);
+        hashtagRepository.saveAllAndFlush(Arrays.asList(h1, h2, h3));
     }
 
     @Nested
@@ -169,9 +174,8 @@ class TextControllerTest {
         public void showTextPagingTest() throws Exception {
             MvcResult mvcResult = mockMvc.perform(get(URL).queryParam("page", "2")).andReturn();
 
-            PageForm expectPageForm = textService.pagingByAll(2, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, "전체");
+            PageForm expectPageForm = textService.pagingByAll(2, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, "전체",null);
             assertThat(expectPageForm.equals(mvcResult.getModelAndView().getModel().get("pageForm"))).isTrue();
-
         }
 
 
@@ -187,7 +191,7 @@ class TextControllerTest {
 
     @Nested
     @DisplayName("특정 글 조회 - /show/{id}")
-    public class showTextTest {
+    public class showText {
 
         private Long textId;
         private String URL = "/show/";
@@ -215,6 +219,9 @@ class TextControllerTest {
             comment3 = new Comment(text1, user1, "comment3");
 
             commentRepository.saveAllAndFlush(Arrays.asList(comment1, comment2, comment3));
+
+            Bookmark bookmark = new Bookmark(text1, user1);
+            bookmarkRepository.saveAndFlush(bookmark);
 
             textId = text1.getId();
             URL += textId;
@@ -266,7 +273,7 @@ class TextControllerTest {
             assertThat(hashtagNameList.size()).isEqualTo(2);
             assertThat(hashtagNameList).contains("h1", "h2");
 
-            assertThat(model.get("isBookmarked")).isEqualTo(false);
+            assertThat(model.get("isBookmarked")).isEqualTo(true);
             assertThat(model.get("commentCnt")).isEqualTo(3);
 
             ArrayList<Comment> commentList = (ArrayList<Comment>) model.get("commentList");
@@ -280,14 +287,16 @@ class TextControllerTest {
     }
 
     @Nested
-    @DisplayName("글 작성 - /new")
+    @DisplayName("글 작성 - /new - 완료")
     public class makeText {
 
         private String URL = "/new";
+        private int prevSize = 0;
 
         @BeforeEach
         public void init(){
             baseInit();
+            prevSize = textRepository.findAll().size();
         }
 
         @Test
@@ -303,31 +312,36 @@ class TextControllerTest {
         @DisplayName("글 생성 성공")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void makeTextSuccessTest() throws Exception {
-            TextCreateForm form = new TextCreateForm("title4", "content4", "h1,h2,h3", "soccer", null);
+            TextCreateForm form = new TextCreateForm("title4", "content4", "h1,h2,h3", "soccer");
             MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("text", form)).andReturn();
 
-            //생성이 완료하여 게시판 메인 화면으로 리다이렉트 되는지 검증
+            Text text4 = textRepository.findByTitle("title4").get(0);
+
+            //생성이 완료하여 게시판 해당 글 조회 URL로 리다이렉트 되는지 검증
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
-            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/");
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text4.getId());
 
             //전달된 form대로 글이 잘 생성되었는지 확인
-            Text text4 = textRepository.findByTitle("title4").get(0);
             assertThat(text4.getTitle()).isEqualTo("title4");
             assertThat(text4.getContent()).isEqualTo("content4");
             assertThat(text4.getBoard().getName()).isEqualTo("soccer");
             assertThat(text4.getCustomer().getId()).isEqualTo(user1.getId());
 
-            List<Hashtag> hashtagList = textHashtagRepository.findHashtagsByText(text4);
-            List<String> hashtagNameList = hashtagList.stream().map(h -> h.getName()).collect(Collectors.toList());
-            assertThat(hashtagNameList).contains("h1", "h2", "h3");
-            assertThat(hashtagNameList.size()).isEqualTo(3);
+            //해당 글에 해시태그가 정상적으로 추가되었는지 확인
+            List<String> hashtagNameList = textHashtagRepository.findHashtagsByText(text4).stream()
+                    .map(h -> h.getName())
+                    .collect(Collectors.toList());
+            assertThat(hashtagNameList.containsAll(Arrays.asList("h1", "h2", "h3")));
+
+            //글의 정상적으로 저장 -> 글의 개수가 1개 증가했는지 확인
+            assertThat(textRepository.findAll().size()).isEqualTo(prevSize + 1);
         }
 
         @Test
-        @DisplayName("글 생성 실패")
+        @DisplayName("글 생성 실패 - DTO Validation")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void makeTextFailTest() throws Exception {
-            TextCreateForm form = new TextCreateForm("", "", "", "", null);
+        public void makeTextFailWrongDto() throws Exception {
+            TextCreateForm form = new TextCreateForm("", "", "", "");
             MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("text", form)).andReturn();
 
             //리다이렉트 되지않고 다시 글 생성 페이지로 왔는지 확인
@@ -335,7 +349,7 @@ class TextControllerTest {
             assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("board/makeText");
 
             //글이 생성되지 않음을 확인
-            assertThat(textRepository.findAll().size()).isEqualTo(2);
+            assertThat(textRepository.findAll().size()).isEqualTo(prevSize);
         }
 
 
@@ -343,8 +357,8 @@ class TextControllerTest {
     }
 
     @Nested
-    @DisplayName("글 수정 - /edit/{id}")
-    public class editTextTest {
+    @DisplayName("글 수정 - /edit/{id} - 완료")
+    public class editText {
         private String URL = "/edit/" ;
 
         @BeforeEach
@@ -352,24 +366,21 @@ class TextControllerTest {
             baseInit();
             Long textId = text1.getId();
             URL += textId;
+
+            TextHashtag textHashtag1 = new TextHashtag(text1, h1);
+            TextHashtag textHashtag2 = new TextHashtag(text1, h2);
+            textHashtagRepository.saveAllAndFlush(Arrays.asList(textHashtag1, textHashtag2));
         }
 
         @Test
         @DisplayName("다른 사람의 글을 수정하려 시도할 경우")
         @WithUserDetails(value = "id456", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void editOthersText() throws Exception {
-
             MvcResult mvcResult = mvcBuilder("get", URL);
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(403);
         }
 
-        @Test
-        @DisplayName("존재하지 않는 글을 수정하려 시도할 경우")
-        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editNotExistText() throws Exception {
-            MvcResult mvcResult = mvcBuilder("get", "/edit/-1");
-            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
-        }
+
 
         @Test
         @DisplayName("뷰 테스트")
@@ -389,9 +400,8 @@ class TextControllerTest {
             TextUpdateForm textUpdateForm = (TextUpdateForm) mvcResult.getModelAndView().getModel().get("text");
             assertThat(textUpdateForm.getContent()).isEqualTo(text1.getContent());
             assertThat(textUpdateForm.getTitle()).isEqualTo(text1.getTitle());
-          //  assertThat(textUpdateForm.getFile().getOriginalFilename()).isEqualTo(text1.getFileName());
 
-            String hashtags = hashtagService.mergeHashtag(textHashtagRepository.findHashtagsByText(text1));
+            String hashtags = textService.mergeHashtag(textHashtagRepository.findHashtagsByText(text1));
             assertThat(textUpdateForm.getHashtags()).isEqualTo(hashtags);
         }
 
@@ -400,26 +410,25 @@ class TextControllerTest {
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void editTextSuccessTest() throws Exception {
 
-            TextUpdateForm newForm = new TextUpdateForm("newTitle1", "newContent1", "11,22,33,44", null);
+            TextUpdateForm newForm = new TextUpdateForm("newTitle1", "newContent1", "11,22,33,44");
 
             MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("text", newForm)).andReturn();
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
             assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text1.getId());
 
-            Text text = textRepository.findById(text1.getId()).orElseThrow();
+            Text text = textRepository.findById(text1.getId()).get();
 
             assertThat(text.getTitle()).isEqualTo("newTitle1");
             assertThat(text.getContent()).isEqualTo("newContent1");
-//            assertThat(text.getFileName()).isEqualTo(null);
-            String hashtags = hashtagService.mergeHashtag(textHashtagRepository.findHashtagsByText(text));
+            String hashtags = textService.mergeHashtag(textHashtagRepository.findHashtagsByText(text));
             assertThat(hashtags).isEqualTo("11,22,33,44");
         }
 
         @Test
-        @DisplayName("글 수정 실패")
+        @DisplayName("글 수정 실패 - DTO Validation")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editTextFailTest() throws Exception {
-            TextUpdateForm newForm = new TextUpdateForm("", "", "", null);
+        public void editTextFailWrongDto() throws Exception {
+            TextUpdateForm newForm = new TextUpdateForm("", "", "");
 
             MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("text", newForm)).andReturn();
 
@@ -428,34 +437,37 @@ class TextControllerTest {
             Text text = textRepository.findById(text1.getId()).orElseThrow();
             assertThat(text.equals(text1)).isTrue();
         }
+
+        @Test
+        @DisplayName("존재하지 않는 글을 수정하려 시도할 경우")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editTextFailNotExistText() throws Exception {
+            MvcResult mvcResult = mvcBuilder("get", "/edit/-1");
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
+        }
     }
 
     @Nested
-    @DisplayName("글 삭제 - POST delete/{id}")
+    @DisplayName("글 삭제 - delete/{id} - 완료")
     public class deleteText{
         private String URL = "/delete/" ;
+        private int prevSize = 0;
 
         @BeforeEach
         public void init(){
             baseInit();
             Long textId = text1.getId();
             URL += textId;
+
+            prevSize = textRepository.findAll().size();
         }
 
         @Test
         @DisplayName("다른 사람의 글을 삭제하려 시도할 경우")
         @WithUserDetails(value = "id456", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void editOthersText() throws Exception {
-            MvcResult mvcResult = mvcBuilder("post", URL);
+            MvcResult mvcResult =  mvcBuilder("post", URL);
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(403);
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 글을 삭제하려 시도할 경우")
-        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void editNotExistText() throws Exception {
-            MvcResult mvcResult = mvcBuilder("post", "/delete/-1");
-            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
         }
 
         @Test
@@ -463,19 +475,39 @@ class TextControllerTest {
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void deleteTextSuccessTest() throws Exception {
             MvcResult mvcResult = mvcBuilder("post", URL);
-            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
 
+            //삭제 성공시 홈화면으로 리다이렉트 되는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/");
+
+            //삭제한 글이 더이상 존재하지 않음을 확인
             Optional<Text> textOptional = textRepository.findById(text1.getId());
             assertThat(textOptional.isEmpty()).isTrue();
+
+            //글의 개수가 1개 줄어듬을 확인
+            assertThat(textRepository.findAll().size()).isEqualTo(prevSize - 1);
+        }
+
+        @Test
+        @DisplayName("글 삭제 실패 - 존재하지 않는 글을 삭제하려 시도한경우")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void editTextFailNotExist() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", "/delete/-1");
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
+
+            //글의 개수에 변동이 없음을 확인
+            assertThat(textRepository.findAll().size()).isEqualTo(prevSize);
         }
     }
 
     @Nested
-    @DisplayName("댓글 추가 - POST comments/new")
+    @DisplayName("댓글 추가 - POST comments/new - 완료")
     public class commentsNew{
         private String URL = "/comments/new" ;
         private Long textId;
         private Comment comment1, comment2, comment3;
+
+        private int prevSize = 0;
 
         @BeforeEach
         public void init(){
@@ -494,32 +526,138 @@ class TextControllerTest {
 
             commentRepository.saveAllAndFlush(Arrays.asList(comment1, comment2, comment3));
 
-            URL += textId;
+            URL = "/text/" + textId + URL;
+
+            prevSize = commentRepository.findAll().size();
         }
 
         @Test
-        @DisplayName("댓글 생성 성공")
+        @DisplayName("댓글 생성 성공 - 댓글 작성")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        public void commentsNewSuccessTest() throws Exception {
-            CommentForm commentForm = new CommentForm("new Comment1", comment1.getId(), textId);
-            MvcResult mvcResult = mvcBuilder("get", URL);
+        public void commentsNewSuccess() throws Exception {
 
-            assertThat(commentRepository.findCommentsByCustomer(user1.getLoginId()).size()).isEqualTo(4); // 3 + 1
+            int prevTextCommentCnt = commentRepository.queryCommentByText(textId).size();
+            String newCommentContent = "new Comment1";
+            CommentForm commentForm = new CommentForm(newCommentContent, null);
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+
+            //해당 글 조회로 리다이렉트 되는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + textId);
+
+            //해당 글에 댓글이 정상적으로 추가되었는지 확인
+            List<Comment> textCommentList = commentRepository.queryCommentByText(textId);
+            assertThat(textCommentList.size()).isEqualTo(prevTextCommentCnt + 1);
+
+            //추가된 댓글의 내용 확인
+            List<Comment> newCommentList = textCommentList.stream()
+                    .filter(c -> c.getContent().equals(newCommentContent))
+                    .collect(Collectors.toList());
+
+            assertThat(newCommentList.size()).isEqualTo(1);
+            Comment newComment = newCommentList.get(0);
+            assertThat(newComment.getContent()).isEqualTo(newCommentContent);
+            assertThat(newComment.getText().getId()).isEqualTo(textId);
+            assertThat(newComment.getParent()).isNull();
+            assertThat(newComment.getChildCommentList()).usingRecursiveComparison().isEqualTo(new ArrayList<>());
+            assertThat(newComment.getCustomer().getId()).isEqualTo(user1.getId());
+
+            //댓글 전체의 개수가 1개 증가함을 확인
+            assertThat(commentRepository.findCommentsByCustomer(user1.getLoginId()).size()).isEqualTo(prevSize + 1);
         }
 
         @Test
-        @DisplayName("댓글 생성 실패")
-        public void commentsNewFailTest(){
+        @DisplayName("댓글 생성 성공 - 대댓글 작성")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void commentsHaveParentNewSuccess() throws Exception {
+            int prevTextCommentCnt = commentRepository.queryCommentByText(textId).size();
+            String newCommentContent = "new Comment1";
+            CommentForm commentForm = new CommentForm(newCommentContent, comment3.getId());
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
 
+            //해당 글 조회로 리다이렉트 되는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + textId);
+
+            //해당 글에 댓글이 정상적으로 추가되었는지 확인
+            List<Comment> textCommentList = commentRepository.queryCommentByText(textId);
+            assertThat(textCommentList.size()).isEqualTo(prevTextCommentCnt + 1);
+
+            //추가된 댓글의 내용 확인
+            List<Comment> newCommentList = textCommentList.stream()
+                    .filter(c -> c.getContent().equals(newCommentContent))
+                    .collect(Collectors.toList());
+
+            assertThat(newCommentList.size()).isEqualTo(1);
+            Comment newComment = newCommentList.get(0);
+            assertThat(newComment.getContent()).isEqualTo(newCommentContent);
+            assertThat(newComment.getText().getId()).isEqualTo(textId);
+            assertThat(newComment.getCustomer().getId()).isEqualTo(user1.getId());
+
+            /**
+             * comment3
+             *      ㄴ newComment
+             *      구조가 잘 생성되었는지 확인
+             */
+
+            assertThat(newComment.getParent().getId()).isEqualTo(comment3.getId());
+            assertThat(comment3.getChildCommentList())
+                    .usingRecursiveComparison().isEqualTo(Arrays.asList(newComment));
+
+            //댓글 전체의 개수가 1개 증가함을 확인
+            assertThat(commentRepository.findAll().size()).isEqualTo(prevSize + 1);
+        }
+
+        @Test
+        @DisplayName("댓글 생성 실패 - DTO Validation")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void commentsNewFailWrongDto() throws Exception {
+            CommentForm commentForm = new CommentForm("", null);
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+
+            //해당 글 조회로 리다이렉트되는지 검증
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + textId);
+
+            //댓글 전체의 개수에 변동이 없음을 확인
+            assertThat(commentRepository.findAll().size()).isEqualTo(prevSize);
+        }
+
+        @Test
+        @DisplayName("댓글 생성 실패 - 존재하지 않는 textId입력")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void commentsNewFailNotExistTextId() throws Exception {
+            CommentForm commentForm = new CommentForm("newComment", comment1.getId());
+
+            MvcResult mvcResult = mockMvc.perform(post("/text/-1/comments/new").flashAttr("commentForm", commentForm)).andReturn();
+
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
+
+            //댓글 전체의 개수에 변동이 없음을 확인
+            assertThat(commentRepository.findAll().size()).isEqualTo(prevSize);
+        }
+
+        @Test
+        @DisplayName("댓글 생성 실패 - 존재하지 않는 customerId입력")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void commentsNewFailNotExistCustomerId() throws Exception {
+            CommentForm commentForm = new CommentForm("newComment",-13L);
+
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
+
+            //댓글 전체의 개수에 변동이 없음을 확인
+            assertThat(commentRepository.findAll().size()).isEqualTo(prevSize);
         }
     }
 
     @Nested
-    @DisplayName("북마크 추가 - bookmarks/new")
+    @DisplayName("북마크 추가 - bookmarks/new - 완료")
     public class bookmarkNew{
 
 
-        private String URL = "/bookmarks/new/" ;
+        private String URL = "/bookmarks/new" ;
 
         @BeforeEach
         public void init(){
@@ -531,19 +669,49 @@ class TextControllerTest {
 
         @Test
         @DisplayName("북마크 추가 성공")
-        public void bookmarkNewSuccessTest(){
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void bookmarkNewSuccess() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL + "?textId=" + text2.getId());
 
+            //글 조회 화면으로 리다이렉트 되었는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text2.getId());
+
+            //북마크가 성공적으로 저장 되었는지 확인
+            Optional<Bookmark> bookmarkOptional = bookmarkRepository.queryBookmark(text2, user1);
+            assertThat(bookmarkOptional.isPresent()).isTrue();
+        }
+
+        /**
+         * 이미 북마크가 추가되어있는 경우에 추가 요청을 보내면 따로 처리를 하지않음.
+         */
+        @Test
+        @DisplayName("북마크가 이미 추가된 상태에서 추가 요청을 보낸경우")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void dupBookmarkNewSuccess() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL + "?textId=" + text1.getId());
+
+            //글 조회 화면으로 리다이렉트 되었는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text1.getId());
+
+            //북마크가 성공적으로 저장 되었는지 확인
+            Optional<Bookmark> bookmarkOptional = bookmarkRepository.queryBookmark(text1, user1);
+            assertThat(bookmarkOptional.isPresent()).isTrue();
         }
 
         @Test
-        @DisplayName("북마크가 이미 추가된 상태에서 추가 요청을 보낸경우")
-        public void dupBookmarkNewTest(){
+        @DisplayName("북마크 추가 실패 - 존재하지 않는 textId입력")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void bookmarkNewFailNotExistTextId() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL + "?textId=-13" );
 
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
         }
     }
 
     @Nested
-    @DisplayName("북마크 추가 - bookmarks/delete")
+    @DisplayName("북마크 삭제 - bookmarks/delete - 완료")
     public class bookmarkDelete{
 
 
@@ -558,15 +726,42 @@ class TextControllerTest {
         }
 
         @Test
-        @DisplayName("북마크가 추가되지 않은 상태에서 삭제 요청")
-        public void dupBookmarkDeleteTest(){
+        @DisplayName("북마크 삭제 성공")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void bookmarkDeleteSuccess() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL + "?textId=" + text1.getId());
 
+            //글 조회 화면으로 리다이렉트 되었는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text1.getId());
+
+            //북마크가 성공적으로 삭제되었는지 확인
+            Optional<Bookmark> bookmarkOptional = bookmarkRepository.queryBookmark(text1, user1);
+            assertThat(bookmarkOptional.isEmpty()).isTrue();
         }
 
         @Test
-        @DisplayName("북마크 삭제 성공")
-        public void bookmarkDeleteSuccessTest(){
+        @DisplayName("북마크가 추가되지 않은 상태에서 삭제 요청")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void dupBookmarkDeleteTest() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL + "?textId=" + text2.getId());
 
+            //글 조회 화면으로 리다이렉트 되었는지 확인
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
+            assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo("/show/" + text2.getId());
+
+            //북마크가 성공적으로 삭제되었는지 확인
+            Optional<Bookmark> bookmarkOptional = bookmarkRepository.queryBookmark(text2, user1);
+            assertThat(bookmarkOptional.isEmpty()).isTrue();
+        }
+
+        @Test
+        @DisplayName("북마크 삭제 실패 - 존재하지 않는 textId입력")
+        @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        public void bookmarkDeleteSuccessTest() throws Exception {
+            MvcResult mvcResult = mvcBuilder("post", URL + "?textId=-13" );
+
+            assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
         }
 
 
@@ -578,7 +773,7 @@ class TextControllerTest {
         if (method.equals("get")) {
             return mockMvc.perform(get(URL)).andReturn();
         } else if(method.equals("post")){
-            return mockMvc.perform(get(URL)).andReturn();
+            return mockMvc. perform(post(URL)).andReturn();
         }
         return null;
     }
