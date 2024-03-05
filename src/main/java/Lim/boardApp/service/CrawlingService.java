@@ -7,12 +7,10 @@ import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.repository.HashtagRepository;
-import Lim.boardApp.repository.bookmark.BookmarkRepository;
-import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
-import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,26 +20,29 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class CrawlingService extends BaseService{
+@RequiredArgsConstructor
+public class CrawlingService {
 
     private final String baseURL = "https://sports.news.naver.com/";
+    private final TextRepository textRepository;
 
-    public CrawlingService(TextRepository textRepository, CustomerRepository customerRepository, HashtagRepository hashtagRepository, BoardRepository boardRepository, CommentRepository commentRepository, TextHashtagRepository textHashtagRepository, BookmarkRepository bookmarkRepository) {
-        super(textRepository, customerRepository, hashtagRepository, boardRepository, commentRepository, textHashtagRepository, bookmarkRepository);
-    }
+    private final BoardRepository boardRepository;
+    private final CustomerRepository customerRepository;
 
     public void crawlingNews(String boardName) throws IOException {
-        boardRepository.findByName(boardName).orElseThrow(() ->{
-            throw new NotFoundException();
-        });
+        boardRepository
+                .findByName(boardName)
+                .orElseThrow(
+                        () -> {
+                            throw new NotFoundException();
+                        });
         String urlName = findUrl(boardName);
         if (urlName == null) {
             throw new NotFoundException();
         }
-        String url = baseURL + urlName +  "/index";
+        String url = baseURL + urlName + "/index";
         Document doc = Jsoup.connect(url).get();
 
         Elements elements = doc.select("div.home_news > ul.home_news_list > li > a");
@@ -62,7 +63,7 @@ public class CrawlingService extends BaseService{
             String contentHtml = document.selectFirst("div#newsEndContents").html();
             String content = Jsoup.parse(contentHtml).wholeText();
 
-            //본문 내용만 발췌
+            // 본문 내용만 발췌
             int idx = content.indexOf("기사제공");
             if (idx != -1) {
                 content = content.substring(0, idx);
@@ -72,13 +73,13 @@ public class CrawlingService extends BaseService{
                 continue;
             }
 
-            //3줄 이상의 줄바꿈은 2줄 줄바꿈으로 변경
+            // 3줄 이상의 줄바꿈은 2줄 줄바꿈으로 변경
             content = content.replaceAll("\\n{3,}", "\n\n");
-
 
             Customer autoBot = customerRepository.findByName("auto-bot").get();
             Board board = boardRepository.findByName(boardName).get();
-            Text text = Text.builder()
+            Text text =
+                    Text.builder()
                             .customer(autoBot)
                             .title(title)
                             .content(content)
@@ -105,10 +106,7 @@ public class CrawlingService extends BaseService{
         return null;
     }
 
-
-
-    private enum URLName{
-
+    private enum URLName {
         SOCCER("축구", "wfootball"),
         BASKETBALL("농구", "basketball"),
         GOLF("골프", "golf"),

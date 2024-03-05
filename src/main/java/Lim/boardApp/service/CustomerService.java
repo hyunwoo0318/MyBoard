@@ -1,19 +1,25 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.Exception.NotFoundException;
+import static Lim.boardApp.Exception.ExceptionInfo.DUP_EMAIL;
+import static Lim.boardApp.Exception.ExceptionInfo.DUP_LOGIN_ID;
+import static Lim.boardApp.Exception.ExceptionInfo.INVALID_PASSWORD_CHECK;
+import static Lim.boardApp.Exception.ExceptionInfo.LOGIN_FAIL;
+import static Lim.boardApp.Exception.ExceptionInfo.NOT_FOUND;
+
+import Lim.boardApp.Exception.CustomException;
+import Lim.boardApp.domain.Bookmark;
+import Lim.boardApp.domain.Comment;
 import Lim.boardApp.domain.Customer;
+import Lim.boardApp.domain.Text;
+import Lim.boardApp.dto.CustomerProfileDto;
 import Lim.boardApp.form.CustomerRegisterForm;
-import Lim.boardApp.repository.BoardRepository;
+import Lim.boardApp.form.LoginForm;
+import Lim.boardApp.form.PasswordChangeForm;
 import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.repository.HashtagRepository;
-import Lim.boardApp.repository.bookmark.BookmarkRepository;
-import Lim.boardApp.repository.comment.CommentRepository;
-import Lim.boardApp.repository.text.TextRepository;
-import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
+
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.utility.RandomString;
+
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -24,153 +30,139 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Service
-public class CustomerService extends BaseService implements UserDetailsService  {
-    public CustomerService(TextRepository textRepository, CustomerRepository customerRepository, HashtagRepository hashtagRepository, BoardRepository boardRepository, CommentRepository commentRepository, TextHashtagRepository textHashtagRepository, BookmarkRepository bookmarkRepository, CustomerRepository customerRepository1, AuthenticationManagerBuilder authenticationManagerBuilder, PasswordEncoder passwordEncoder) {
-        super(textRepository, customerRepository, hashtagRepository, boardRepository, commentRepository, textHashtagRepository, bookmarkRepository);
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
-        this.passwordEncoder = passwordEncoder;
-    }
+@RequiredArgsConstructor
+public class CustomerService implements UserDetailsService {
 
-    private AuthenticationManagerBuilder authenticationManagerBuilder;
-    private PasswordEncoder passwordEncoder;
-
-    private final int saltSize = 20;
-    public Customer findCustomer(Long id) {
-        return customerRepository.findById(id).orElse(null);
-    }
-
-    public Customer findCustomer(String loginId){
-        return customerRepository.findByLoginId(loginId).orElseThrow(() ->{
-            throw new NotFoundException();
-        });
-    }
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final PasswordEncoder passwordEncoder;
+    private final CustomerRepository customerRepository;
 
     public Customer findCustomerByEmail(String email) {
         return customerRepository.findByEmail(email).orElse(null);
     }
 
+    @Transactional
+    public void addCustomer(CustomerRegisterForm form) {
 
-    public void addCustomer(CustomerRegisterForm form){
-        Customer customer = Customer.builder()
-                .age(form.getAge())
-                .loginId(form.getLoginId())
-                .password(passwordEncoder.encode(form.getPassword()))
-                .email(form.getEmail())
-                .kakaoId(form.getKakaoId())
-                .name(form.getName())
-                .role("USER")
-                .build();
+        // 로그인아이디 중복 체크
+        if (dupLoginId(form.getLoginId())) throw new CustomException(DUP_LOGIN_ID);
+
+        // 이메일 중복 체크
+        if (dupEmail(form.getEmail())) throw new CustomException(DUP_EMAIL);
+
+        // 비밀번호와 비밀번호 확인이 같은지 체크
+        if (!form.getPassword().equals(form.getPasswordCheck()))
+            throw new CustomException(INVALID_PASSWORD_CHECK);
+
+        Customer customer =
+                Customer.builder()
+                        .age(form.getAge())
+                        .loginId(form.getLoginId())
+                        .password(passwordEncoder.encode(form.getPassword()))
+                        .email(form.getEmail())
+                        .kakaoId(form.getKakaoId())
+                        .name(form.getName())
+                        .role("USER")
+                        .build();
 
         customerRepository.save(customer);
     }
 
-    public boolean changePassword(String password, Long id) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(id);
-        if(optionalCustomer.isEmpty()){
-            return false;
+    public void changePassword(PasswordChangeForm form, Long id) {
+
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> {
+                                    throw new CustomException(NOT_FOUND);
+                                });
+
+        if (!form.getPassword().equals(form.getPasswordCheck())) {
+            throw new CustomException(INVALID_PASSWORD_CHECK);
         }
-        optionalCustomer.get().changePassword(passwordEncoder.encode(password));
-        return true;
+
+        customer.changePassword(passwordEncoder.encode(form.getPassword()));
     }
+
     @Transactional
-    public Customer login(String inputLoginId, String inputPassword){
+    public void login(LoginForm form) {
 
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(inputLoginId, inputPassword);
-        Authentication authentication;
-        try{
-            AuthenticationManager object = authenticationManagerBuilder.getObject();
-            authentication = object.authenticate(token);
-//            authentication = authenticationManagerBuilder.getObject().authenticate(token);
-        }catch (BadCredentialsException e){
-            return null;
-        }
+        String inputLoginId = form.getLoginId();
 
-        //로그인 성공
-        Customer customer = customerRepository.findByLoginId(inputLoginId).get();
+        // 로그인 성공
+        customerRepository
+                .findByLoginId(inputLoginId)
+                .ifPresentOrElse(
+                        (findCustomer) -> {
+                            UsernamePasswordAuthenticationToken token =
+                                    new UsernamePasswordAuthenticationToken(
+                                            form.getLoginId(), form.getPassword());
+                            AuthenticationManager object = authenticationManagerBuilder.getObject();
+                            Authentication authentication = object.authenticate(token);
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(authentication);
-
-        return customer;
+                            SecurityContext securityContext = SecurityContextHolder.getContext();
+                            securityContext.setAuthentication(authentication);
+                        },
+                        () -> {
+                            throw new CustomException(LOGIN_FAIL);
+                        });
     }
 
-
-    //로그아웃
+    // 로그아웃
     public void logout(HttpServletRequest request) {
         request.getSession().invalidate();
     }
 
-    public boolean dupLoginId(String loginId){
+    public boolean dupLoginId(String loginId) {
         Optional<Customer> dup = customerRepository.findByLoginId(loginId);
-        if(dup.isEmpty()) return false;
-        else return true;
+        return dup.isPresent();
     }
 
-    public boolean dupEmail(CustomerRegisterForm customerRegisterForm) {
-        Optional<Customer> dup = customerRepository.findByEmail(customerRegisterForm.getEmail());
-        if (dup.isEmpty()) return false;
-        else return true;
-    }
-
-    //카카오 로그인
-    public Customer findKakao(Long kakaoId){
-        Optional<Customer> customerOptional = customerRepository.findByKakaoId(kakaoId);
-        List<Customer> all = customerRepository.findAll();
-        return customerOptional.orElse(null);
-    }
-
-
-    //비밀번호 해시화
-    public String makeSalt(int length){
-        RandomString salt = new RandomString(length);
-        return salt.nextString();
-    }
-
-    public String hashPassword(String password, String salt){
-        try{
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update((password + salt).getBytes());
-            byte[] digest = md.digest();
-            StringBuilder builder = new StringBuilder();
-            for (byte b : digest) {
-                builder.append(String.format("%02X", b));
-            }
-            return builder.toString();
-        }catch(NoSuchAlgorithmException e){
-            e.getMessage();
-            return null;
-        }
-    }
-
-    public PasswordPair parsePasswordHash(String passwordHash){
-        return new PasswordPair(passwordHash.substring(0, 64), passwordHash.substring(64));
+    public boolean dupEmail(String email) {
+        Optional<Customer> dup = customerRepository.findByEmail(email);
+        return dup.isPresent();
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Customer customer = customerRepository.findByLoginId(username).orElseThrow(() -> new UsernameNotFoundException("등록되지 않은 회원입니다."));
+        Customer customer =
+                customerRepository
+                        .findByLoginId(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("등록되지 않은 회원입니다."));
         return customer;
     }
 
-    private class PasswordPair {
-        public String passwordHash;
-        public String salt;
+    @Transactional(readOnly = true)
+    public CustomerProfileDto getCustomerProfile(String loginId) {
+        Customer customer =
+                customerRepository
+                        .findByLoginId(loginId)
+                        .orElseThrow(() -> new CustomException(NOT_FOUND));
 
-        private PasswordPair(String passwordHash, String salt){
-            this.passwordHash= passwordHash;
-            this.salt = salt;
-        }
+        List<Text> textList = customer.getTextList();
+        List<Comment> commentList = customer.getCommentList();
+        List<Text> bookmarkedTextList =
+                customer.getBookmarkList().stream()
+                        .map(Bookmark::getText)
+                        .collect(Collectors.toList());
+
+        return new CustomerProfileDto(
+                customer.getLoginId(),
+                customer.getEmail(),
+                customer.getName(),
+                customer.getAge(),
+                textList,
+                commentList,
+                bookmarkedTextList);
     }
-
 }
-
-

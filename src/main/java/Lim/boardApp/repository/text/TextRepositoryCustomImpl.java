@@ -4,6 +4,7 @@ import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,8 +13,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static Lim.boardApp.domain.QBoard.board;
 import static Lim.boardApp.domain.QBookmark.bookmark;
 import static Lim.boardApp.domain.QComment.comment;
+import static Lim.boardApp.domain.QCustomer.customer;
 import static Lim.boardApp.domain.QHashtag.hashtag;
 import static Lim.boardApp.domain.QText.*;
 import static Lim.boardApp.domain.QTextHashtag.textHashtag;
@@ -59,6 +62,17 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom{
         return queryFactory.selectFrom(text)
                 .where(text.board.name.eq(boardName))
                 .fetch();
+    }
+
+    @Override
+    public Optional<Text> queryText(Long textId) {
+        Text findText = queryFactory.selectFrom(text)
+            .leftJoin(text.board, board).fetchJoin()
+            .leftJoin(text.commentList).fetchJoin()
+            .leftJoin(text.customer, customer).fetchJoin()
+            .where(text.id.eq(textId))
+            .fetchOne();
+        return Optional.ofNullable(findText);
     }
 
     @Override

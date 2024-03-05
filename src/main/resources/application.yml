@@ -1,13 +1,11 @@
 spring:
   messages:
     basename: application, errors
-  config:
-    import: local.yml
 
   datasource:
-     url :  jdbc:h2:tcp://localhost/~/boardApp
+     url :  jdbc:h2:mem:boardApp
      username : sa
-     password : sa
+     password :
      driver-class-name : org.h2.Driver
 
   redis:
@@ -54,27 +52,12 @@ spring:
             enable: true
           socketFactory:
             class: javax.net.ssl.SSLSocketFactory
+    username: whskwock
+    password: naverboard123
 
   security:
-    oauth2:
-      client:
-        registration:
-          kakao:
-            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
-            client-authentication-method: POST
-            authorization-grant-type: authorization_code
-            scope:
-            client-name: Kakao
-        provider:
-          kakao:
-            authorization_uri: https://kauth.kakao.com/oauth/authorize
-            token_uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/me
-            user_name_attribute: id
 
 
-admin:
-  password: admin123123
 
 
 file:
@@ -88,13 +71,6 @@ jasypt:
     string-output-type: base64
     key-obtention-iterations: 100000
     password: password
-
-logging:
-  level:
-    org:
-      apache:
-        coyote:
-          http11: trace
 
 
 

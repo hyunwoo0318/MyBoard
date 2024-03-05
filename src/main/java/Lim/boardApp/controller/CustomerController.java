@@ -1,27 +1,28 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.Exception.NotFoundException;
-import Lim.boardApp.ObjectValue.KakaoConst;
-import Lim.boardApp.domain.Comment;
+import Lim.boardApp.Exception.BindingResultHelper;
+import Lim.boardApp.Exception.CustomException;
 import Lim.boardApp.domain.Customer;
-import Lim.boardApp.domain.Text;
+import Lim.boardApp.dto.CustomerProfileDto;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.EmailAuthForm;
 import Lim.boardApp.form.LoginForm;
 import Lim.boardApp.form.PasswordChangeForm;
 import Lim.boardApp.service.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import javax.validation.Valid;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,67 +30,39 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
-    private final OauthService oauthService;
     private final EmailService emailService;
-    private final TextService textService;
-    private final BookmarkService bookmarkService;
 
-
-    /**
-     * 회원가입 화면 -> 폼을 입력받아 회원가입을 진행하고 카카오톡 계정 연동까지 가능함
-     */
-    //회원가입 화면
+    // 회원가입 화면
     @GetMapping("/register")
-    public String getAddCustomer(@RequestParam(value = "kakao-id",required = false) Long kakaoId,
-                                  Model model) {
-        CustomerRegisterForm customerRegisterForm = new CustomerRegisterForm();
-        model.addAttribute("customer", customerRegisterForm);
-
-        if(kakaoId != null){
-            Customer customerKakao = customerService.findKakao(kakaoId);
-            if (customerKakao == null) {
-                model.addAttribute("isKakao", true);
-                model.addAttribute("kakaoId", kakaoId);
-            }else{
-                model.addAttribute("dupKakao", true);
-            }
-
-        }
+    public String getAddCustomer(Model model) {
+        model.addAttribute("customer", new CustomerRegisterForm());
 
         return "customer/addCustomer";
     }
 
-    //일반회원가입
+    // 일반회원가입
     @PostMapping("/register")
-    public String postAddCustomer(@Validated @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm, BindingResult bindingResult) {
+    public String postAddCustomer(
+            @Valid @ModelAttribute("customer") CustomerRegisterForm customerRegisterForm,
+            BindingResult bindingResult) {
 
-       if(customerService.dupLoginId(customerRegisterForm.getLoginId()))
-           bindingResult.reject("dupLoginId", "이미 등록된 아이디입니다.");
-
-        if(customerService.dupEmail(customerRegisterForm))
-            bindingResult.reject("dupEmail", "이미 등록된 이메일주소입니다.");
-
-       if(!customerRegisterForm.getPassword().equals(customerRegisterForm.getPasswordCheck()))
-           bindingResult.reject("wrongPasswordInput", "입력하신 비밀번호와 비밀번호 확인이 다릅니다.");
-
-        if(bindingResult.hasErrors()){
+        //DTO Validation Check
+        if (bindingResult.hasErrors()) {
             return "customer/addCustomer";
         }
 
+        try{
+            customerService.addCustomer(customerRegisterForm);
+            return "redirect:/";
+        }catch (CustomException customException){
+            BindingResultHelper.setBindingResult(customException, bindingResult);
+            return "customer/addCustomer";
+        }
 
-        customerService.addCustomer(customerRegisterForm);
-        return "redirect:/";
     }
 
-    /**
-     * 로그인 구현 -> 아이디&비밀번호, 카카오 로그인 구현
-     * 로그인 성공시 spring security에서 알아서 session을 넣어줌
-     */
     @GetMapping("/customer-login")
-    public String loginForm(@RequestParam(value = "error", required = false) String error,Model model) {
-        if(error != null && error.equals("kakao_user_not_found")){
-            model.addAttribute("kakao_user_not_found", "해당 카카오 아이디와 연동된 회원이 존재하지 않습니다.");
-        }
+    public String loginForm(Model model) {
         LoginForm loginForm = new LoginForm();
 
         model.addAttribute("loginForm", loginForm);
@@ -97,81 +70,62 @@ public class CustomerController {
     }
 
     @PostMapping("/customer-login")
-    public String login(@RequestParam(value = "error", required = false, defaultValue = "") String error
-            ,@Validated @ModelAttribute LoginForm form,BindingResult bindingResult){
-        if(error.equals("kakao-user-not-found")){
-            bindingResult.reject("kakao-user-not-found", "해당 카카오 아이디와 연동된 회원이 존재하지 않습니다.");
-        }
-        if (bindingResult.hasErrors()) {
-            return "customer/login";
-        }
-        Customer loginCustomer = customerService.login(form.getLoginId(), form.getPassword());
+    public String login(@Valid @ModelAttribute LoginForm form, BindingResult bindingResult) {
 
-        if (loginCustomer == null) { //로그인 실패
-            bindingResult.reject("loginFail","존재하지 않는 아이디이거나 잘못된 비밀번호입니다.");
+        //DTO Validation check
+        if(bindingResult.hasErrors()){
             return "customer/login";
         }
 
-        return "redirect:/";
+        try{
+            customerService.login(form);
+            return "redirect:/";
+        }catch (CustomException customException){
+            BindingResultHelper.setBindingResult(customException, bindingResult);
+            return "customer/login";
+        } catch (BadCredentialsException badCredentialsException){
+            bindingResult.reject("loginFail", "로그인에 실패했습니다.");
+            return "customer/login";
+        }
     }
 
     @PostMapping("/logout")
-    public String logout(HttpServletRequest request){
+    public String logout(HttpServletRequest request) {
         customerService.logout(request);
         return "redirect:/";
     }
 
-    /**
-     * 소셜 회원가입은 직접 api 서버와 연결해서 원하는 정보를 받아옴
-     */
-    @GetMapping("/kakao/register")
-    public String redirectionToKakaoRegister(){
-        String loginUrl = "https://kauth.kakao.com/oauth/authorize?client_id=" + KakaoConst.KEY + "&redirect_uri="
-                + KakaoConst.REDIRECT_URL_REG + "&response_type=code";
-        return "redirect:"+ loginUrl;
-    }
+    /** 가입시 등록한 이메일을 통해 비밀번호 찾기 구현 */
 
-    @GetMapping("/oauth/kakao/register")
-    public String kakaoRegister(@RequestParam("code")String code){
-        String accessToken = oauthService.getKakaoToken(code);
-        Long kakaoId = oauthService.getUserID(accessToken);
-
-            return "redirect:/register?kakao-id=" + kakaoId;
-        }
-
-    /**
-     * 가입시 등록한 이메일을 통해 비밀번호 찾기 구현
-     */
-
-    //비밀번호 찾기 -> 이메일 인증
+    // 비밀번호 찾기 -> 이메일 인증
     @GetMapping("/find-password")
-    public String emailAuthView (Model model){
+    public String emailAuthView(Model model) {
         EmailAuthForm emailAuthForm = new EmailAuthForm();
         model.addAttribute("emailAuthForm", emailAuthForm);
         return "customer/emailAuth";
     }
 
     @PostMapping("/find-password")
-    public String emailAuthCheck(@Validated @ModelAttribute EmailAuthForm emailAuthForm, BindingResult bindingResult){
-        if(!emailService.checkEmailAuth(emailAuthForm.getEmail(), emailAuthForm.getEmailAuth())){
-            //인증 실패
-            bindingResult.reject("authFail", "이메일 인증에 실패하였습니다. 다시 정확하게 입력해주세요.");
-        }
+    public String emailAuthCheck(
+            @Valid @ModelAttribute EmailAuthForm emailAuthForm, BindingResult bindingResult) {
 
+        //DTO Validation Check
         if (bindingResult.hasErrors()) {
             return "customer/emailAuth";
-            //인증 성공
-
         }
-        Customer customer = customerService.findCustomerByEmail(emailAuthForm.getEmail());
-            Long id = customer.getId();
-            return "redirect:/new-password?id=" + id;
 
+        try{
+            Long customerId = emailService.checkEmailAuth(emailAuthForm.getEmail(),
+                emailAuthForm.getEmailAuth());
+
+            return "redirect:/new-password?id=" + customerId;
+        }catch (CustomException customException){
+            BindingResultHelper.setBindingResult(customException, bindingResult);
+            return "customer/emailAuth";
+        }
     }
 
-    /**
-     * 이메일 인증이 성공하면 새로운 비밀번호로 변경 (기존의 비밀번호는 알수없음)
-     */
+    /** 이메일 인증이 성공하면 새로운 비밀번호로 변경 (기존의 비밀번호는 알수없음) */
     @GetMapping("/new-password")
     public String newPassword(Model model) {
         PasswordChangeForm form = new PasswordChangeForm();
@@ -180,49 +134,47 @@ public class CustomerController {
     }
 
     @PostMapping("/new-password")
-    public String newPasswordPost(@Validated @ModelAttribute("form") PasswordChangeForm form, BindingResult bindingResult, @RequestParam("id") Long id) throws NotFoundException {
-        Customer customer = customerService.findCustomer(id);
+    public String newPasswordPost(
+            @Validated @ModelAttribute("form") PasswordChangeForm form, BindingResult bindingResult,
+            @RequestParam("id") Long id) {
 
-        if (!form.getPassword().equals(form.getPasswordCheck())) {
-            bindingResult.reject("wrongPasswordInput","입력하신 비밀번호와 비밀번호 입력이 동일하지 않습니다. 다시 입력해주세요");
-        }
+        //DTO Validation check
         if (bindingResult.hasErrors()) {
             return "customer/newPassword";
         }
-        customerService.changePassword(form.getPassword(), id);
-        return "customer/changePasswordSuccess";
+
+        try{
+            customerService.changePassword(form, id);
+            return "customer/changePasswordSuccess";
+        }catch (CustomException customException){
+            BindingResultHelper.setBindingResult(customException, bindingResult);
+            return "customer/newPassword";
+        }
     }
 
-    /**
-     * 내 정보 확인
-     */
+    /** 내 정보 확인 */
     @GetMapping("/profiles/{loginId}")
-    public String getProfile(@PathVariable("loginId") String loginId,@AuthenticationPrincipal Customer customer, Model model){
+    public String getProfile(
+            @PathVariable("loginId") String loginId,
+            @AuthenticationPrincipal Customer customer,
+            BindingResult bindingResult,
+            Model model) {
+
         if (!customer.getLoginId().equals(loginId)) {
             return "redirect:/";
         }
 
-        Customer curCustomer = customerService.findCustomer(loginId);
+        try{
+            CustomerProfileDto customerProfileDto = customerService.getCustomerProfile(loginId);
 
-        //아이디, 나이, 이름, 이메일, 작성 글 제목 리스트, 작성 댓글 리스트, 북마크한 글 리스트
-        model.addAttribute("loginId", curCustomer.getLoginId());
-        model.addAttribute("email", curCustomer.getEmail());
-        model.addAttribute("name", curCustomer.getName());
-        model.addAttribute("age", curCustomer.getAge());
+            model.addAttribute("customerProfile", customerProfileDto);
+            return "customer/profile";
+        } catch (CustomException customException){
+            BindingResultHelper.setBindingResult(customException, bindingResult);
+            return "redirect:/";
+        }
 
-        List<Text> textList = textService.findTextByCustomer(loginId);
-        model.addAttribute("textList", textList);
 
-        List<Comment> commentList = textService.findCommentsByCustomer(loginId);
-        model.addAttribute("commentList", commentList);
-
-        List<Text> bookmarkedTextList = bookmarkService.findBookmarkedTextsByCustomer(loginId);
-        model.addAttribute("bookmarkedTextList", bookmarkedTextList);
-
-        return "customer/profile";
 
     }
-
 }
-
-

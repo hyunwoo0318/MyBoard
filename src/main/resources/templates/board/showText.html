@@ -10,14 +10,14 @@
         <nav th:replace="fragment/header.html">header</nav>
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 th:text="${text.getTitle()}">글 제목</h1>
+                <h1 th:text="${textDto.getTitle()}">글 제목</h1>
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-8" th:text="${text.getCustomer().getName()}">작성자</div>
-                            <div class="col-md-3 text-md-end" th:text="${text.getCreatedTime()}">작성 날짜</div>
+                            <div class="col-md-8" th:text="${textDto.getCustomerName()}">작성자</div>
+                            <div class="col-md-3 text-md-end" th:text="${textDto.getCreatedTime()}">작성 날짜</div>
                             <div class="col-md-1 text-md-end">
-                                <div th:if="${isBookmarked == false}" class="mt-auto">
+                                <div th:if="${textDto.isBookmarked == false}" class="mt-auto">
                                     <form th:action="@{/bookmarks/new}" th:method="post">
                                         <input type="hidden" name="textId" th:value="${textId}">
                                         <button class="btn" type="submit">
@@ -28,7 +28,7 @@
                                         </button>
                                     </form>
                                 </div>
-                                <div th:if="${isBookmarked == true}" class="mt-auto">
+                                <div th:if="${textDto.isBookmarked == true}" class="mt-auto">
                                     <form th:action="@{/bookmarks/delete}" th:method="post">
                                         <input type="hidden" name="textId" th:value="${textId}">
                                         <button class="btn" type="submit">
@@ -42,29 +42,29 @@
                         </div>
                         <div class="row">
                             <div class="text-md-end">
-                                <small th:text="|조회수 : ${text.viewCount}|"></small>
+                                <small th:text="|조회수 : ${textDto.getViewCnt()}|"></small>
                             </div>
                         </div>
                         <hr style="width: 100%"/>
                         <div>
                            <p style="white-space: pre-wrap;"
-                              th:text="${text.getContent()}">글 내용</p>
+                              th:text="${textDto.getContent()}">글 내용</p>
                         </div>
                         <hr style="width: 100%"/>
                         <div>
                             <h5 class="card-title h6">Hashtags</h5>
-                            <a th:each="hashtag : ${hashtagList}">
+                            <a th:each="hashtag : ${textDto.hashtagList}">
                                 <a class="badge bg-primary me-1 my-1" th:text="${hashtag.name}" th:onclick="|location.href='@{/?searchKey={name}&type=hashtag(name=${hashtag.name})}'|">해시태그</a>
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-header" th:text="'댓글 ' +  ${commentCnt} + '개'"></div>
+                    <div class="card-header" th:text="'댓글 ' +  ${textDto.getCommentList().size()} + '개'"></div>
                     <div class="card-body">
-                        <div th:each="comment : ${commentList}">
+                        <div th:each="comment : ${textDto.getCommentList()}">
                             <div class="row border bg-light d-flex">
-                                <p class="col-auto mt-auto" th:text="${comment.customer.name}"></p>
+                                <p class="col-auto mt-auto" th:text="${comment.getCustomerName()}"></p>
                                 <p class="col-auto mt-auto ms-auto" th:text="${comment.createdTime}"></p>
                             </div>
                             <div class="row border-bottom d-flex">
@@ -77,10 +77,10 @@
                             </div>
                             <div class="row">
                                 <div th:id="'addComment' + ${comment.id}" class="collapse">
-                                    <form th:action="@{../text/{textId}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post" id="commentForm">
+                                    <form th:action="@{../text/${textDto.getId()}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post" id="commentForm">
                                         <div class="form-group">
                                             <input type="hidden"  name="parent" th:value="${comment.id}">
-                                            <input type="hidden" name="textId" th:value="${text.id}">
+                                            <input type="hidden" name="textId" th:value="${textDto.getId()}">
                                             <label for="content">대댓글 작성</label>
                                             <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                                         </div>
@@ -91,7 +91,7 @@
                             <div style="margin-left : 30px" th:if="${not #lists.isEmpty(comment.childCommentList)}">
                                 <div th:each="childComment : ${comment.childCommentList}">
                                     <div class="row border bg-light d-flex">
-                                        <p class="col-auto mt-auto" th:text="${childComment.customer.name}"></p>
+                                        <p class="col-auto mt-auto" th:text="${childComment.customerName}"></p>
                                         <p class="col-auto mt-auto ms-auto" th:text="${childComment.createdTime}"></p>
                                     </div>
                                     <div class="row border-bottom d-flex">
@@ -103,7 +103,7 @@
                         <div id="firstComment">
                             <form th:action="@{/text/{textId}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post">
                                 <div class="form-group">
-                                    <input type="hidden" name="textId" th:value="${text.id}">
+                                    <input type="hidden" name="textId" th:value="${textDto.getId()}">
                                     <label for="content">댓글 내용</label>
                                     <textarea class="form-control" name="content" rows="3" required></textarea>
                                 </div>
@@ -117,10 +117,10 @@
                         <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/}'|">목록으로</button>
                     </div>
                     <div class="col-md-3 text-md-end">
-                        <button class="btn btn-secondary" th:if="${owner}" type="button" th:onclick="|location.href='@{/edit/{id}(id=${text.id})}'|">글 수정</button>
+                        <button class="btn btn-secondary" th:if="${textDto.textOwn}" type="button" th:onclick="|location.href='@{/edit/{id}(id=${textDto.id})}'|">글 수정</button>
                     </div>
                     <div class="col-md-3">
-                        <form th:if="${owner}" th:action="@{/delete/{id}(id=${text.id})}" th:object="${text}" th:method="post">
+                        <form th:if="${textDto.getTextOwn()}" th:action="@{/delete/{id}(id=${textDto.id})}" th:object="${textDto}" th:method="post">
                             <button class="btn btn-secondary " type="submit">글 삭제</button>
                         </form>
                     </div>

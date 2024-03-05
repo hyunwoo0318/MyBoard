@@ -1,7 +1,7 @@
 package Lim.boardApp.configuration;
 
-import Lim.boardApp.service.OauthService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,11 +16,11 @@ import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final OauthService oauthService;
+
     private final RedisIndexedSessionRepository sessionRepository;
 
-    private final String[] loginWhiteList = {"/static/**","/css/**","/*.ico","/error", "/","/customer-login/**", "/logout/**", "/register/**","/oauth/**","/kakao/**","/auth/**",
-            "/swagger-ui/**","/js/**", "/api/**", "/find-password/**", "/new-password/**", "/#", "/news", "/img/**"};
+    private final String[] loginWhiteList = {"/static/**","/css/**","/*.ico","/error", "/","/customer-login/**", "/logout/**", "/register/**","/oauth/**","/oauth2/**","/kakao/**","/auth/**",
+            "/swagger-ui/**","/js/**", "/api/**", "/find-password/**", "/new-password/**", "/#", "/news", "/img/**","/", "/customer-login"};
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -30,13 +30,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         return http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(loginWhiteList).permitAll()
-                .anyRequest().authenticated().and()
-                .oauth2Login().loginPage("/customer-login")
-                .failureHandler(customAuthenticationFailureHandler())
-                .userInfoEndpoint().userService(oauthService)
-                .and().and()
-                .build();
+                 .anyRequest().permitAll()
+//                .antMatchers(loginWhiteList).permitAll()
+//                .anyRequest().authenticated().and()
+            .and().build();
     }
 
     @Bean

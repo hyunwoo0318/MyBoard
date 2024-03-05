@@ -2,8 +2,8 @@ package Lim.boardApp.controller;
 
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.PageConst;
-import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
+import Lim.boardApp.dto.TextQueryDto;
 import Lim.boardApp.form.*;
 import Lim.boardApp.service.*;
 import lombok.RequiredArgsConstructor;
@@ -38,14 +38,12 @@ public class TextController {
                                @RequestParam(value = "board-name", defaultValue = "전체") String boardName,
                                @RequestParam(value = "textType", required = false) String textType,
                                Model model){
-        String searchKey="";
-        String searchType="";
 
         PageForm pageForm = textService.pagingByAll(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, boardName, textType);
         model.addAttribute("boardName", boardName);
         model.addAttribute("pageForm", pageForm);
-        model.addAttribute("searchKey", searchKey);
-        model.addAttribute("searchType", searchType);
+        model.addAttribute("searchKey", "");
+        model.addAttribute("searchType", "");
         return "board/textList";
     }
 
@@ -59,11 +57,10 @@ public class TextController {
                              @RequestParam(value = "board-name", defaultValue = "전체", required = false)String boardName,
                              Model model) {
 
-        String newSearchKey = "";
         PageForm pageForm = textService.pagingBySearch(page, PageConst.PAGE_SIZE, PageConst.PAGE_BLOCK_SIZE, searchKey, searchType ,boardName);
         model.addAttribute("boardName", boardName);
         model.addAttribute("pageForm", pageForm);
-        model.addAttribute("searchKey", newSearchKey);
+        model.addAttribute("searchKey", "");
         return "board/textList";
     }
 
@@ -73,33 +70,26 @@ public class TextController {
     */
     @GetMapping("show/{textId}")
     public String showText(@PathVariable("textId") Long textId, @AuthenticationPrincipal Customer customer, Model model) throws NotFoundException {
-        Text text = textService.findText(textId);
-        Long customerId = customer.getId();
+
+        TextQueryDto textQueryDto = textService.showText(customer, textId);
         boolean textOwn = textService.isOwner(textId, customer.getId());
+//
+//        //조회수 상승
+//        if (!textOwn) {
+//            textService.increaseViewCnt(text,customer.getId());
+//        }
+//
+//        //글을 조회하는 사람이 해당 글을 북마크했는지 확인
+//        boolean isBookmarked = bookmarkService.isBookmarked(textId, customerId);
+//
+//        List<Hashtag> hashtagList = textService.findHashtagList(text);
+//        List<Comment> commentList = textService.findParentCommentList(text);
+//        int commentCnt = textService.findCommentCnt(text.getId());
 
-        //조회수 상승
-        if (!textOwn) {
-            textService.increaseViewCnt(text,customer.getId());
-        }
 
-        //글을 조회하는 사람이 해당 글을 북마크했는지 확인
-        boolean isBookmarked = bookmarkService.isBookmarked(textId, customerId);
-
-        List<Hashtag> hashtagList = textService.findHashtagList(text);
-        List<Comment> commentList = textService.findParentCommentList(text);
-        int commentCnt = textService.findCommentCnt(text.getId());
-
-
-        model.addAttribute("text",text);
-        model.addAttribute("hashtagList", hashtagList);
-        model.addAttribute("commentList", commentList);
-        model.addAttribute("commentCnt", commentCnt);
-        model.addAttribute("owner", textOwn);
-        model.addAttribute("isBookmarked", isBookmarked);
-
+        model.addAttribute("textDto",textQueryDto);
         model.addAttribute("commentForm", new CommentForm());
-        model.addAttribute("customerId", customerId);
-        model.addAttribute("textId", text.getId());
+
 
         return "board/showText";
     }
@@ -122,7 +112,7 @@ public class TextController {
             return "board/makeText";
         }
 
-        Text text = textService.createText(customer.getId(), textCreateForm);
+        Text text = textService.createText(customer, textCreateForm);
 
         return "redirect:/show/" + text.getId();
     }

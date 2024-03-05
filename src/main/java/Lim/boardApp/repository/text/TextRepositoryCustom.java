@@ -3,6 +3,7 @@ package Lim.boardApp.repository.text;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
 import com.querydsl.core.Tuple;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,8 @@ public interface TextRepositoryCustom {
     public List<Text> queryArticleTexts(String boardName);
 
     public List<Text> queryTextByBoard(String boardName);
+
+    public Optional<Text> queryText(Long textId);
 
 
 

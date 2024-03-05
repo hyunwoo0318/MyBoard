@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-public class Customer  extends BaseEntity implements UserDetails, OAuth2User {
+public class Customer  extends BaseEntity implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="customer_id")
     private Long id;
@@ -41,12 +41,14 @@ public class Customer  extends BaseEntity implements UserDetails, OAuth2User {
     @Column(unique = true)
     private String email;
 
-
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Text> textList = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Bookmark> bookmarkList = new ArrayList<>();
 
     public Customer() {
     }
@@ -71,9 +73,6 @@ public class Customer  extends BaseEntity implements UserDetails, OAuth2User {
         this.role = role;
     }
 
-    public void updateTextList(List<Text> textList){
-        this.textList = textList;
-    }
 
     public void changePassword(String password) {
         this.password = password;
@@ -84,15 +83,6 @@ public class Customer  extends BaseEntity implements UserDetails, OAuth2User {
         this.id = id;
     }
 
-    @Override
-    public <A> A getAttribute(String name) {
-        return OAuth2User.super.getAttribute(name);
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return null;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -11,11 +11,8 @@ import java.lang.annotation.Target;
 @Target( { ElementType.METHOD, ElementType.FIELD } )
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CustomEmail {
-
     public String message() default "올바른 형식의 이메일을 작성해주세요.";
 
     public Class<?>[] groups() default {};
     public Class<? extends Payload>[] payload() default {};
-
-
 }

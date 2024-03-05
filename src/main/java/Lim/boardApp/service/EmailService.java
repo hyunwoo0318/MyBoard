@@ -1,34 +1,40 @@
 package Lim.boardApp.service;
 
+import static Lim.boardApp.Exception.ExceptionInfo.EMAIL_AUTH_FAIL;
+import static Lim.boardApp.Exception.ExceptionInfo.NOT_FOUND;
+
+import Lim.boardApp.Exception.CustomException;
+import Lim.boardApp.domain.Customer;
+import Lim.boardApp.repository.CustomerRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import net.jodah.expiringmap.ExpiringMap;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.util.Random;
+import java.util.regex.Pattern;
 
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Random;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    //이메일 인증번호를 저장해놓는 맵
+    // 이메일 인증번호를 저장해놓는 맵
     private final ExpiringMap<String, String> emailMap;
+    private final CustomerRepository customerRepository;
 
-    public boolean checkEmailForm(String email){
-        if(email==null) return false;
+    public boolean checkEmailForm(String email) {
+        if (email == null) return false;
         String regex = "^(.+)@(\\S+)$";
         return Pattern.compile(regex).matcher(email).matches();
-    }
-
-    public boolean findPrevAuth(String email){
-        return emailMap.containsKey(email);
     }
 
 
@@ -48,9 +54,21 @@ public class EmailService {
         mailSender.send(mimeMessage);
     }
 
-    public Boolean checkEmailAuth(String email, String emailAuth) {
+    public Long checkEmailAuth(String email, String emailAuth) {
         String code = emailMap.get(email);
-        return code.equals(emailAuth);
-    }
+        if (!code.equals(emailAuth)) {
+            throw new CustomException(EMAIL_AUTH_FAIL);
+        }
 
+        // 이메일 인증이 성공한 경우 해당 이메일을 가진 회원의 id 리턴
+        Customer customer =
+                customerRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () -> {
+                                    throw new CustomException(NOT_FOUND);
+                                });
+
+        return customer.getId();
+    }
 }

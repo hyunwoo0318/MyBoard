@@ -24,16 +24,16 @@
 								</div>
 
 								<div class="card-body text-center">
-									<h5 class="card-title mb-0" th:text="${name}">이름</h5>
+									<h5 class="card-title mb-0" th:text="${customerProfile.name}">이름</h5>
 								</div>
 								<hr class="my-0" />
 
 								<div class="card-body">
 									<h5 class="h6 card-title">세부사항</h5>
 									<ul class="list-unstyled mb-0">
-										<li class="mb-1">아이디 = <span th:text="${loginId}"></span></li>
-										<li class="mb-1">나이 = <span th:text="${age}"></span></li>
-										<li class="mb-1">이메일 = <span th:text="${email}"></span></li>
+										<li class="mb-1">아이디 = <span th:text="${customerProfile.loginId}"></span></li>
+										<li class="mb-1">나이 = <span th:text="${customerProfile.age}"></span></li>
+										<li class="mb-1">이메일 = <span th:text="${customerProfile.email}"></span></li>
 									</ul>
 								</div>
 							</div>
@@ -46,7 +46,7 @@
 								</div>
 								<hr class="my-0"/>
 								<div class="card-body h-25">
-									<div th:each="text : ${textList}">
+									<div th:each="text : ${customerProfile.textList}">
 									<div class="d-flex align-items-start">
 										<div class="flex-grow-1">
 											<a th:text="${text.getTitle()}" th:onclick="|location.href='@{/show/{id}(id=${text.id})}'|">작성글 제목</a><br />
@@ -65,7 +65,7 @@
 								</div>
 								<hr class="my-0"/>
 								<div class="card-body h-25">
-									<div th:each="comment : ${commentList}">
+									<div th:each="comment : ${customerProfile.commentList}">
 										<div class="d-flex align-items-start">
 											<div class="flex-grow-1">
 												<a th:text="${comment.getContent()}" th:onclick="|location.href='@{/show/{id}(id=${comment.text.id})}'|">작성 댓글 내용</a><br />
@@ -83,7 +83,7 @@
 								</div>
 								<hr class="my-0"/>
 								<div class="card-body h-25">
-									<div th:each="text : ${bookmarkedTextList}">
+									<div th:each="text : ${customerProfile.bookmarkedTextList}">
 										<div class="d-flex align-items-start">
 											<div class="flex-grow-1">
 												<a th:text="${text.getTitle()}" th:onclick="|location.href='@{/show/{id}(id=${text.id})}'|">작성글 제목</a><br />

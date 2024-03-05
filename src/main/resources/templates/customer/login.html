@@ -4,61 +4,65 @@
 </head>
 
 <body>
-	<main class="d-flex w-100">
-		<div class="container d-flex flex-column">
-			<div class="row vh-100">
-				<div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
-					<div class="d-table-cell align-middle">
+<main class="d-flex w-100">
+  <div class="container d-flex flex-column">
+    <div class="row vh-100">
+      <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+        <div class="d-table-cell align-middle">
 
-						<div class="text-center mt-4">
-							<h1 class="h2">로그인 페이지</h1>
-						</div>
+          <div class="text-center mt-4">
+            <h1 class="h2">로그인 페이지</h1>
+          </div>
 
-						<div class="card">
-							<div class="card-body">
-								<div class="m-sm-4">
-									<form th:class="form-control" th:action th:object="${loginForm}" method="post">
-										<div th:if="${#fields.hasGlobalErrors()}">
-											<small class="text-danger" th:each="err : ${#fields.globalErrors()}"
-												   th:text="${err}">글로벌 오류 메시지</small>
-										</div>
-										<div th:if="${kakao_user_not_found}">
-											<small class="text-danger" th:text="${kakao_user_not_found}">카카오 로그인 실패</small>
-										</div>
-										<div class="mb-3">
-											<label class="form-label">로그인 ID</label>
-											<input class="form-control form-control-lg" type="text" th:errorclass="field-error" th:field="*{loginId}" />
-											<small class="field-error text-danger" th:errors="*{loginId}">
-												아이디 오류
-											</small>
-										</div>
-										<div class="mb-3">
-											<label class="form-label">비밀번호</label>
-											<input class="form-control form-control-lg" type="password" th:errorclass="field-error" th:field="*{password}" />
-											<small class="field-error text-danger" th:errors="*{password}">
-												비밀번호 오류
-											</small>
-											<small>
-            									<a th:onclick="|location.href='@{/find-password}'|">Forgot password?</a>
-          									</small>
-										</div>
-										<div class="text-center mt-3">
-											<button type="submit" class="btn btn-lg btn-primary">로그인</button>
-											<button class="btn btn-primary" type="button" th:onclick="|location.href='@{/oauth2/authorization/kakao}'|">카카오 로그인</button>
-											<button class="btn btn-secondary" type="button" th:onclick="|location.href='@{/}'|">홈으로</button>
-										</div>
-									</form>
-								</div>
-							</div>
-						</div>
+          <div class="card">
+            <div class="card-body">
+              <div class="m-sm-4">
+                <form method="post" th:action th:class="form-control" th:object="${loginForm}">
+                  <div th:if="${#fields.hasGlobalErrors()}">
+                    <small class="text-danger" th:each="err : ${#fields.globalErrors()}"
+                           th:text="${err}">글로벌 오류 메시지</small>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">로그인 ID</label>
+                    <input class="form-control form-control-lg" th:errorclass="field-error"
+                           th:field="*{loginId}" type="text"/>
+                    <small class="field-error text-danger" th:errors="*{loginId}">
+                      아이디 오류
+                    </small>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">비밀번호</label>
+                    <input class="form-control form-control-lg" th:errorclass="field-error"
+                           th:field="*{password}" type="password"/>
+                    <small class="field-error text-danger" th:errors="*{password}">
+                      비밀번호 오류
+                    </small>
+                    <small>
+                      <a th:onclick="|location.href='@{/find-password}'|">Forgot password?</a>
+                    </small>
+                  </div>
+                  <div class="text-center mt-3">
+                    <button class="btn btn-lg btn-primary" type="submit">로그인</button>
+                    <button class="btn btn-primary"
+                            th:onclick="|location.href='@{/oauth2/authorization/kakao}'|"
+                            type="button">카카오 로그인
+                    </button>
+                    <button class="btn btn-secondary" th:onclick="|location.href='@{/}'|"
+                            type="button">홈으로
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
 
-					</div>
-				</div>
-			</div>
-		</div>
-	</main>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
 
-	<script src="../../js/app.js"></script>
+<script src="../../js/app.js"></script>
 
 </body>
 

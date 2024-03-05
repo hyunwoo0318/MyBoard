@@ -3,12 +3,16 @@ package Lim.boardApp.service;
 import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.ObjectValue.TextType;
 import Lim.boardApp.domain.*;
+import Lim.boardApp.dto.CommentQueryDto;
+import Lim.boardApp.dto.HashtagQueryDto;
+import Lim.boardApp.dto.TextQueryDto;
 import Lim.boardApp.form.*;
 import Lim.boardApp.repository.*;
 import Lim.boardApp.repository.bookmark.BookmarkRepository;
 import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,14 +28,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
-public class TextService extends BaseService {
-    public TextService(TextRepository textRepository, CustomerRepository customerRepository, HashtagRepository hashtagRepository, BoardRepository boardRepository, CommentRepository commentRepository, TextHashtagRepository textHashtagRepository, BookmarkRepository bookmarkRepository, RedisTemplate redisTemplate) {
-        super(textRepository, customerRepository, hashtagRepository, boardRepository, commentRepository, textHashtagRepository, bookmarkRepository);
-        this.redisTemplate = redisTemplate;
-    }
+@RequiredArgsConstructor
+public class TextService {
 
-    private RedisTemplate redisTemplate;
+    private final TextRepository textRepository;
+    private final BoardRepository boardRepository;
+    private final TextHashtagRepository textHashtagRepository;
+    private final RedisTemplate redisTemplate;
+    private final CustomerRepository customerRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final HashtagRepository hashtagRepository;
+    private final CommentRepository commentRepository;
 
 
     public PageForm pagingByAll(int page,int pageSize,int blockSize,String boardName, String textType){
@@ -46,7 +53,9 @@ public class TextService extends BaseService {
                 resultList = textRepository.queryArticleTexts();
             } else return null;
         }else{
-            checkBoard(boardName);
+            Board board = boardRepository.findByName(boardName).orElseThrow(() -> {
+                throw new NotFoundException();
+            });
             if (textType == null) {
                 resultList = textRepository.queryTextByBoard(boardName);
             } else if (textType.equals(TextType.GENERAL.name())) {
@@ -90,7 +99,7 @@ public class TextService extends BaseService {
     }
 
     private Page<Text> makePage(List<Text> textList, PageRequest pageRequest, int blockSize) {
-        int first = Math.min(new Long(pageRequest.getOffset()).intValue(), textList.size());
+        int first = Math.min(Long.valueOf(pageRequest.getOffset()).intValue(), textList.size());
         int last = Math.min(first + pageRequest.getPageSize(), textList.size());
 
         return new PageImpl<Text>(textList.subList(first, last), pageRequest, blockSize);
@@ -112,13 +121,14 @@ public class TextService extends BaseService {
         return pageForm;
     }
 
-    public Text createText(Long customerId, TextCreateForm textCreateForm) {
-        //입력된 회원 customerId, 게시판 이름 검증
-        Customer customer = checkCustomer(customerId);
-        Board board = checkBoard(textCreateForm.getBoardName());
+    public Text createText(Customer customer, TextCreateForm textCreateForm) {
+
+        Board board = boardRepository.findByName(textCreateForm.getBoardName()).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
 
         //글 저장
-        Text text = new Text().builder()
+        Text text = Text.builder()
                 .title(textCreateForm.getTitle())
                 .content(textCreateForm.getContent())
                 .customer(customer)
@@ -136,9 +146,22 @@ public class TextService extends BaseService {
 
     public Boolean isOwner(Long textId, Long customerId) {
         Customer customer = checkCustomer(customerId);
+
         Text text = checkText(textId);
         Long ownerId = text.getCustomer().getId();
         return ownerId == customerId;
+    }
+
+    private Customer checkCustomer(Long customerId) {
+        return customerRepository.findById(customerId).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
+    }
+
+    private Text checkText (Long textId){
+        return textRepository.findById(textId).orElseThrow(() -> {
+            throw new NotFoundException();
+        });
     }
 
 
@@ -168,7 +191,6 @@ public class TextService extends BaseService {
 
     @Transactional
     public void updateHashtags(Long textId, List<Hashtag> existedHashtagList, List<Hashtag> newHashgtagList) {
-
         //text 검증
         Text text = checkText(textId);
 
@@ -335,8 +357,37 @@ public class TextService extends BaseService {
         }
     }
 
-    public Text findText(Long textId) {
-        return checkText(textId);
+    @Transactional
+    public TextQueryDto showText(Customer customer, Long textId) {
+
+        boolean isBookmarked = false;
+        boolean textOwn = true;
+
+        Text text = textRepository.queryText(textId).orElseThrow( () -> {
+            throw new NotFoundException();
+        });
+
+        if(bookmarkRepository.queryBookmark(text, customer).isPresent()){
+            isBookmarked = true;
+        }
+
+        if(!text.getCustomer().equals(customer)){
+           textOwn = false;
+           increaseViewCnt(text, customer.getId());
+        }
+
+        List<CommentQueryDto> commentList = text.getCommentList().stream()
+            .map(CommentQueryDto::new)
+            .collect(Collectors.toList());
+
+        List<HashtagQueryDto> hashTagList = textHashtagRepository.findHashtagsByText(text).stream()
+            .map(HashtagQueryDto::new)
+            .collect(Collectors.toList());
+
+        return new TextQueryDto(text.getId(),text.getTitle(), text.getContent(),
+            textOwn,customer.getName(), text.getCreatedTime(), hashTagList, commentList, isBookmarked,text.getViewCount());
+
+
     }
 }
 

@@ -25,15 +25,18 @@ public class BoardTypesInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 
-        String viewName = modelAndView.getViewName();
-        if(viewName.startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)){
-            return;
+        if(modelAndView != null){
+            String viewName = modelAndView.getViewName();
+            if(viewName.startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)){
+                return;
+            }
+
+            List<Board> boardList = boardRepository.findAll();
+            if (!boardList.isEmpty()) {
+                List<String> boardNameList = boardList.stream().map(m -> m.getName()).collect(Collectors.toList());
+                modelAndView.getModel().put("boardNameList", boardNameList);
+            }
         }
 
-        List<Board> boardList = boardRepository.findAll();
-        if (!boardList.isEmpty()) {
-            List<String> boardNameList = boardList.stream().map(m -> m.getName()).collect(Collectors.toList());
-            modelAndView.getModel().put("boardNameList", boardNameList);
-        }
     }
 }

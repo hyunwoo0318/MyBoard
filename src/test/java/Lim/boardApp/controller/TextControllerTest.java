@@ -37,7 +37,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 
 @AutoConfigureMockMvc
-@SpringBootTest
 @Transactional
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 @ContextConfiguration
