@@ -1,4 +1,4 @@
-package Lim.boardApp.Exception;
+package Lim.boardApp.exception;
 
 import org.springframework.validation.BindingResult;
 

@@ -1,9 +1,9 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.Exception.NotFoundException;
 import Lim.boardApp.domain.Bookmark;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
+import Lim.boardApp.exception.NotFoundException;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.repository.bookmark.BookmarkRepository;
 import Lim.boardApp.repository.text.TextRepository;

@@ -1,22 +1,16 @@
 package Lim.boardApp.configuration;
 
-import Lim.boardApp.ObjectValue.RoleConst;
+import Lim.boardApp.constant.RoleConst;
 import Lim.boardApp.domain.Board;
 import Lim.boardApp.domain.Customer;
-import Lim.boardApp.domain.UploadFile;
 import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.repository.UploadFileRepository;
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
-import javax.validation.valueextraction.ExtractedValue;
-import java.io.File;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

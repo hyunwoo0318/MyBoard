@@ -1,10 +1,10 @@
 package Lim.boardApp.service;
 
-import static Lim.boardApp.Exception.ExceptionInfo.EMAIL_AUTH_FAIL;
-import static Lim.boardApp.Exception.ExceptionInfo.NOT_FOUND;
+import static Lim.boardApp.exception.ExceptionInfo.EMAIL_AUTH_FAIL;
+import static Lim.boardApp.exception.ExceptionInfo.NOT_FOUND;
 
-import Lim.boardApp.Exception.CustomException;
 import Lim.boardApp.domain.Customer;
+import Lim.boardApp.exception.CustomException;
 import Lim.boardApp.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;

@@ -1,42 +1,25 @@
 package Lim.boardApp.repository.text;
 
-import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
-import com.querydsl.core.Tuple;
-import java.util.Optional;
+import Lim.boardApp.dto.TextListQueryDto;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface TextRepositoryCustom {
 
-    public List<Text> queryGeneralTexts();
+    public Optional<Text> queryTextWithCommentList(Long textId);
 
-    public List<Text> queryGeneralTexts(String boardName);
-
-    public List<Text> queryArticleTexts();
-
-    public List<Text> queryArticleTexts(String boardName);
-
-    public List<Text> queryTextByBoard(String boardName);
-
-    public Optional<Text> queryText(Long textId);
-
-
-
-
-
-    public List<Text> searchTextByContentTitle(String searchKey);
-    public List<Text> searchTextByContentTitle(String searchKey,String boardName);
-    public List<Text> searchTextByContent(String searchKey);
-    public List<Text> searchTextByContent(String searchKey,String boardName);
-    public List<Text> searchTextByTitle(String searchKey,String boardName);
-    public List<Text> searchTextByTitle(String searchKey);
-
-    public List<Text> queryTextByCustomer(String loginId);
+    public Optional<Text> queryTextWithHashtagList(Long textId);
 
     public Long updateViewCount(Long textId, Long viewCnt);
 
+    public Page<TextListQueryDto> queryTextListWithSearch(
+            String searchType,
+            String textType,
+            String searchKey,
+            String boardName,
+            Pageable pageable);
 }

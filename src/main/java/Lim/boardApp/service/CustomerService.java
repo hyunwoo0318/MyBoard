@@ -1,17 +1,17 @@
 package Lim.boardApp.service;
 
-import static Lim.boardApp.Exception.ExceptionInfo.DUP_EMAIL;
-import static Lim.boardApp.Exception.ExceptionInfo.DUP_LOGIN_ID;
-import static Lim.boardApp.Exception.ExceptionInfo.INVALID_PASSWORD_CHECK;
-import static Lim.boardApp.Exception.ExceptionInfo.LOGIN_FAIL;
-import static Lim.boardApp.Exception.ExceptionInfo.NOT_FOUND;
+import static Lim.boardApp.exception.ExceptionInfo.DUP_EMAIL;
+import static Lim.boardApp.exception.ExceptionInfo.DUP_LOGIN_ID;
+import static Lim.boardApp.exception.ExceptionInfo.INVALID_PASSWORD_CHECK;
+import static Lim.boardApp.exception.ExceptionInfo.LOGIN_FAIL;
+import static Lim.boardApp.exception.ExceptionInfo.NOT_FOUND;
 
-import Lim.boardApp.Exception.CustomException;
 import Lim.boardApp.domain.Bookmark;
 import Lim.boardApp.domain.Comment;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
 import Lim.boardApp.dto.CustomerProfileDto;
+import Lim.boardApp.exception.CustomException;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.LoginForm;
 import Lim.boardApp.form.PasswordChangeForm;

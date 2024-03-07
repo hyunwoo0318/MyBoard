@@ -1,14 +1,16 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.ObjectValue.RoleConst;
-import Lim.boardApp.ObjectValue.TextType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
+
+import Lim.boardApp.constant.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.PageForm;
 import Lim.boardApp.form.TextCreateForm;
-import Lim.boardApp.form.TextUpdateForm;
 import Lim.boardApp.repository.*;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,9 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class TextServiceTest {

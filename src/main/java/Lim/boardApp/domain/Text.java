@@ -1,18 +1,18 @@
 package Lim.boardApp.domain;
 
-import Lim.boardApp.ObjectValue.TextType;
+import Lim.boardApp.constant.TextType;
+
 import lombok.Builder;
 import lombok.Getter;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import javax.persistence.*;
 
 @Getter
 @Entity

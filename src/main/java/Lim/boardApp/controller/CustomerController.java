@@ -1,9 +1,9 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.Exception.BindingResultHelper;
-import Lim.boardApp.Exception.CustomException;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.dto.CustomerProfileDto;
+import Lim.boardApp.exception.BindingResultHelper;
+import Lim.boardApp.exception.CustomException;
 import Lim.boardApp.form.CustomerRegisterForm;
 import Lim.boardApp.form.EmailAuthForm;
 import Lim.boardApp.form.LoginForm;
@@ -156,7 +156,7 @@ public class CustomerController {
     @GetMapping("/profiles/{loginId}")
     public String getProfile(
             @PathVariable("loginId") String loginId,
-            @AuthenticationPrincipal Customer customer,
+            @AuthenticationPrincipal(errorOnInvalidType = true) Customer customer,
             BindingResult bindingResult,
             Model model) {
 

@@ -1,10 +1,10 @@
 package Lim.boardApp.service;
 
-import Lim.boardApp.Exception.NotFoundException;
-import Lim.boardApp.ObjectValue.TextType;
+import Lim.boardApp.constant.TextType;
 import Lim.boardApp.domain.Board;
 import Lim.boardApp.domain.Customer;
 import Lim.boardApp.domain.Text;
+import Lim.boardApp.exception.NotFoundException;
 import Lim.boardApp.repository.BoardRepository;
 import Lim.boardApp.repository.CustomerRepository;
 import Lim.boardApp.repository.text.TextRepository;

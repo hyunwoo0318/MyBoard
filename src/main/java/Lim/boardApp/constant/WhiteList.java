@@ -1,4 +1,4 @@
-package Lim.boardApp.ObjectValue;
+package Lim.boardApp.constant;
 
 import java.util.Arrays;
 import java.util.List;

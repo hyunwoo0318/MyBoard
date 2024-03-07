@@ -1,4 +1,4 @@
-package Lim.boardApp.ObjectValue;
+package Lim.boardApp.constant;
 public abstract class KakaoConst {
     public static final String KEY = "5119b65b42c4da50a4c3bb23eb9a7dd6";
    // public static final String REDIRECT_URL_LOGIN = "http://localhost:8080/oauth/kakao/login";

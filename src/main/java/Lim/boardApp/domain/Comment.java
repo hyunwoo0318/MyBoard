@@ -1,13 +1,13 @@
 package Lim.boardApp.domain;
 
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -36,6 +36,10 @@ public class Comment extends BaseEntity {
     private List<Comment> childCommentList = new ArrayList<>();
 
     public Comment() {
+    }
+
+    public Comment(Long id){
+        this.id = id;
     }
 
     public Comment(Text text, Customer customer, String content, Comment parent) {

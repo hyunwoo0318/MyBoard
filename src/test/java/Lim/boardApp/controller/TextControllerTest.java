@@ -1,7 +1,11 @@
 package Lim.boardApp.controller;
 
-import Lim.boardApp.ObjectValue.PageConst;
-import Lim.boardApp.ObjectValue.TextType;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import Lim.boardApp.constant.PageConst;
+import Lim.boardApp.constant.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.form.CommentForm;
 import Lim.boardApp.form.PageForm;
@@ -15,10 +19,10 @@ import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
 import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 import Lim.boardApp.service.TextService;
+
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,11 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 
 @AutoConfigureMockMvc
 @Transactional
@@ -124,6 +123,21 @@ class TextControllerTest {
         hashtagRepository.saveAllAndFlush(Arrays.asList(h1, h2, h3));
     }
 
+    @Test
+    @DisplayName("글 검색 테스트 - /search")
+    public void searchTextListTest() throws Exception{
+
+    }
+
+    private MvcResult mvcBuilder(String method, String URL) throws  Exception{
+        if (method.equals("get")) {
+            return mockMvc.perform(get(URL)).andReturn();
+        } else if(method.equals("post")){
+            return mockMvc. perform(post(URL)).andReturn();
+        }
+        return null;
+    }
+
     @Nested
     @DisplayName("글 리스트 화면 테스트 - /")
     public class showTextList {
@@ -180,13 +194,6 @@ class TextControllerTest {
 
 
     }
-
-    @Test
-    @DisplayName("글 검색 테스트 - /search")
-    public void searchTextListTest() throws Exception{
-
-    }
-
 
     @Nested
     @DisplayName("특정 글 조회 - /show/{id}")
@@ -764,17 +771,6 @@ class TextControllerTest {
         }
 
 
-    }
-
-
-
-    private MvcResult mvcBuilder(String method, String URL) throws  Exception{
-        if (method.equals("get")) {
-            return mockMvc.perform(get(URL)).andReturn();
-        } else if(method.equals("post")){
-            return mockMvc. perform(post(URL)).andReturn();
-        }
-        return null;
     }
 
 }
