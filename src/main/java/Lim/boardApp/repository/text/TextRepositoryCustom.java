@@ -21,5 +21,6 @@ public interface TextRepositoryCustom {
             String textType,
             String searchKey,
             String boardName,
+            String sort,
             Pageable pageable);
 }

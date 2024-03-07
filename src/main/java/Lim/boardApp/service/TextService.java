@@ -48,11 +48,12 @@ public class TextService {
 
 
     @Transactional(readOnly = true)
-    public Page<TextListQueryDto> queryTextListWithSearch(
-            int page, String searchKey, String searchType, String textType, String boardName) {
+    public Page<TextListQueryDto> queryTextListWithSearchAndSort(
+            int page, String searchKey, String searchType, String textType, String boardName,
+        String sort) {
         PageRequest pageRequest = PageRequest.of(page, PageConst.PAGE_SIZE);
         return textRepository.queryTextListWithSearch(
-                searchType, textType, searchKey, boardName, pageRequest);
+                searchType, textType, searchKey, boardName,sort, pageRequest);
     }
 
 

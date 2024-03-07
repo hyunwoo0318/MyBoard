@@ -38,17 +38,29 @@
         </div>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
           <div class="container">
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
               <ul class="navbar-nav">
                 <li class="nav-item">
                   <a class="nav-link"
-                     th:href="@{/(searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType='GENERAL')}"
+                     th:href="@{/(searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, sort=${sort},textType='GENERAL')}"
                      >일반 글</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link"
-                     th:href="@{/(searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType='ARTICLE')}"
+                     th:href="@{/(searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, sort=${sort},textType='ARTICLE')}"
                      >기사</a>
+                </li>
+              </ul>
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link"
+                     th:href="@{/(searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName},textType=${textType}, sort='RECENT')}"
+                  >최신 순</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link"
+                     th:href="@{/(searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType}, sort='MOST_VIEWED')}"
+                  >조회수 많은 순</a>
                 </li>
               </ul>
             </div>
@@ -91,19 +103,19 @@
           <ul class="pagination pagination-md" style="list-style: none">
             <li class="page-item" style="display: inline" th:if="${!pageForm.first}">
               <a class="page-link"
-                 th:href="@{/(page=${pageForm.number - 1}, searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType})}"
+                 th:href="@{/(page=${pageForm.number - 1}, searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType}, sort=${sort})}"
                  th:text="prev"></a>
             </li>
             <li class="page-item" style="display: inline"
                 th:each="i : ${#numbers.sequence(startPage, endPage)}">
               <!--              <a class="page-link" th:href="@{/(page=${i})}" th:text="${i + 1}"></a>-->
               <a class="page-link"
-                 th:href="@{/(page=${i}, searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType})}"
+                 th:href="@{/(page=${i}, searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType}, sort=${sort})}"
                  th:text="${i + 1}"></a>
             </li>
             <li class="page-item" style="display: inline" th:if="${!pageForm.last}">
               <a class="page-link"
-                 th:href="@{/(page=${pageForm.number - 1}, searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType})}"
+                 th:href="@{/(page=${pageForm.number - 1}, searchKey=${searchKey}, searchType=${searchType}, board-name=${boardName}, textType=${textType}, sort=${sort})}"
                  th:text="${param.paramData}">
               </a>
             </li>

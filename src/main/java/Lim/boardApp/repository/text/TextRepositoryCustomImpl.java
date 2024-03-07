@@ -7,10 +7,13 @@ import static Lim.boardApp.domain.QText.*;
 import static org.springframework.util.StringUtils.hasText;
 
 import Lim.boardApp.constant.SearchType;
+import Lim.boardApp.constant.SortConst;
 import Lim.boardApp.constant.TextType;
 import Lim.boardApp.domain.*;
 import Lim.boardApp.dto.TextListQueryDto;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -80,6 +83,7 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom {
             String textType,
             String searchKey,
             String boardName,
+            String sort,
             Pageable pageable) {
         List<Text> textList =
                 queryFactory
@@ -89,6 +93,7 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom {
                         .where(boardNameCheck(boardName))
                         .where(searchTypeCheck(searchType, searchKey))
                         .where(textTypeCheck(textType))
+                        .orderBy(sortCheck(sort))
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
                         .fetch();
@@ -107,6 +112,15 @@ public class TextRepositoryCustomImpl implements TextRepositoryCustom {
                         .fetchOne();
 
         return new PageImpl<>(textListQueryDtoList, pageable, count);
+    }
+
+    private OrderSpecifier sortCheck(String sort) {
+        if(sort.equals(SortConst.MOST_VIEWED.name())){
+            return new OrderSpecifier(Order.DESC, text.viewCount);
+        }else if(sort.equals(SortConst.RECENT.name())){
+            return new OrderSpecifier(Order.DESC, text.createdTime);
+        }
+        return new OrderSpecifier(Order.DESC, text.id);
     }
 
     private BooleanExpression textTypeCheck(String textType) {

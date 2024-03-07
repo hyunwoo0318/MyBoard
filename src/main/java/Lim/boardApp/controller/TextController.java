@@ -48,14 +48,14 @@ public class TextController {
             @RequestParam(value = "searchKey", required = false) String searchKey,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(value = "board-name", defaultValue = "전체", required = false)
-                    String boardName,
+            @RequestParam(value = "board-name", defaultValue = "전체", required = false) String boardName,
             @RequestParam(value = "textType", required = false) String textType,
+            @RequestParam(value = "sort", defaultValue = "RECENT", required = false) String sort,
             Model model) {
 
         Page<TextListQueryDto> pageTextList =
-                textService.queryTextListWithSearch(
-                        page, searchKey, searchType, textType, boardName);
+                textService.queryTextListWithSearchAndSort(
+                        page, searchKey, searchType, textType, boardName, sort);
         makePageBlock(model, pageTextList);
 
         model.addAttribute("pageForm", pageTextList);
@@ -63,6 +63,7 @@ public class TextController {
         model.addAttribute("textType", textType);
         model.addAttribute("searchKey", searchKey);
         model.addAttribute("searchType", searchType);
+        model.addAttribute("sort", sort);
 
         return "board/textList";
     }
