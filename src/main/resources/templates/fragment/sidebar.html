@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<nav id="sidebar" class="sidebar js-sidebar">
+<nav class="sidebar js-sidebar" id="sidebar">
     <div class="sidebar-content js-simplebar">
         <a class="sidebar-brand" th:onclick="|location.href='@{/}'|">
             <span class="align-middle">게시판</span>
         </a>
 
         <ul class="sidebar-nav">
-            <li class="sidebar-item" style="height: auto" th:each="name : ${boardNameList}">
-                <a class="sidebar-link" th:onclick="|location.href='@{/?board-name={boardName}(boardName = ${name})}'|">
-                    <span  th:text="${name}">게시판 종류</span>
+            <li class="sidebar-item" style="height: auto" >
+                <a class="sidebar-link" th:onclick="|location.href='@{/?board-name={boardName}(boardName = '축구')}'|">
+                    <span>축구</span>
                 </a>
+                <a class="sidebar-link" th:onclick="|location.href='@{/?board-name={boardName}(boardName = '야구')}'|">
+                    <span>야구</span>
+                </a>
+                <a class="sidebar-link" th:onclick="|location.href='@{/?board-name={boardName}(boardName = '배구')}'|">
+                    <span>배구</span>
+                </a>
+                <a class="sidebar-link" th:onclick="|location.href='@{/?board-name={boardName}(boardName = '골프')}'|">
+                    <span>골프</span>
+                </a>
+                <a class="sidebar-link" th:onclick="|location.href='@{/?board-name={boardName}(boardName = '농구')}'|">
+                    <span>농구</span>
+                </a>
+
             </li>
         </ul>
         

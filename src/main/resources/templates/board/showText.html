@@ -17,23 +17,23 @@
                             <div class="col-md-8" th:text="${textDto.getCustomerName()}">작성자</div>
                             <div class="col-md-3 text-md-end" th:text="${textDto.getCreatedTime()}">작성 날짜</div>
                             <div class="col-md-1 text-md-end">
-                                <div th:if="${textDto.isBookmarked == false}" class="mt-auto">
+                                <div class="mt-auto" th:if="${textDto.isBookmarked == false}">
                                     <form th:action="@{/bookmarks/new}" th:method="post">
-                                        <input type="hidden" name="textId" th:value="${textId}">
+                                        <input name="textId" th:value="${textId}" type="hidden">
                                         <button class="btn" type="submit">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-star" viewBox="0 0 16 16">
+                                            <svg class="bi bi-bookmark-star" fill="currentColor" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M7.84 4.1a.178.178 0 0 1 .32 0l.634 1.285a.178.178 0 0 0 .134.098l1.42.206c.145.021.204.2.098.303L9.42 6.993a.178.178 0 0 0-.051.158l.242 1.414a.178.178 0 0 1-.258.187l-1.27-.668a.178.178 0 0 0-.165 0l-1.27.668a.178.178 0 0 1-.257-.187l.242-1.414a.178.178 0 0 0-.05-.158l-1.03-1.001a.178.178 0 0 1 .098-.303l1.42-.206a.178.178 0 0 0 .134-.098L7.84 4.1z"/>
                                                 <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
                                             </svg>
                                         </button>
                                     </form>
                                 </div>
-                                <div th:if="${textDto.isBookmarked == true}" class="mt-auto">
+                                <div class="mt-auto" th:if="${textDto.isBookmarked == true}">
                                     <form th:action="@{/bookmarks/delete}" th:method="post">
-                                        <input type="hidden" name="textId" th:value="${textId}">
+                                        <input name="textId" th:value="${textId}" type="hidden">
                                         <button class="btn" type="submit">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-star-fill" viewBox="0 0 16 16">
-                                                <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5zM8.16 4.1a.178.178 0 0 0-.32 0l-.634 1.285a.178.178 0 0 1-.134.098l-1.42.206a.178.178 0 0 0-.098.303L6.58 6.993c.042.041.061.1.051.158L6.39 8.565a.178.178 0 0 0 .258.187l1.27-.668a.178.178 0 0 1 .165 0l1.27.668a.178.178 0 0 0 .257-.187L9.368 7.15a.178.178 0 0 1 .05-.158l1.028-1.001a.178.178 0 0 0-.098-.303l-1.42-.206a.178.178 0 0 1-.134-.098L8.16 4.1z"/>
+                                            <svg class="bi bi-bookmark-star-fill" fill="currentColor" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5zM8.16 4.1a.178.178 0 0 0-.32 0l-.634 1.285a.178.178 0 0 1-.134.098l-1.42.206a.178.178 0 0 0-.098.303L6.58 6.993c.042.041.061.1.051.158L6.39 8.565a.178.178 0 0 0 .258.187l1.27-.668a.178.178 0 0 1 .165 0l1.27.668a.178.178 0 0 0 .257-.187L9.368 7.15a.178.178 0 0 1 .05-.158l1.028-1.001a.178.178 0 0 0-.098-.303l-1.42-.206a.178.178 0 0 1-.134-.098L8.16 4.1z" fill-rule="evenodd"/>
                                             </svg>
                                         </button>
                                     </form>
@@ -54,7 +54,7 @@
                         <div>
                             <h5 class="card-title h6">Hashtags</h5>
                             <a th:each="hashtag : ${textDto.hashtagList}">
-                                <a class="badge bg-primary me-1 my-1" th:text="${hashtag.name}" th:onclick="|location.href='@{/?searchKey={name}&type=hashtag(name=${hashtag.name})}'|">해시태그</a>
+                                <a class="badge bg-primary me-1 my-1" th:onclick="|location.href='@{/?searchKey={name}&type=hashtag(name=${hashtag.name})}'|" th:text="${hashtag.name}">해시태그</a>
                             </a>
                         </div>
                     </div>
@@ -70,21 +70,21 @@
                             <div class="row border-bottom d-flex">
                                 <p class="col mt-auto" th:text="${comment.content}">내용</p>
                                 <div class="col">
-                                    <button class="btn-sm float-lg-end btn" type="button" data-bs-toggle="collapse" th:data-bs-target="'#addComment' + ${comment.id}" aria-expanded="false" th:aria-controls="'addComment' + ${comment.id}">
+                                    <button aria-expanded="false" class="btn-sm float-lg-end btn" data-bs-toggle="collapse" th:aria-controls="'addComment' + ${comment.id}" th:data-bs-target="'#addComment' + ${comment.id}" type="button">
                                         댓글 작성
                                     </button>
                                 </div>
                             </div>
                             <div class="row">
-                                <div th:id="'addComment' + ${comment.id}" class="collapse">
-                                    <form th:action="@{../text/${textDto.getId()}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post" id="commentForm">
+                                <div class="collapse" th:id="'addComment' + ${comment.id}">
+                                    <form id="commentCreateForm" method="post" th:action="@{../text/${textDto.getId()}/comments/new(textId = ${textId})}" th:object="${commentCreateForm}">
                                         <div class="form-group">
-                                            <input type="hidden"  name="parent" th:value="${comment.id}">
-                                            <input type="hidden" name="textId" th:value="${textDto.getId()}">
+                                            <input name="parent"  th:value="${comment.id}" type="hidden">
+                                            <input name="textId" th:value="${textDto.getId()}" type="hidden">
                                             <label for="content">대댓글 작성</label>
-                                            <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                                            <textarea class="form-control" id="content" name="content" required rows="3"></textarea>
                                         </div>
-                                        <button type="submit" class="btn-sm float-lg-end">작성하기</button>
+                                        <button class="btn-sm float-lg-end" type="submit">작성하기</button>
                                     </form>
                                 </div>
                             </div>
@@ -101,26 +101,26 @@
                             </div>
                         </div>
                         <div id="firstComment">
-                            <form th:action="@{/text/{textId}/comments/new(textId = ${textId})}" th:object="${commentForm}" method="post">
+                            <form method="post" th:action="@{/text/{textId}/comments/new(textId = ${textId})}" th:object="${commentCreateForm}">
                                 <div class="form-group">
-                                    <input type="hidden" name="textId" th:value="${textDto.getId()}">
+                                    <input name="textId" th:value="${textDto.getId()}" type="hidden">
                                     <label for="content">댓글 내용</label>
-                                    <textarea class="form-control" name="content" rows="3" required></textarea>
+                                    <textarea class="form-control" name="content" required rows="3"></textarea>
                                 </div>
-                                <button type="submit" class="btn-sm float-lg-end">작성하기</button>
+                                <button class="btn-sm float-lg-end" type="submit">작성하기</button>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 text-md-end">
-                        <button class="btn btn-primary" type="button" th:onclick="|location.href='@{/}'|">목록으로</button>
+                        <button class="btn btn-primary" th:onclick="|location.href='@{/}'|" type="button">목록으로</button>
                     </div>
                     <div class="col-md-3 text-md-end">
-                        <button class="btn btn-secondary" th:if="${textDto.textOwn}" type="button" th:onclick="|location.href='@{/edit/{id}(id=${textDto.id})}'|">글 수정</button>
+                        <button class="btn btn-secondary" th:if="${textDto.textOwn}" th:onclick="|location.href='@{/edit/{id}(id=${textDto.id})}'|" type="button">글 수정</button>
                     </div>
                     <div class="col-md-3">
-                        <form th:if="${textDto.getTextOwn()}" th:action="@{/delete/{id}(id=${textDto.id})}" th:object="${textDto}" th:method="post">
+                        <form th:action="@{/delete/{id}(id=${textDto.id})}" th:if="${textDto.getTextOwn()}" th:method="post" th:object="${textDto}">
                             <button class="btn btn-secondary " type="submit">글 삭제</button>
                         </form>
                     </div>

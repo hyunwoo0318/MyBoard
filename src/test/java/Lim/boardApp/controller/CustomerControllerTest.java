@@ -6,12 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import Lim.boardApp.constant.SessionConst;
-import Lim.boardApp.domain.Customer;
-import Lim.boardApp.form.CustomerRegisterForm;
-import Lim.boardApp.form.LoginForm;
-import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.service.EmailService;
+import Lim.boardApp.common.constant.SessionConst;
+import Lim.boardApp.domain.customer.form.CustomerRegisterForm;
+import Lim.boardApp.domain.customer.form.LoginForm;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

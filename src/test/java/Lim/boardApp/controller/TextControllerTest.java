@@ -4,21 +4,21 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import Lim.boardApp.constant.PageConst;
-import Lim.boardApp.constant.TextType;
-import Lim.boardApp.domain.*;
-import Lim.boardApp.form.CommentForm;
-import Lim.boardApp.form.PageForm;
-import Lim.boardApp.form.TextCreateForm;
-import Lim.boardApp.form.TextUpdateForm;
-import Lim.boardApp.repository.BoardRepository;
-import Lim.boardApp.repository.CustomerRepository;
-import Lim.boardApp.repository.HashtagRepository;
+import Lim.boardApp.common.constant.PageConst;
+import Lim.boardApp.common.constant.TextType;
+import Lim.boardApp.domain.bookmark.entity.Bookmark;
+import Lim.boardApp.domain.comment.entity.Comment;
+import Lim.boardApp.domain.comment.form.CommentCreateForm;
+import Lim.boardApp.domain.text.entity.Board;
+import Lim.boardApp.domain.text.entity.Hashtag;
+import Lim.boardApp.domain.text.entity.Text;
+import Lim.boardApp.domain.text.entity.TextHashtag;
+import Lim.boardApp.domain.text.repository.board.BoardRepository;
+import Lim.boardApp.domain.text.repository.hashtag.HashtagRepository;
+import Lim.boardApp.domain.text.repository.hashtag.TextHashtagRepository;
 import Lim.boardApp.repository.bookmark.BookmarkRepository;
 import Lim.boardApp.repository.comment.CommentRepository;
 import Lim.boardApp.repository.text.TextRepository;
-import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
-import Lim.boardApp.service.TextService;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -272,7 +272,7 @@ class TextControllerTest {
             Map<String, Object> model = mvcResult.getModelAndView().getModel();
             assertThat(model.get("customerId")).isEqualTo(user1.getId());
             assertThat(model.get("textId")).isEqualTo(textId);
-            assertThat(model.get("commentForm").getClass()).isEqualTo(CommentForm.class);
+            assertThat(model.get("commentForm").getClass()).isEqualTo(CommentCreateForm.class);
 
             ArrayList<Hashtag> hashtagList = (ArrayList<Hashtag>) model.get("hashtagList");
             List<String> hashtagNameList = hashtagList.stream().map(h -> h.getName()).collect(Collectors.toList());
@@ -544,8 +544,9 @@ class TextControllerTest {
 
             int prevTextCommentCnt = commentRepository.queryCommentByText(textId).size();
             String newCommentContent = "new Comment1";
-            CommentForm commentForm = new CommentForm(newCommentContent, null);
-            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+            CommentCreateForm commentCreateForm = new CommentCreateForm(newCommentContent, null);
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm",
+                commentCreateForm)).andReturn();
 
             //해당 글 조회로 리다이렉트 되는지 확인
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
@@ -578,8 +579,9 @@ class TextControllerTest {
         public void commentsHaveParentNewSuccess() throws Exception {
             int prevTextCommentCnt = commentRepository.queryCommentByText(textId).size();
             String newCommentContent = "new Comment1";
-            CommentForm commentForm = new CommentForm(newCommentContent, comment3.getId());
-            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+            CommentCreateForm commentCreateForm = new CommentCreateForm(newCommentContent, comment3.getId());
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm",
+                commentCreateForm)).andReturn();
 
             //해당 글 조회로 리다이렉트 되는지 확인
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
@@ -618,8 +620,9 @@ class TextControllerTest {
         @DisplayName("댓글 생성 실패 - DTO Validation")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void commentsNewFailWrongDto() throws Exception {
-            CommentForm commentForm = new CommentForm("", null);
-            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+            CommentCreateForm commentCreateForm = new CommentCreateForm("", null);
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm",
+                commentCreateForm)).andReturn();
 
             //해당 글 조회로 리다이렉트되는지 검증
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302);
@@ -633,9 +636,10 @@ class TextControllerTest {
         @DisplayName("댓글 생성 실패 - 존재하지 않는 textId입력")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void commentsNewFailNotExistTextId() throws Exception {
-            CommentForm commentForm = new CommentForm("newComment", comment1.getId());
+            CommentCreateForm commentCreateForm = new CommentCreateForm("newComment", comment1.getId());
 
-            MvcResult mvcResult = mockMvc.perform(post("/text/-1/comments/new").flashAttr("commentForm", commentForm)).andReturn();
+            MvcResult mvcResult = mockMvc.perform(post("/text/-1/comments/new").flashAttr("commentForm",
+                commentCreateForm)).andReturn();
 
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
 
@@ -647,9 +651,10 @@ class TextControllerTest {
         @DisplayName("댓글 생성 실패 - 존재하지 않는 customerId입력")
         @WithUserDetails(value = "id123", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         public void commentsNewFailNotExistCustomerId() throws Exception {
-            CommentForm commentForm = new CommentForm("newComment",-13L);
+            CommentCreateForm commentCreateForm = new CommentCreateForm("newComment",-13L);
 
-            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm", commentForm)).andReturn();
+            MvcResult mvcResult = mockMvc.perform(post(URL).flashAttr("commentForm",
+                commentCreateForm)).andReturn();
 
             assertThat(mvcResult.getResponse().getStatus()).isEqualTo(404);
 

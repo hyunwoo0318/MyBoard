@@ -1,9 +1,9 @@
 package Lim.boardApp.api.controller;
 
 import Lim.boardApp.api.dto.EmailParam;
-import Lim.boardApp.domain.Customer;
-import Lim.boardApp.service.CustomerService;
-import Lim.boardApp.service.EmailService;
+import Lim.boardApp.common.email.EmailService;
+import Lim.boardApp.domain.customer.entity.Customer;
+import Lim.boardApp.domain.customer.service.CustomerService;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

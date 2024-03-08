@@ -3,13 +3,14 @@ package Lim.boardApp.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 
-import Lim.boardApp.constant.TextType;
-import Lim.boardApp.domain.*;
-import Lim.boardApp.form.PageForm;
-import Lim.boardApp.form.TextCreateForm;
+import Lim.boardApp.common.constant.TextType;
+import Lim.boardApp.domain.text.entity.Board;
+import Lim.boardApp.domain.text.entity.Hashtag;
+import Lim.boardApp.domain.text.entity.Text;
+import Lim.boardApp.domain.text.entity.TextHashtag;
+import Lim.boardApp.domain.text.repository.hashtag.TextHashtagRepository;
 import Lim.boardApp.repository.*;
 import Lim.boardApp.repository.text.TextRepository;
-import Lim.boardApp.repository.texthashtag.TextHashtagRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
